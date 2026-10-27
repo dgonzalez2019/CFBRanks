@@ -100,6 +100,8 @@ def load_cfbd(year, key):
             if hp is None or ap is None:
                 continue
             h = g.get("homeTeam", g.get("home_team")); a = g.get("awayTeam", g.get("away_team"))
+            if h not in fbs and a not in fbs:
+                continue  # no FBS team involved
             games.append(dict(week=g.get("week", 0) + (20 if seas == "postseason" else 0),
                               home=h, away=a, hp=hp, ap=ap,
                               neutral=bool(g.get("neutralSite", g.get("neutral_site"))),
@@ -157,6 +159,7 @@ def quadrant(opp_rank, venue):
 
 
 def compute(games, benchmark_rank=25):
+    games = [g for g in games if g["home_fbs"] or g["away_fbs"]]  # pooled-vs-pooled games carry no signal
     ratings, hfa, norm = fit_ratings(games)
     fbs_sorted = sorted((t for t in ratings if t != FCS_POOL), key=lambda t: -ratings[t])
     rank = {t: i + 1 for i, t in enumerate(fbs_sorted)}

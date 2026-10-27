@@ -227,6 +227,7 @@ function solve(A,b){ // Gaussian elimination w/ partial pivoting
 }
 
 function compute(games, benchRank){
+  games = games.filter(g => g.hf || g.af);  // pooled-vs-pooled games carry no signal
   const nm = (t,f) => f ? t : FCS;
   const teams = [...new Set(games.flatMap(g => [nm(g.home,g.hf), nm(g.away,g.af)]))].sort();
   const idx = Object.fromEntries(teams.map((t,i)=>[t,i])), n = teams.length, H = n;
