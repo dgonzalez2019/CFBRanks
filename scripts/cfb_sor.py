@@ -217,16 +217,17 @@ def fmt_game(x):
     return f"{v}{rk}{x['opp']} {x['pf']}-{x['pa']} ({x['value']:+.2f})"
 
 
-def print_table(rows, hfa, bench_team, top):
+def print_table(rows, hfa, bench_team, top, by="power"):
     print(f"\nEstimated home-field advantage: {hfa:.2f} pts | Outcome SD: {WIN_PROB_SD:.1f} | Benchmark: {bench_team}\n")
-    hdr = f"{'SOR':>3} {'Team':<22}{'Rec':>6}{'WAB':>7}{'SOR%':>8}{'Pwr':>5}{'SOS':>5}  {'Q1':>5}{'Q2':>5}  Best win / Worst loss"
+    rows = sorted(rows, key=lambda r: r["power_rank"] if by == "power" else r["sor_rank"])
+    hdr = f"{'Pwr':>3} {'Team':<22}{'Rec':>6}{'Rating':>7}{'SOR':>5}{'WAB':>7}{'SOS':>5}  {'Q1':>5}{'Q2':>5}  Best win / Worst loss"
     print(hdr); print("-" * len(hdr))
     for r in rows[:top]:
         q = r["quads"]
         bw = fmt_game(r["best_wins"][0]) if r["best_wins"] else "-"
         wl = fmt_game(r["worst_losses"][0]) if r["worst_losses"] else "-"
-        print(f"{r['sor_rank']:>3} {r['team']:<22}{r['record']:>6}{r['wab']:>+7.2f}"
-              f"{r['sor_prob']*100:>7.1f}%{r['power_rank']:>5}{r['sos_rank']:>5}  "
+        print(f"{r['power_rank']:>3} {r['team']:<22}{r['record']:>6}{r['rating']:>+7.1f}"
+              f"{r['sor_rank']:>5}{r['wab']:>+7.2f}{r['sos_rank']:>5}  "
               f"{q['Q1'][0]}-{q['Q1'][1]:<3}{q['Q2'][0]}-{q['Q2'][1]:<3} {bw} | {wl}")
 
 
@@ -259,6 +260,7 @@ def main():
     ap.add_argument("--csv"); ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--benchmark", type=int, default=25)
     ap.add_argument("--top", type=int, default=25)
+    ap.add_argument("--rank", choices=("power", "sor"), default="power", help="order of the table (default: power)")
     ap.add_argument("--team"); ap.add_argument("--out")
     a = ap.parse_args()
 
@@ -271,7 +273,7 @@ def main():
     if not games: sys.exit("No completed games found.")
 
     rows, hfa, bench = compute(games, a.benchmark)
-    print_table(rows, hfa, bench, a.top)
+    print_table(rows, hfa, bench, a.top, a.rank)
     if a.team:
         m = [r for r in rows if r["team"].lower() == a.team.lower()]
         print_team(m[0]) if m else print(f"\nTeam '{a.team}' not found.")

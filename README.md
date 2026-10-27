@@ -1,6 +1,6 @@
-# CFB Strength of Record
+# CFB Power Rankings
 
-College football strength-of-record rankings with a live Top 25 and a team lookup that shows every opponent's rank, the venue, and how much each win or loss was worth.
+College football power rankings: a live Top 25 ordered by who the best teams are, with strength of record, schedule strength and Q1–Q4 records alongside, plus a team lookup that shows every opponent's rank, the venue, and how much each win or loss was worth.
 
 ## How it works
 - `index.html` — the whole site (no build step). It reads `data/games.json` and runs the rating + SOR algorithm in the browser. With no data it shows a simulated sample season.
@@ -20,5 +20,5 @@ pip install numpy
 export CFBD_API_KEY=your_key
 python scripts/fetch_games.py
 python -m http.server 8000   # then open http://localhost:8000
-python scripts/cfb_sor.py --year 2026 --team "Miami"
+python scripts/cfb_sor.py --year 2026 --team "Miami"   # add --rank sor to order by strength of record
 ```

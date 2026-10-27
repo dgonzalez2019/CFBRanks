@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>CFB Strength of Record</title>
+<title>CFB Power Rankings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -48,6 +48,8 @@ button{cursor:pointer;font-weight:500}
 button.primary{background:var(--accent);border-color:var(--accent);color:var(--card)}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:8px}
 .scroll{overflow-x:auto}
+.view>div{grid-template-columns:minmax(0,1fr)}  /* let wide tables scroll instead of widening the page */
+.method code{overflow-wrap:anywhere}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 th{font:600 11px/1 var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
@@ -101,7 +103,7 @@ body{margin:0}
 <header>
   <div class="wrap">
     <div class="head">
-      <h1>CFB <span>Strength</span> of Record</h1>
+      <h1>CFB <span>Power</span> Rankings</h1>
       <div class="status" id="status"><i class="dot"></i> Loading…</div>
     </div>
     <nav aria-label="Sections">
@@ -117,14 +119,8 @@ body{margin:0}
   <section id="v-top25" class="view">
     <div style="display:grid;gap:14px">
       <div class="bar">
-        <h2 id="t25title">Top 25 by Strength of Record</h2>
+        <h2 id="t25title">Top 25 Power Rankings</h2>
         <div class="ctrl">
-          <label for="bench">Benchmark</label>
-          <select id="bench">
-            <option value="12">#12 team (playoff bar)</option>
-            <option value="25" selected>#25 team (ranked bar)</option>
-            <option value="40">#40 team (bowl-plus bar)</option>
-          </select>
           <label for="showall">Show</label>
           <select id="showall"><option value="25">Top 25</option><option value="all">All FBS</option></select>
         </div>
@@ -132,9 +128,8 @@ body{margin:0}
       <div class="panel scroll">
         <table class="top">
           <thead><tr>
-            <th>SOR</th><th>Team</th><th class="num" title="Wins above what the benchmark team would expect against this schedule">WAB</th>
-            <th class="num hide-sm" title="Chance the benchmark team matches this record">Bench %</th>
-            <th class="num">Power</th><th class="num">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
+            <th>Rank</th><th>Team</th><th class="num" title="Points better than an average FBS team on a neutral field">Rating</th>
+            <th class="num" title="Strength of record rank: how much the team's results have earned">SOR</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
           </tr></thead>
           <tbody id="t25"></tbody>
         </table>
@@ -151,6 +146,12 @@ body{margin:0}
         <div class="ctrl">
           <label for="q">Team</label>
           <input id="q" type="search" list="teamlist" placeholder="Search a team" autocomplete="off">
+          <label for="bench" title="The team used to grade each game for strength of record">SOR benchmark</label>
+          <select id="bench">
+            <option value="12">#12 team (playoff bar)</option>
+            <option value="25" selected>#25 team (ranked bar)</option>
+            <option value="40">#40 team (bowl-plus bar)</option>
+          </select>
           <datalist id="teamlist"></datalist>
         </div>
       </div>
@@ -162,11 +163,12 @@ body{margin:0}
   <section id="v-method" class="view" hidden>
     <div class="panel method">
       <h3>How the rankings are built</h3>
+      <p>The rankings answer one question: who are the best teams? Teams are ordered by power rating, the expected margin against an average FBS team on a neutral field.</p>
       <ol>
         <li><b>Power ratings from every game at once.</b> Each team gets a rating in points versus an average FBS team on a neutral field. All ratings are solved together, so a team's rating reflects how its opponents did against their own opponents. Margins are compressed past about three scores, and all FCS teams share one pooled rating.</li>
         <li><b>Home field is measured, not assumed.</b> The model estimates the home edge from this season's results. Neutral-site games get none.</li>
         <li><b>Each game gets a difficulty.</b> The page asks how often the benchmark team would win that exact game at that venue. A road game at a top-15 team might be 25%. A home game against a bottom-20 team might be 95%.</li>
-        <li><b>Strength of record.</b> Wins above benchmark (WAB) is actual wins minus the benchmark's expected wins. Bench % is the chance the benchmark would do at least as well. Teams are ranked by WAB.</li>
+        <li><b>Strength of record.</b> Shown alongside the rankings as a résumé check. Wins above benchmark (WAB) is actual wins minus the benchmark's expected wins, and SOR ranks teams by it.</li>
         <li><b>Win and loss quality.</b> A win is worth 1 minus the benchmark's win chance, so hard wins score high. A loss costs the benchmark's win chance, so losing a game a good team should win costs the most.</li>
         <li><b>Quadrants.</b> Opponents are tiered by rank and venue. Q1 is home vs. top 15, neutral vs. top 25, or road vs. top 40. Q2 runs to 40, 55 and 75. Q3 runs to 80, 95 and 110. Everything else, including FCS, is Q4.</li>
       </ol>
@@ -273,6 +275,7 @@ function compute(games, benchRank){
   });
   out.sort((x,y)=>y.wab-x.wab || x.sorp-y.sorp).forEach((r,i)=>r.sor=i+1);
   out.slice().sort((x,y)=>y.sos-x.sos).forEach((r,i)=>r.sosRank=i+1);
+  out.sort((x,y)=>x.power-y.power);  // rows are listed best team first
   const byTeam = Object.fromEntries(out.map(r=>[r.team,r]));
   return {rows:out, byTeam, hfa, SD, benchTeam, nGames:games.length, recs};
 }
@@ -284,17 +287,16 @@ const fmtQ = q => `${q[0]}-${q[1]}`;
 
 function renderTop(){
   const rows = SHOWALL ? RESULT.rows : RESULT.rows.slice(0,25);
-  $("#t25title").textContent = SHOWALL ? "All FBS by Strength of Record" : "Top 25 by Strength of Record";
+  $("#t25title").textContent = SHOWALL ? "All FBS Power Rankings" : "Top 25 Power Rankings";
   $("#t25").innerHTML = rows.map(r => `<tr class="click" data-team="${esc(r.team)}" tabindex="0">
-    <td class="rk">${r.sor}</td>
+    <td class="rk">${r.power}</td>
     <td><span class="tm">${esc(r.team)}</span><span class="rec">${r.w}-${r.l}</span></td>
-    <td class="num ${r.wab>=0?"pos":"neg"}">${r.wab>=0?"+":""}${r.wab.toFixed(2)}</td>
-    <td class="num hide-sm">${(r.sorp*100).toFixed(1)}%</td>
-    <td class="num">${r.power}</td><td class="num">${r.sosRank}</td>
+    <td class="num ${r.rating>=0?"pos":"neg"}">${r.rating>=0?"+":""}${r.rating.toFixed(1)}</td>
+    <td class="num">${r.sor}</td><td class="num">${r.sosRank}</td>
     ${["Q1","Q2","Q3","Q4"].map(k=>`<td><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
     <td class="hide-sm">${gameStr(r.W[0])}</td>
     <td class="hide-sm">${gameStr(r.L[0])}</td></tr>`).join("");
-  $("#hfaNote").innerHTML = `Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b> (compressed scale). Benchmark team: <b>${esc(RESULT.benchTeam)}</b> (power #${BENCH}). ${RESULT.nGames} games. Tap a team for its full schedule.`;
+  $("#hfaNote").innerHTML = `Teams are ranked by power rating: how they would fare against an average FBS team on a neutral field, based on every game's score and opponent. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
 function renderTeam(name){
@@ -306,8 +308,8 @@ function renderTeam(name){
   $("#teamOut").innerHTML = `
     <div class="teamhead"><h2>${esc(r.team)}</h2><span class="rec" style="font-size:16px">${r.w}-${r.l}</span></div>
     <div class="tiles">
+      <div class="tile"><b>#${r.power}</b><span>Power rank</span></div>
       <div class="tile"><b>#${r.sor}</b><span>Strength of record</span></div>
-      <div class="tile"><b>#${r.power}</b><span>Power rating</span></div>
       <div class="tile"><b>#${r.sosRank}</b><span>Schedule strength</span></div>
       <div class="tile"><b class="${r.wab>=0?"pos":"neg"}">${r.wab>=0?"+":""}${r.wab.toFixed(2)}</b><span>Wins above bench</span></div>
       <div class="tile"><b class="pos">${r.winVal.toFixed(2)}</b><span>Win value</span></div>
