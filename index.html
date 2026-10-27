@@ -128,8 +128,9 @@ body{margin:0}
       <div class="panel scroll">
         <table class="top">
           <thead><tr>
-            <th>Rank</th><th>Team</th><th class="num" title="Points better than an average FBS team on a neutral field">Rating</th>
-            <th class="num" title="Strength of record rank: how much the team's results have earned">SOR</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
+            <th>Rank</th><th>Team</th><th class="num" title="Power rating plus 0.75 × résumé points">Score</th>
+            <th class="num" title="Power rating rank: expected margin vs. an average FBS team on a neutral field">Power</th>
+            <th class="num" title="Résumé points from wins and losses by quadrant">Résumé</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
           </tr></thead>
           <tbody id="t25"></tbody>
         </table>
@@ -163,13 +164,14 @@ body{margin:0}
   <section id="v-method" class="view" hidden>
     <div class="panel method">
       <h3>How the rankings are built</h3>
-      <p>The rankings answer one question: who are the best teams? Teams are ordered by power rating, the expected margin against an average FBS team on a neutral field.</p>
+      <p>The rankings answer one question: who are the best teams? Each team's score is its power rating plus 0.75 × its résumé points, so how well a team plays sets the base and who it has beaten moves it up or down.</p>
       <ol>
         <li><b>Power ratings from every game at once.</b> Each team gets a rating in points versus an average FBS team on a neutral field. All ratings are solved together, so a team's rating reflects how its opponents did against their own opponents. Margins are compressed past about three scores, and all FCS teams share one pooled rating.</li>
         <li><b>Home field is measured, not assumed.</b> The model estimates the home edge from this season's results. Neutral-site games get none.</li>
         <li><b>Each game gets a difficulty.</b> The page asks how often the benchmark team would win that exact game at that venue. A road game at a top-15 team might be 25%. A home game against a bottom-20 team might be 95%.</li>
         <li><b>Strength of record.</b> Shown alongside the rankings as a résumé check. Wins above benchmark (WAB) is actual wins minus the benchmark's expected wins, and SOR ranks teams by it.</li>
         <li><b>Win and loss quality.</b> A win is worth 1 minus the benchmark's win chance, so hard wins score high. A loss costs the benchmark's win chance, so losing a game a good team should win costs the most.</li>
+        <li><b>Résumé points.</b> Wins earn 4 (Q1), 2 (Q2), 1 (Q3) or 0.5 (Q4). Losses cost 85% of the mirror-image win: 0.43 (Q1), 0.85 (Q2), 1.7 (Q3) or 3.4 (Q4). Beating good teams matters most, and wins count slightly more than losses.</li>
         <li><b>Quadrants.</b> Opponents are tiered by rank and venue. Q1 is home vs. top 15, neutral vs. top 25, or road vs. top 40. Q2 runs to 40, 55 and 75. Q3 runs to 80, 95 and 110. Everything else, including FCS, is Q4.</li>
       </ol>
       <h3>Updating the data</h3>
@@ -217,6 +219,9 @@ function sampleSeason(){
 
 /* ---------------- algorithm ---------------- */
 const CAP = 21, RIDGE = 2;
+// Ranking score = power rating + RESUME_WEIGHT * résumé. Résumé points per game by quadrant:
+// Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
+const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85, RESUME_WEIGHT = 0.75;
 const compress = m => CAP*Math.tanh(m/CAP);
 function erf(x){const t=1/(1+.3275911*Math.abs(x)),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);return x>=0?y:-y}
 
@@ -270,12 +275,13 @@ function compute(games, benchRank){
     const ps = gs.map(x=>x.pb), exp = ps.reduce((a,c)=>a+c,0);
     const q = {Q1:[0,0],Q2:[0,0],Q3:[0,0],Q4:[0,0]}; gs.forEach(x=>q[x.quad][x.won?0:1]++);
     const W = gs.filter(x=>x.won).sort((x,y)=>y.value-x.value), L = gs.filter(x=>!x.won).sort((x,y)=>x.value-y.value);
-    return {team:t,w,l,rating:R[t],power:prank[t],wab:w-exp,sorp:pbAtLeast(ps,w),sos:gs.length?(gs.length-exp)/gs.length:0,q,W,L,games:gs,
+    const resume = gs.reduce((a,x)=>a+(x.won?WIN_PTS[x.quad]:-LOSS_WEIGHT*LOSS_PTS[x.quad]),0);
+    return {team:t,w,l,rating:R[t],power:prank[t],resume,score:R[t]+RESUME_WEIGHT*resume,wab:w-exp,sorp:pbAtLeast(ps,w),sos:gs.length?(gs.length-exp)/gs.length:0,q,W,L,games:gs,
             winVal:W.reduce((a,x)=>a+x.value,0),lossCost:-L.reduce((a,x)=>a+x.value,0)};
   });
   out.sort((x,y)=>y.wab-x.wab || x.sorp-y.sorp).forEach((r,i)=>r.sor=i+1);
   out.slice().sort((x,y)=>y.sos-x.sos).forEach((r,i)=>r.sosRank=i+1);
-  out.sort((x,y)=>x.power-y.power);  // rows are listed best team first
+  out.sort((x,y)=>y.score-x.score).forEach((r,i)=>r.rank=i+1);  // rows are listed best team first
   const byTeam = Object.fromEntries(out.map(r=>[r.team,r]));
   return {rows:out, byTeam, hfa, SD, benchTeam, nGames:games.length, recs};
 }
@@ -289,14 +295,15 @@ function renderTop(){
   const rows = SHOWALL ? RESULT.rows : RESULT.rows.slice(0,25);
   $("#t25title").textContent = SHOWALL ? "All FBS Power Rankings" : "Top 25 Power Rankings";
   $("#t25").innerHTML = rows.map(r => `<tr class="click" data-team="${esc(r.team)}" tabindex="0">
-    <td class="rk">${r.power}</td>
+    <td class="rk">${r.rank}</td>
     <td><span class="tm">${esc(r.team)}</span><span class="rec">${r.w}-${r.l}</span></td>
-    <td class="num ${r.rating>=0?"pos":"neg"}">${r.rating>=0?"+":""}${r.rating.toFixed(1)}</td>
-    <td class="num">${r.sor}</td><td class="num">${r.sosRank}</td>
+    <td class="num">${r.score.toFixed(1)}</td>
+    <td class="num">${r.power}</td>
+    <td class="num ${r.resume>=0?"pos":"neg"}">${r.resume>=0?"+":""}${r.resume.toFixed(1)}</td><td class="num">${r.sosRank}</td>
     ${["Q1","Q2","Q3","Q4"].map(k=>`<td><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
     <td class="hide-sm">${gameStr(r.W[0])}</td>
     <td class="hide-sm">${gameStr(r.L[0])}</td></tr>`).join("");
-  $("#hfaNote").innerHTML = `Teams are ranked by power rating: how they would fare against an average FBS team on a neutral field, based on every game's score and opponent. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
+  $("#hfaNote").innerHTML = `Score = power rating + 0.75 × résumé. Power is how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
 function renderTeam(name){
@@ -308,7 +315,9 @@ function renderTeam(name){
   $("#teamOut").innerHTML = `
     <div class="teamhead"><h2>${esc(r.team)}</h2><span class="rec" style="font-size:16px">${r.w}-${r.l}</span></div>
     <div class="tiles">
+      <div class="tile"><b>#${r.rank}</b><span>Overall rank</span></div>
       <div class="tile"><b>#${r.power}</b><span>Power rank</span></div>
+      <div class="tile"><b class="${r.resume>=0?"pos":"neg"}">${r.resume>=0?"+":""}${r.resume.toFixed(1)}</b><span>Résumé points</span></div>
       <div class="tile"><b>#${r.sor}</b><span>Strength of record</span></div>
       <div class="tile"><b>#${r.sosRank}</b><span>Schedule strength</span></div>
       <div class="tile"><b class="${r.wab>=0?"pos":"neg"}">${r.wab>=0?"+":""}${r.wab.toFixed(2)}</b><span>Wins above bench</span></div>

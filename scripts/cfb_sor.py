@@ -56,6 +56,12 @@ RIDGE = 2.0               # regularization (pulls thin-sample teams toward avera
 WIN_PROB_SD = 15.0        # overwritten at fit time from model residuals
 FCS_POOL = "FCS (pooled)" # all non-FBS opponents share one rating
 RECENCY = 0.0             # 0 = all weeks equal; e.g. 0.03 = later weeks weigh more
+# Ranking score = power rating + RESUME_WEIGHT * resume. Resume points per game by quadrant:
+# Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
+WIN_PTS = {"Q1": 4.0, "Q2": 2.0, "Q3": 1.0, "Q4": 0.5}
+LOSS_PTS = {"Q1": 0.5, "Q2": 1.0, "Q3": 2.0, "Q4": 4.0}
+LOSS_WEIGHT = 0.85
+RESUME_WEIGHT = 0.75
 
 
 def compress(m):
@@ -196,8 +202,10 @@ def compute(games, benchmark_rank=25):
         for x in gs: q[x["quad"]][0 if x["won"] else 1] += 1
         W_ = sorted([x for x in gs if x["won"]], key=lambda x: -x["value"])
         L_ = sorted([x for x in gs if not x["won"]], key=lambda x: x["value"])
+        resume = sum(WIN_PTS[x["quad"]] if x["won"] else -LOSS_WEIGHT * LOSS_PTS[x["quad"]] for x in gs)
         rows.append(dict(
             team=t, record=f"{wins}-{losses}", rating=ratings[t], power_rank=rank[t],
+            resume=resume, score=ratings[t] + RESUME_WEIGHT * resume,
             wab=wins - exp_w, sor_prob=sor_prob, sos=sos,
             win_value=sum(x["value"] for x in W_), loss_cost=-sum(x["value"] for x in L_),
             quads={k: tuple(q[k]) for k in ("Q1", "Q2", "Q3", "Q4")},
@@ -207,6 +215,7 @@ def compute(games, benchmark_rank=25):
     sos_order = sorted(rows, key=lambda r: -r["sos"])
     for i, r in enumerate(rows): r["sor_rank"] = i + 1
     for i, r in enumerate(sos_order): r["sos_rank"] = i + 1
+    for i, r in enumerate(sorted(rows, key=lambda r: -r["score"])): r["rank"] = i + 1
     return rows, hfa, fbs_sorted[min(benchmark_rank, len(fbs_sorted)) - 1]
 
 
@@ -219,20 +228,20 @@ def fmt_game(x):
 
 def print_table(rows, hfa, bench_team, top, by="power"):
     print(f"\nEstimated home-field advantage: {hfa:.2f} pts | Outcome SD: {WIN_PROB_SD:.1f} | Benchmark: {bench_team}\n")
-    rows = sorted(rows, key=lambda r: r["power_rank"] if by == "power" else r["sor_rank"])
-    hdr = f"{'Pwr':>3} {'Team':<22}{'Rec':>6}{'Rating':>7}{'SOR':>5}{'WAB':>7}{'SOS':>5}  {'Q1':>5}{'Q2':>5}  Best win / Worst loss"
+    rows = sorted(rows, key=lambda r: r[{"score": "rank", "power": "power_rank", "sor": "sor_rank"}[by]])
+    hdr = f"{'Rk':>3} {'Team':<22}{'Rec':>6}{'Score':>7}{'Pwr':>5}{'Resume':>8}{'SOR':>5}{'SOS':>5}  {'Q1':>5}{'Q2':>5}  Best win / Worst loss"
     print(hdr); print("-" * len(hdr))
     for r in rows[:top]:
         q = r["quads"]
         bw = fmt_game(r["best_wins"][0]) if r["best_wins"] else "-"
         wl = fmt_game(r["worst_losses"][0]) if r["worst_losses"] else "-"
-        print(f"{r['power_rank']:>3} {r['team']:<22}{r['record']:>6}{r['rating']:>+7.1f}"
-              f"{r['sor_rank']:>5}{r['wab']:>+7.2f}{r['sos_rank']:>5}  "
+        print(f"{r['rank']:>3} {r['team']:<22}{r['record']:>6}{r['score']:>7.1f}{r['power_rank']:>5}"
+              f"{r['resume']:>+8.1f}{r['sor_rank']:>5}{r['sos_rank']:>5}  "
               f"{q['Q1'][0]}-{q['Q1'][1]:<3}{q['Q2'][0]}-{q['Q2'][1]:<3} {bw} | {wl}")
 
 
 def print_team(r):
-    print(f"\n{r['team']}  {r['record']}  | SOR #{r['sor_rank']}  Power #{r['power_rank']}  SOS #{r['sos_rank']}")
+    print(f"\n{r['team']}  {r['record']}  | Rank #{r['rank']}  Power #{r['power_rank']}  Resume {r['resume']:+.1f}  SOR #{r['sor_rank']}  SOS #{r['sos_rank']}")
     print(f"Wins above benchmark {r['wab']:+.2f} | P(benchmark matches record) {r['sor_prob']*100:.1f}%")
     print(f"Total win value {r['win_value']:.2f} | total loss cost {r['loss_cost']:.2f}\n")
     for x in r["games"]:
@@ -242,12 +251,12 @@ def print_team(r):
 def write_csv(rows, path):
     with open(path, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["sor_rank", "team", "record", "wins_above_benchmark", "sor_prob", "power_rank",
+        w.writerow(["rank", "score", "resume", "sor_rank", "team", "record", "wins_above_benchmark", "sor_prob", "power_rank",
                     "rating", "sos_rank", "sos", "win_value", "loss_cost", "Q1", "Q2", "Q3", "Q4",
                     "best_win", "worst_loss"])
-        for r in rows:
+        for r in sorted(rows, key=lambda r: r["rank"]):
             q = r["quads"]
-            w.writerow([r["sor_rank"], r["team"], r["record"], round(r["wab"], 3), round(r["sor_prob"], 4),
+            w.writerow([r["rank"], round(r["score"], 2), round(r["resume"], 2), r["sor_rank"], r["team"], r["record"], round(r["wab"], 3), round(r["sor_prob"], 4),
                         r["power_rank"], round(r["rating"], 2), r["sos_rank"], round(r["sos"], 3),
                         round(r["win_value"], 3), round(r["loss_cost"], 3),
                         *[f"{q[k][0]}-{q[k][1]}" for k in ("Q1", "Q2", "Q3", "Q4")],
@@ -260,7 +269,8 @@ def main():
     ap.add_argument("--csv"); ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--benchmark", type=int, default=25)
     ap.add_argument("--top", type=int, default=25)
-    ap.add_argument("--rank", choices=("power", "sor"), default="power", help="order of the table (default: power)")
+    ap.add_argument("--rank", choices=("score", "power", "sor"), default="score",
+                    help="order of the table: score (power + resume, default), power, or sor")
     ap.add_argument("--team"); ap.add_argument("--out")
     a = ap.parse_args()
 
