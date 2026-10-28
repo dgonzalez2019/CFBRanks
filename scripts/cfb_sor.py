@@ -221,6 +221,43 @@ def compute(games, benchmark_rank=25):
     return rows, hfa, fbs_sorted[min(benchmark_rank, len(fbs_sorted)) - 1]
 
 
+def colley(games):
+    """Results-only ranking (Colley Matrix): ratings solved from wins, losses and opponents' ratings
+    at once, so strength flows through the whole schedule. Margins and venue are ignored."""
+    games = [g for g in games if (g["home_fbs"] or g["away_fbs"]) and g["hp"] != g["ap"]]
+    norm = lambda t, fbs: t if fbs else FCS_POOL
+    teams = sorted({norm(g["home"], g["home_fbs"]) for g in games} | {norm(g["away"], g["away_fbs"]) for g in games})
+    idx = {t: i for i, t in enumerate(teams)}
+    C = 2 * np.eye(len(teams)); b = np.ones(len(teams))
+    sched = defaultdict(list)
+    for g in games:
+        h, a = norm(g["home"], g["home_fbs"]), norm(g["away"], g["away_fbs"])
+        i, j, hw = idx[h], idx[a], g["hp"] > g["ap"]
+        C[i, i] += 1; C[j, j] += 1; C[i, j] -= 1; C[j, i] -= 1
+        b[i] += 0.5 if hw else -0.5; b[j] += -0.5 if hw else 0.5
+        sched[h].append((a, hw)); sched[a].append((h, not hw))
+    r = dict(zip(teams, np.linalg.solve(C, b)))
+    fbs = sorted((t for t in teams if t != FCS_POOL), key=lambda t: -r[t])
+    rank = {t: i + 1 for i, t in enumerate(fbs)}
+    rows = []
+    for t in fbs:
+        gs = sched[t]
+        wins = sorted((o for o, w in gs if w), key=lambda o: -r[o])
+        losses = sorted((o for o, w in gs if not w), key=lambda o: r[o])
+        rows.append(dict(team=t, rank=rank[t], rating=r[t], record=f"{len(wins)}-{len(losses)}",
+                         opp_avg=sum(r[o] for o, _ in gs) / len(gs),
+                         best_win=f"#{rank[wins[0]]} {wins[0]}" if wins and wins[0] in rank else (wins[0] if wins else "-"),
+                         worst_loss=f"#{rank[losses[0]]} {losses[0]}" if losses and losses[0] in rank else (losses[0] if losses else "-")))
+    return rows
+
+
+def print_colley(rows, top):
+    hdr = f"{'Rk':>3} {'Team':<22}{'Rec':>6}{'Rating':>8}{'OppAvg':>8}  Best win / Worst loss"
+    print("\nResults-only ranking (Colley Matrix)\n"); print(hdr); print("-" * len(hdr))
+    for r in rows[:top]:
+        print(f"{r['rank']:>3} {r['team']:<22}{r['record']:>6}{r['rating']:>8.3f}{r['opp_avg']:>8.3f}  {r['best_win']} | {r['worst_loss']}")
+
+
 # ---------------------------------------------------------------- output
 def fmt_game(x):
     v = {"home": "vs", "road": "@", "neutral": "n-"}[x["venue"]]
@@ -271,8 +308,8 @@ def main():
     ap.add_argument("--csv"); ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--benchmark", type=int, default=25)
     ap.add_argument("--top", type=int, default=25)
-    ap.add_argument("--rank", choices=("score", "power", "sor"), default="score",
-                    help="order of the table: score (power + resume, default), power, or sor")
+    ap.add_argument("--rank", choices=("score", "power", "sor", "colley"), default="score",
+                    help="order of the table: score (power + resume, default), power, sor, or colley (results only)")
     ap.add_argument("--team"); ap.add_argument("--out")
     a = ap.parse_args()
 
@@ -284,6 +321,8 @@ def main():
         games = load_cfbd(a.year, key)
     if not games: sys.exit("No completed games found.")
 
+    if a.rank == "colley":
+        print_colley(colley(games), a.top); return
     rows, hfa, bench = compute(games, a.benchmark)
     print_table(rows, hfa, bench, a.top, a.rank)
     if a.team:

@@ -108,6 +108,7 @@ body{margin:0}
     </div>
     <nav aria-label="Sections">
       <a href="#top25" data-view="top25">Top 25</a>
+      <a href="#results" data-view="results">Results only</a>
       <a href="#teams" data-view="teams">Team lookup</a>
       <a href="#method" data-view="method">How it works</a>
     </nav>
@@ -136,6 +137,30 @@ body{margin:0}
         </table>
       </div>
       <p class="note" id="hfaNote"></p>
+    </div>
+  </section>
+
+  <!-- RESULTS ONLY -->
+  <section id="v-results" class="view" hidden>
+    <div style="display:grid;gap:14px">
+      <div class="bar">
+        <h2 id="rtitle">Results-Only Top 25</h2>
+        <div class="ctrl">
+          <label for="rshowall">Show</label>
+          <select id="rshowall"><option value="25">Top 25</option><option value="all">All FBS</option></select>
+        </div>
+      </div>
+      <div class="panel scroll">
+        <table class="top">
+          <thead><tr>
+            <th>Rank</th><th>Team</th><th class="num" title="Colley rating: 0.5 is average; higher means better wins against better opponents">Rating</th>
+            <th class="num" title="Average results-only rating of the team's opponents">Opp avg</th>
+            <th class="num" title="Rank on the main Top 25 for comparison">Main</th><th>Best win</th><th>Worst loss</th>
+          </tr></thead>
+          <tbody id="rt"></tbody>
+        </table>
+      </div>
+      <p class="note">Ranked only by who beat whom. Each team's rating comes from its wins and losses, adjusted by how good its opponents were, where opponents are judged the same way from their own results, all the way through the schedule (the Colley Matrix method). Scores, margins and home field are ignored. Opponent ranks in this tab are results-only ranks. Tap a team for its full schedule.</p>
     </div>
   </section>
 
@@ -174,6 +199,8 @@ body{margin:0}
         <li><b>Résumé points.</b> Wins earn 4 (Q1), 2 (Q2), 1 (Q3) or 0.5 (Q4). Losses cost 85% of the mirror-image win: 0.43 (Q1), 0.85 (Q2), 1.7 (Q3) or 3.4 (Q4). Beating good teams matters most, and wins count slightly more than losses.</li>
         <li><b>Quadrants.</b> Opponents are tiered by power rank, at any venue: Q1 is the top 25, Q2 is 26–50, Q3 is 51–80, and everything else, including FCS, is Q4. Power rank is used so one team's résumé never inflates its opponents' ranks, which would let a conference's teams prop each other up.</li>
       </ol>
+      <h3>The Results only tab</h3>
+      <p>A second, independent ranking that uses nothing but who won. It follows the Colley Matrix method: every team starts even, a win raises a team and a loss lowers it, and each result is weighed by how good the opponent is, where the opponent is judged the same way from its own results. All teams are solved together, so beating a team that beat good teams counts for more. Scores, margins and home field are ignored.</p>
       <h3>Updating the data</h3>
       <p>Upload a CSV with the columns <code>week,home_team,away_team,home_points,away_points,neutral_site,home_fbs,away_fbs</code>. Rows without scores are skipped. An uploaded file only changes your own view. The published rankings come from <code>data/games.json</code>, which the scheduled GitHub Action refreshes from collegefootballdata.com.</p>
       <div class="upload panel" style="border-style:dashed">
@@ -189,7 +216,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -227,6 +254,33 @@ const QUAD_CUTS = [25, 50, 80];
 const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85, RESUME_WEIGHT = 0.5;
 const compress = m => CAP*Math.tanh(m/CAP);
 function erf(x){const t=1/(1+.3275911*Math.abs(x)),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);return x>=0?y:-y}
+
+// Results-only ranking (Colley Matrix): each team's rating is solved from wins, losses and its opponents'
+// ratings at once, so strength flows through the whole schedule. Margins and venue are ignored.
+function colley(games){
+  const nm = (t,f) => f ? t : FCS;
+  const teams = [...new Set(games.flatMap(g => [nm(g.home,g.hf), nm(g.away,g.af)]))].sort();
+  const idx = Object.fromEntries(teams.map((t,i)=>[t,i])), n = teams.length;
+  const C = Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?2:0)), b = new Array(n).fill(1);
+  const sched = Object.fromEntries(teams.map(t=>[t,[]]));
+  games.forEach(g => {
+    if(g.hp===g.ap) return;
+    const h=nm(g.home,g.hf), a=nm(g.away,g.af), i=idx[h], j=idx[a], hw=g.hp>g.ap;
+    C[i][i]++; C[j][j]++; C[i][j]--; C[j][i]--;
+    b[i] += hw?.5:-.5; b[j] += hw?-.5:.5;
+    sched[h].push({opp:a, oppName:a===FCS?g.away:a, won:hw, venue:g.neutral?"neutral":"home", pf:g.hp, pa:g.ap});
+    sched[a].push({opp:h, oppName:h===FCS?g.home:h, won:!hw, venue:g.neutral?"neutral":"road", pf:g.ap, pa:g.hp});
+  });
+  const r = solve(C, b), rating = Object.fromEntries(teams.map((t,i)=>[t,r[i]]));
+  const fbs = teams.filter(t=>t!==FCS).sort((x,y)=>rating[y]-rating[x]), rank = {};
+  fbs.forEach((t,i)=>rank[t]=i+1);
+  return fbs.map(t => {
+    const gs = sched[t].map(x=>({...x, opp_rank:rank[x.opp]||null}));
+    const W = gs.filter(x=>x.won).sort((x,y)=>rating[y.opp]-rating[x.opp]), L = gs.filter(x=>!x.won).sort((x,y)=>rating[x.opp]-rating[y.opp]);
+    return {team:t, rank:rank[t], rating:rating[t], w:W.length, l:L.length,
+            oppAvg: gs.length ? gs.reduce((s,x)=>s+rating[x.opp],0)/gs.length : 0, W, L};
+  });
+}
 
 function solve(A,b){ // Gaussian elimination w/ partial pivoting
   const n=b.length;
@@ -309,6 +363,17 @@ function renderTop(){
   $("#hfaNote").innerHTML = `Score = power rating + 0.5 × résumé. Power is how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
+function renderResults(){
+  const all = $("#rshowall").value==="all", rows = all ? RONLY : RONLY.slice(0,25);
+  $("#rtitle").textContent = all ? "Results-Only Rankings, All FBS" : "Results-Only Top 25";
+  $("#rt").innerHTML = rows.map(r => `<tr class="click" data-team="${esc(r.team)}" tabindex="0">
+    <td class="rk">${r.rank}</td>
+    <td><span class="tm">${esc(r.team)}</span><span class="rec">${r.w}-${r.l}</span></td>
+    <td class="num">${r.rating.toFixed(3)}</td><td class="num">${r.oppAvg.toFixed(3)}</td>
+    <td class="num">${RESULT.byTeam[r.team]?.rank ?? "—"}</td>
+    <td>${gameStr(r.W[0])}</td><td>${gameStr(r.L[0])}</td></tr>`).join("");
+}
+
 function renderTeam(name){
   const r = RESULT.byTeam[name];
   if(!r){ $("#teamOut").innerHTML = `<div class="panel empty">${name?`No FBS team named “${esc(name)}” in this data.`:"Search for a team to see its opponents, their rankings, and the strength of each win and loss."}</div>`; return; }
@@ -352,6 +417,8 @@ function renderStatus(){
 
 function recompute(){
   RESULT = compute(GAMES, BENCH);
+  RONLY = colley(GAMES.filter(g => g.hf || g.af));
+  renderResults();
   $("#teamlist").innerHTML = RESULT.rows.map(r=>`<option value="${esc(r.team)}">`).join("");
   renderStatus(); renderTop();
   const cur = $("#q").value || store.get("sor.team") || "";
@@ -361,7 +428,7 @@ function recompute(){
 
 /* ---------------- routing ---------------- */
 function route(){
-  const v = (location.hash||"#top25").slice(1), view = ["top25","teams","method"].includes(v)?v:"top25";
+  const v = (location.hash||"#top25").slice(1), view = ["top25","results","teams","method"].includes(v)?v:"top25";
   document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-"+view);
   document.querySelectorAll("nav a").forEach(a => a.dataset.view===view ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
 }
@@ -374,6 +441,7 @@ $("#q").addEventListener("input", e => { if(RESULT.byTeam[e.target.value]) rende
 $("#q").addEventListener("change", e => renderTeam(e.target.value));
 $("#bench").addEventListener("change", e => { BENCH = +e.target.value; store.set("sor.bench", BENCH); recompute(); });
 $("#showall").addEventListener("change", e => { SHOWALL = e.target.value==="all"; renderTop(); });
+$("#rshowall").addEventListener("change", renderResults);
 
 /* ---------------- CSV + shared data ---------------- */
 function parseCSV(text){
