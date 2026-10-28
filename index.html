@@ -128,7 +128,7 @@ body{margin:0}
       <div class="panel scroll">
         <table class="top">
           <thead><tr>
-            <th>Rank</th><th>Team</th><th class="num" title="Power rating plus 0.75 × résumé points">Score</th>
+            <th>Rank</th><th>Team</th><th class="num" title="Power rating plus 0.5 × résumé points">Score</th>
             <th class="num" title="Power rating rank: expected margin vs. an average FBS team on a neutral field">Power</th>
             <th class="num" title="Résumé points from wins and losses by quadrant">Résumé</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
           </tr></thead>
@@ -164,7 +164,7 @@ body{margin:0}
   <section id="v-method" class="view" hidden>
     <div class="panel method">
       <h3>How the rankings are built</h3>
-      <p>The rankings answer one question: who are the best teams? Each team's score is its power rating plus 0.75 × its résumé points, so how well a team plays sets the base and who it has beaten moves it up or down.</p>
+      <p>The rankings answer one question: who are the best teams? Each team's score is its power rating plus 0.5 × its résumé points, so how well a team plays sets the base and who it has beaten moves it up or down.</p>
       <ol>
         <li><b>Power ratings from every game at once.</b> Each team gets a rating in points versus an average FBS team on a neutral field. All ratings are solved together, so a team's rating reflects how its opponents did against their own opponents. Margins are compressed past about three scores, and all FCS teams share one pooled rating.</li>
         <li><b>Home field is measured, not assumed.</b> The model estimates the home edge from this season's results. Neutral-site games get none.</li>
@@ -172,7 +172,7 @@ body{margin:0}
         <li><b>Strength of record.</b> Shown alongside the rankings as a résumé check. Wins above benchmark (WAB) is actual wins minus the benchmark's expected wins, and SOR ranks teams by it.</li>
         <li><b>Win and loss quality.</b> A win is worth 1 minus the benchmark's win chance, so hard wins score high. A loss costs the benchmark's win chance, so losing a game a good team should win costs the most.</li>
         <li><b>Résumé points.</b> Wins earn 4 (Q1), 2 (Q2), 1 (Q3) or 0.5 (Q4). Losses cost 85% of the mirror-image win: 0.43 (Q1), 0.85 (Q2), 1.7 (Q3) or 3.4 (Q4). Beating good teams matters most, and wins count slightly more than losses.</li>
-        <li><b>Quadrants.</b> Opponents are tiered by their overall rank on this page, at any venue: Q1 is the top 25, Q2 is 26–50, Q3 is 51–80, and everything else, including FCS, is Q4. Because quadrants feed the rankings, the page re-ranks until the order stops changing.</li>
+        <li><b>Quadrants.</b> Opponents are tiered by power rank, at any venue: Q1 is the top 25, Q2 is 26–50, Q3 is 51–80, and everything else, including FCS, is Q4. Power rank is used so one team's résumé never inflates its opponents' ranks, which would let a conference's teams prop each other up.</li>
       </ol>
       <h3>Updating the data</h3>
       <p>Upload a CSV with the columns <code>week,home_team,away_team,home_points,away_points,neutral_site,home_fbs,away_fbs</code>. Rows without scores are skipped. An uploaded file only changes your own view. The published rankings come from <code>data/games.json</code>, which the scheduled GitHub Action refreshes from collegefootballdata.com.</p>
@@ -221,9 +221,10 @@ function sampleSeason(){
 const CAP = 21, RIDGE = 2;
 // Ranking score = power rating + RESUME_WEIGHT * résumé. Résumé points per game by quadrant:
 // Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
-// Quadrants by the opponent's overall rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = the rest and FCS.
+// Quadrants by the opponent's power rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = the rest and FCS.
+// Power rank (not overall rank) keeps résumés from feeding back into opponents' ranks.
 const QUAD_CUTS = [25, 50, 80];
-const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85, RESUME_WEIGHT = 0.75;
+const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85, RESUME_WEIGHT = 0.5;
 const compress = m => CAP*Math.tanh(m/CAP);
 function erf(x){const t=1/(1+.3275911*Math.abs(x)),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);return x>=0?y:-y}
 
@@ -268,19 +269,9 @@ function compute(games, benchRank){
       const venue = g.neutral?"neutral":side, adj = venue==="home"?hfa:venue==="road"?-hfa:0;
       const pb = wp(bench+adj-R[opp]), won = pf>pa;
       recs[me][won?0:1]++;
-      sched[me].push({week:g.week,opp,oppName:opp===FCS?oppName:opp,venue,pf,pa,won,pb,value:won?1-pb:-pb,expMargin:R[me]+adj-R[opp]});
+      sched[me].push({week:g.week,opp,oppName:opp===FCS?oppName:opp,venue,pf,pa,won,opp_rank:prank[opp]||null,quad:quad(prank[opp]),pb,value:won?1-pb:-pb,expMargin:R[me]+adj-R[opp]});
     });
   });
-  // Quadrants use the overall rank, which itself depends on quadrants, so re-rank until the order settles.
-  const resumeOf = (gs,rk) => gs.reduce((a,x)=>{ const q=quad(rk[x.opp]); return a+(x.won?WIN_PTS[q]:-LOSS_WEIGHT*LOSS_PTS[q]); },0);
-  let rk = prank;
-  for(let it=0; it<30; it++){
-    const sc = {}; order.forEach(t=>sc[t]=R[t]+RESUME_WEIGHT*resumeOf(sched[t],rk));
-    const nr = {}; order.slice().sort((x,y)=>sc[y]-sc[x]).forEach((t,i)=>nr[t]=i+1);
-    const settled = order.every(t=>nr[t]===rk[t]); rk = nr;
-    if(settled) break;
-  }
-  fbs.forEach(t => sched[t].forEach(x => { x.opp_rank = rk[x.opp]||null; x.quad = quad(rk[x.opp]); }));
   const pbAtLeast = (ps,k) => { let d=[1]; ps.forEach(p=>{const nd=new Array(d.length+1).fill(0); d.forEach((v,i)=>{nd[i]+=v*(1-p); nd[i+1]+=v*p}); d=nd;}); return d.slice(k).reduce((a,c)=>a+c,0); };
   const out = fbs.map(t => {
     const gs = sched[t].sort((x,y)=>x.week-y.week), w=gs.filter(x=>x.won).length, l=gs.length-w;
@@ -315,7 +306,7 @@ function renderTop(){
     ${["Q1","Q2","Q3","Q4"].map(k=>`<td><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
     <td class="hide-sm">${gameStr(r.W[0])}</td>
     <td class="hide-sm">${gameStr(r.L[0])}</td></tr>`).join("");
-  $("#hfaNote").innerHTML = `Score = power rating + 0.75 × résumé. Power is how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
+  $("#hfaNote").innerHTML = `Score = power rating + 0.5 × résumé. Power is how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
 function renderTeam(name){
@@ -338,7 +329,7 @@ function renderTeam(name){
     </div>
     <div class="quads">${["Q1","Q2","Q3","Q4"].map(k=>`<div><span class="chip ${k}">${k}</span>${fmtQ(r.q[k])}</div>`).join("")}</div>
     <div class="panel scroll"><table>
-      <thead><tr><th>Wk</th><th></th><th>Opponent</th><th class="num">Opp rank</th><th class="hide-sm">Opp rec</th><th>Tier</th><th class="num">Score</th>
+      <thead><tr><th>Wk</th><th></th><th>Opponent</th><th class="num" title="Opponent's power rank, which sets the quadrant">Opp power</th><th class="hide-sm">Opp rec</th><th>Tier</th><th class="num">Score</th>
       <th class="num" title="How often the benchmark team wins this game at this venue">Bench win</th><th>Game value</th></tr></thead>
       <tbody>${r.games.map(x=>`<tr ${x.opp!==FCS?`class="click" data-team="${esc(x.opp)}" tabindex="0"`:""}>
         <td class="num">${x.week}</td><td><span class="wl ${x.won?"W":"L"}">${x.won?"W":"L"}</span></td>
