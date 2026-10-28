@@ -9,7 +9,7 @@ Static site + Python tooling for college football power rankings. Teams are rank
   2. Outcome SD calibrated from residuals ×1.05; win prob = normal CDF.
   3. For each game, P(benchmark team wins at that venue); benchmark = Nth-rated team (default 25).
   4. WAB = wins − Σ benchmark win prob (SOR rank key); SOR% = Poisson-binomial P(benchmark ≥ actual wins). SOR is a reference, not the main ranking.
-  5. Win value = 1 − p; loss cost = p. Quadrants by venue-adjusted opponent rank: home 15/40/80, neutral 25/55/95, road 40/75/110.
+  5. Win value = 1 − p; loss cost = p. Quadrants by opponent's overall rank, any venue: Q1 ≤25, Q2 ≤50, Q3 ≤80, else Q4 (incl. FCS). Overall rank depends on quadrants, so compute() re-ranks until the order settles (max 30 passes).
   6. Résumé points per game by quadrant: wins 4/2/1/0.5 (Q1–Q4), losses cost 0.85 × 0.5/1/2/4. Ranking score = rating + 0.75 × résumé (constants WIN_PTS, LOSS_PTS, LOSS_WEIGHT, RESUME_WEIGHT in both files).
 - **Updates:** GitHub Action `update-games.yml` runs `scripts/fetch_games.py` with secret `CFBD_API_KEY` and commits `data/games.json`.
 - **Test:** `python -m http.server` and open the page; `python scripts/cfb_sor.py --csv <file>` for a CLI check.

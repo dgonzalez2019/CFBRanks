@@ -62,6 +62,8 @@ WIN_PTS = {"Q1": 4.0, "Q2": 2.0, "Q3": 1.0, "Q4": 0.5}
 LOSS_PTS = {"Q1": 0.5, "Q2": 1.0, "Q3": 2.0, "Q4": 4.0}
 LOSS_WEIGHT = 0.85
 RESUME_WEIGHT = 0.75
+# Quadrants by the opponent's overall rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = rest + FCS
+QUAD_CUTS = (25, 50, 80)
 
 
 def compress(m):
@@ -156,10 +158,9 @@ def poisson_binomial_at_least(probs, k):
     return float(dist[k:].sum())
 
 
-def quadrant(opp_rank, venue):
-    cut = {"home": (15, 40, 80), "neutral": (25, 55, 95), "road": (40, 75, 110)}[venue]
+def quadrant(opp_rank):
     if opp_rank is None: return "Q4"
-    for q, c in zip(("Q1", "Q2", "Q3"), cut):
+    for q, c in zip(("Q1", "Q2", "Q3"), QUAD_CUTS):
         if opp_rank <= c: return q
     return "Q4"
 
@@ -184,10 +185,23 @@ def compute(games, benchmark_rank=25):
             won = pf > pa
             sched[me].append(dict(
                 week=g["week"], opp=opp, venue=venue, pf=pf, pa=pa, won=won,
-                opp_rank=rank.get(opp), quad=quadrant(rank.get(opp), venue),
                 p_bench=p_bench,
                 value=(1 - p_bench) if won else -p_bench,   # + win quality / - loss cost
             ))
+
+    # Quadrants use the overall rank, which itself depends on quadrants, so re-rank until the order settles.
+    def resume_of(gs, rk):
+        return sum(WIN_PTS[q] if x["won"] else -LOSS_WEIGHT * LOSS_PTS[q]
+                   for x in gs for q in [quadrant(rk.get(x["opp"]))])
+    rk = rank
+    for _ in range(30):
+        sc = {t: ratings[t] + RESUME_WEIGHT * resume_of(sched[t], rk) for t in fbs_sorted}
+        new = {t: i + 1 for i, t in enumerate(sorted(fbs_sorted, key=lambda t: -sc[t]))}
+        settled = new == rk; rk = new
+        if settled: break
+    for t in fbs_sorted:
+        for x in sched[t]:
+            x["opp_rank"] = rk.get(x["opp"]); x["quad"] = quadrant(x["opp_rank"])
 
     rows = []
     for t in fbs_sorted:
