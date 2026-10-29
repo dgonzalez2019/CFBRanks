@@ -356,7 +356,7 @@ def fit_predictor(games, prior=None, cap=None):
 
 
 # Injury picker: see playerValues() in index.html for the reasoning behind these.
-INJ_POS, INJ_SHRINK, INJ_SHARE = ("QB", "RB", "WR", "TE"), 50, 0.5
+INJ_POS, INJ_SHRINK, INJ_SHARE, INJ_SHARE_QB = ("QB", "RB", "WR", "TE"), 50, 0.5, 1.25
 
 
 def player_values(players, games):
@@ -378,7 +378,8 @@ def player_values(players, games):
     for (team, pos), l in groups.items():
         for i, p in enumerate(l):
             repl = shrink(l[1], backup[pos]) if i == 0 and len(l) > 1 else backup[pos]
-            out[team].append(dict(p, value=max(0.0, shrink(p, pos_avg[pos]) - repl) * p["plays"] / gp[team] * INJ_SHARE))
+            share = INJ_SHARE_QB if pos == "QB" else INJ_SHARE
+            out[team].append(dict(p, value=max(0.0, shrink(p, pos_avg[pos]) - repl) * p["plays"] / gp[team] * share))
     for l in out.values(): l.sort(key=lambda p: -p["value"])
     return out
 

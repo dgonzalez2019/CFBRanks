@@ -260,7 +260,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -419,12 +419,13 @@ function predict(M, a, b, venue, outA=0, outB=0){  // outA/outB: points per game
 }
 
 // Injury picker. A player's worth in points per game = (his PPA per play - his replacement's) x his plays per
-// game x INJ_SHARE. PPA credits a pass to both passer and receiver, so INJ_SHARE halves the raw value (an
-// estimate: there is no injury history to test it on). PPA is shrunk toward the position average by INJ_SHRINK
-// plays. A team's top player at a position is replaced by its own next player there (shrunk toward the
+// game x a share. QBs: INJ_SHARE_QB, fitted on 2022-25 from 301 games where a team's main QB missed his first
+// game (teams fell 4.4 pts short of the model; fitted share 1.33 +/- 0.20, used rounded down). Other positions:
+// INJ_SHARE halves the raw value because PPA credits each pass to both passer and receiver (untested).
+// PPA is shrunk toward the position average by INJ_SHRINK plays. A team's top player at a position is replaced by its own next player there (shrunk toward the
 // league-wide backup level); anyone else is replaced at the backup level. Offense only: the free data has no
 // per-player value for defenders or linemen.
-const INJ_POS = ["QB","RB","WR","TE"], INJ_SHRINK = 50, INJ_SHARE = 0.5;
+const INJ_POS = ["QB","RB","WR","TE"], INJ_SHRINK = 50, INJ_SHARE = 0.5, INJ_SHARE_QB = 1.25;
 function playerValues(players, games){
   const gp = {}; games.forEach(g => { gp[g.home] = (gp[g.home]||0)+1; gp[g.away] = (gp[g.away]||0)+1; });
   const ps = players.filter(p => INJ_POS.includes(p.pos) && gp[p.team]);
@@ -439,7 +440,7 @@ function playerValues(players, games){
   Object.entries(groups).forEach(([k,l]) => { const [team,pos] = k.split("|");
     l.forEach((p,i) => {
       const repl = i===0 && l[1] ? shrink(l[1], backup[pos]) : backup[pos];
-      const value = Math.max(0, shrink(p, posAvg[pos]) - repl) * p.plays / gp[team] * INJ_SHARE;
+      const value = Math.max(0, shrink(p, posAvg[pos]) - repl) * p.plays / gp[team] * (pos==="QB" ? INJ_SHARE_QB : INJ_SHARE);
       (byTeam[team] ||= []).push({...p, value});
     });
   });
@@ -602,8 +603,18 @@ function renderMatchup(force){
   const inj = PLAYERS.length ? `<details id="injbox" class="panel" style="padding:12px 16px"${INJOPEN?" open":""}>
       <summary><b>Injuries: mark players who are out</b> <span class="sub">${(OUT[a]?.size||0)+(OUT[b]?.size||0)} marked</span></summary>
       <div class="injgrid">${injList(a)}${injList(b)}</div>
-      <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him, from his points added per play this season versus his backup's, times his plays per game, halved because passing credit is shared between passer and receiver. Offensive players only: there is no free per-player data for defenders or linemen. An estimate; nothing to test it against.</p>
+      <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him: his points added per play this season versus his backup's, times his plays per game. QB values are calibrated on 2022–25, where teams whose starting QB missed a game fell short by about 1.25× this raw gap. Other positions are halved because passing credit is shared between passer and receiver, and are untested. Offensive players only: there is no free per-player data for defenders or linemen.</p>
     </details>` : "";
+  const ln = LINES.find(l => l.hp==null && ((l.home===a && l.away===b) || (l.home===b && l.away===a)));
+  let mkt = "";
+  if(ln){
+    const mA = (ln.home===a ? -ln.spread : ln.spread) + outVal(b) - outVal(a), pA = .5*(1+erf(mA/(MKT_SD*Math.SQRT2)));
+    const fav = mA>=0 ? a : b, fp = mA>=0 ? pA : 1-pA, where = ln.neutral ? "neutral site" : `at ${ln.home}`;
+    mkt = `<div class="panel" style="padding:14px 16px;border-color:var(--accent)">
+      <b>Best prediction: the betting line.</b> ${esc(fav)} by ${(Math.round(Math.abs(mA)*2)/2).toFixed(1)}, wins about ${Math.round(fp*100)}%
+      <span class="sub">(week ${ln.week}, ${esc(where)}; line ${lineStr(ln.home, ln.away, -ln.spread)}${outVal(a)||outVal(b) ? ", adjusted for the players you marked out" : ""})</span>
+      <p class="sub" style="margin:6px 0 0">Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse. The score above is our model's, for comparison and for games without a line. If an injury was already announced, the line likely includes it: don't mark it again.</p></div>`;
+  }
   const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
   const side = (t, s, r, win) => `<div class="side${win?" win":""}"><b>${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
   $("#mout").innerHTML = `
@@ -615,7 +626,7 @@ function renderMatchup(force){
         <p style="margin:6px 0 0"><b>${esc(w)}</b> wins ${Math.round(wp*100)}% of the time by about <b>${Math.max(1,Math.round(Math.abs(p.margin)))}</b> point${Math.round(Math.abs(p.margin))===1?"":"s"}${v==="N"?" on a neutral field":` with ${esc(v==="A"?a:b)} at home`}.</p>
         ${met.map(g=>`<p class="sub" style="margin:0">Already played, week ${g.week}: ${esc(g.away)} ${g.ap} ${g.neutral?"vs.":"at"} ${esc(g.home)} ${g.hp}${g.neutral?" (neutral site)":""}.</p>`).join("")}
       </div>
-    </div>${inj}${eff}`;
+    </div>${mkt}${inj}${eff}`;
   $("#injbox")?.addEventListener("toggle", e => INJOPEN = e.target.open);
   $("#mout").querySelectorAll(".inj input").forEach(cb => cb.addEventListener("change", () => {
     const t = cb.dataset.team, s = (OUT[t] ||= new Set());
@@ -625,6 +636,10 @@ function renderMatchup(force){
 }
 
 // Betting lines use the home team's spread (negative = home favored), so the market's home margin is -spread.
+// Over 2022-25 the betting line picked more winners than our model every season, and blending in any of our
+// model made it worse, so when a game has a line the Matchup tab leads with it. MKT_SD: spread of results
+// around the line (15.2 on 3,174 games; win chances from it matched actual rates within ~2 points).
+const MKT_SD = 15.2;
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 function renderLines(){
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
@@ -662,12 +677,22 @@ function renderLines(){
       <div class="panel scroll"><table><thead><tr><th>When we disagreed by</th><th class="num">Games</th><th class="num">Result on our side</th></tr></thead><tbody>${tiers}</tbody></table></div>
       <p class="note">${done.length} games from week ${BT.first} on. Each of our predictions used only games played before that week. Betting at standard odds needs about 52.4% on your side just to break even, so small samples above that can easily be luck.</p>`;
   }
+  const R = RESEARCH, pct = ([w,l]) => w+l ? `${w}–${l} <span class="sub">${Math.round(100*w/(w+l))}%</span>` : "—";
+  const past = R ? `<div class="bar"><h2>Past seasons, ${R.seasons[0]}–${R.seasons[R.seasons.length-1]}</h2></div>
+    <div class="panel scroll"><table><thead><tr><th>Season</th><th class="num">Games</th><th class="num">Line: winners</th><th class="num">Ours: winners</th><th class="num">Line: avg miss</th><th class="num">Ours: avg miss</th></tr></thead>
+      <tbody>${R.accuracy.map(a => `<tr><td>${a.season}</td><td class="num">${a.n}</td><td class="num"><b>${(a.line_winners*100).toFixed(1)}%</b></td><td class="num">${(a.ours_winners*100).toFixed(1)}%</td><td class="num"><b>${a.line_miss.toFixed(1)}</b></td><td class="num">${a.ours_miss.toFixed(1)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="panel scroll"><table><thead><tr><th>Our side of the line, when we disagreed by</th>${R.seasons.map(y=>`<th class="num">${y}</th>`).join("")}<th class="num">All</th></tr></thead>
+      <tbody>${R.ats.map(a => `<tr><td>${a.edge ? `${a.edge}+ points` : "Any amount"}</td>${R.seasons.map(y=>`<td class="num">${pct(a.by_season[y])}</td>`).join("")}<td class="num"><b>${pct(a.total)}</b></td></tr>`).join("")}</tbody></table></div>
+    <p class="note">Each of our predictions used only games before that week plus last season's ratings. The line picked more winners and missed by less in every season, and no mix of the line with our model did better than the line alone. Our side of the line covered about half the time, below the 52.4% needed to profit at standard odds, and bigger disagreements did worse. A model trained to spot where the line is wrong (by spread size, week, home or road, and our disagreement) also landed at 50% on seasons it wasn't trained on.</p>
+    <div class="panel" style="padding:14px 16px"><b>The one pattern that held up: starting QB out.</b>
+      <p style="margin:6px 0 0">In the first game a team's main QB missed, betting against that team covered ${pct([0,1].map(i=>Object.values(R.qb_out.by_season).reduce((s,x)=>s+x[i],0)))} (${R.seasons.map(y=>`${y}: ${pct(R.qb_out.by_season[y])}`).join(", ")}), and more often the better the QB: worth 4+ points, ${pct(R.qb_out.by_value["4"])}; 8+ points, ${pct(R.qb_out.by_value["8"])}. Teams fell ${R.qb_out.drop_vs_model} points short of our model on average.</p>
+      <p class="sub" style="margin:6px 0 0">Caution: this uses who actually sat, known only after the fact. Surprise absences never reached the line, so part of this can't be acted on. It's usable only when you know a QB is out before the line fully moves: mark him on the Matchup tab.</p></div>` : "";
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   $("#ltitle").textContent = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: our lines vs. betting lines` : "Our lines vs. betting lines";
   $("#lout").innerHTML = (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines.</div>`) +
     `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by biggest difference. The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
     (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : "") +
-    record;
+    record + past;
 }
 
 function renderTeam(name){
@@ -795,6 +820,10 @@ async function loadData(){
       const lr = await fetch("data/lines.json", {cache:"no-store"});
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[]}));
     }catch(e){ LINES = []; }
+    try{
+      const rr = await fetch("data/research.json", {cache:"no-store"});
+      if(rr.ok) RESEARCH = await rr.json();
+    }catch(e){ RESEARCH = null; }
     try{
       const hr = await fetch(`data/history/${d.season-1}.json`, {cache:"no-store"});
       if(hr.ok){ const h = await hr.json(); PREV = (h.games||[]).map(a => unpack(a[0], a.slice(1))).filter(g => g.hf || g.af); PRIOR = seasonPrior(PREV); }
