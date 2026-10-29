@@ -11,6 +11,7 @@ ap.add_argument("--out", help="output file (default: data/games.json)")
 ap.add_argument("--lines", help="also write betting lines for the season's games (played and upcoming) here")
 ap.add_argument("--players", help="also write player value (season PPA per play, offensive players) here")
 ap.add_argument("--ppa", help="also write this season's per-game team PPA (play efficiency) here")
+ap.add_argument("--teams", help="also write team logos and colors here (refreshed at most once a week)")
 a = ap.parse_args()
 key = os.environ.get("CFBD_API_KEY") or sys.exit("CFBD_API_KEY is not set")
 upcoming = []
@@ -177,3 +178,23 @@ if a.ppa:
         print(f"PPA: wrote {len(rows)} team-game rows")
     except Exception as e:
         print(f"PPA unavailable: {e}")
+
+
+# Team logos and colors for the page: one /teams call, only when the file is missing or more than a week old.
+# Stored per team: [school, logo URL, color, alternate color].
+if a.teams:
+    tp = pathlib.Path(a.teams)
+    try: age = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(json.loads(tp.read_text())["updated"])).days
+    except (OSError, ValueError, KeyError): age = None
+    if age is not None and age < 7:
+        print(f"Teams: kept ({age} days old)")
+    else:
+        try:
+            T = get("https://api.collegefootballdata.com/teams")
+            rows = [[t["school"], (t.get("logos") or [None])[0], t.get("color"), t.get("alternateColor", t.get("alt_color"))]
+                    for t in T if t.get("school") and t.get("logos")]
+            tp.write_text(json.dumps({"updated": out["updated"], "teams": rows}, separators=(",", ":")))
+            print(f"Teams: wrote {len(rows)} with logos")
+            if T and not rows: print("  First team item, for debugging:", json.dumps(T[0])[:600])
+        except Exception as e:
+            print(f"Teams unavailable: {e}")
