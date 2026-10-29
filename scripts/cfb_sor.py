@@ -384,6 +384,50 @@ def player_values(players, games):
     return out
 
 
+# Play-efficiency (PPA) model, as in research/ppa_model.py: opponent-adjusted offense/defense PPA per play, ridge
+# toward last season's ratings (kept at PPA_KEEP) nudged by recruiting talent; net PPA -> points with a fit on
+# 2022-25 (PPA_A, PPA_B). Used for the top-confidence criterion, not for the predicted margin.
+PPA_KEEP, PPA_RIDGE, PPA_TALENT, PPA_A, PPA_B = 0.6, 4.0, 0.02, 57.701, 2.884
+
+
+def _ppa_fit(rows, prior):
+    teams = sorted({t for r in rows for t in r[:2]}); ix = {t: i for i, t in enumerate(teams)}; n = len(teams)
+    A = np.zeros((2 * n + 1, 2 * n + 1)); b = np.zeros(2 * n + 1)
+    for o, d, y in rows:
+        cols = [ix[o], n + ix[d], 2 * n]
+        for i in cols:
+            b[i] += y
+            for j in cols: A[i, j] += 1
+    for t, i in ix.items():
+        A[i, i] += PPA_RIDGE; b[i] += PPA_RIDGE * prior[0].get(t, 0)
+        A[n + i, n + i] += PPA_RIDGE; b[n + i] += PPA_RIDGE * prior[1].get(t, 0)
+    A[2 * n, 2 * n] += 1e-6
+    x = np.linalg.solve(A, b)
+    return {t: x[ix[t]] for t in teams}, {t: x[n + ix[t]] for t in teams}
+
+
+def ppa_model(cur_rows, prev_rows, talent, fbs):
+    """cur_rows/prev_rows: [week, team, opponent, off PPA, ..., def PPA, ...] (data/ppa.json, history/<y>_ppa.json);
+    talent: {team: composite}; fbs: set of FBS team names. Returns (off, def, prior) dicts."""
+    norm = lambda t: t if t in fbs else FCS_POOL
+    prev = [(norm(r[1]), norm(r[2]), r[3]) for r in prev_rows] + [(norm(r[2]), norm(r[1]), r[6]) for r in prev_rows]
+    o0, d0 = _ppa_fit(prev, ({}, {})) if prev else ({}, {})
+    tv = np.array([talent[t] for t in fbs if t in talent]) if talent else np.array([])
+    tz = {t: (talent[t] - tv.mean()) / tv.std() for t in fbs if t in talent} if len(tv) > 1 else {}
+    teams = fbs | {FCS_POOL}
+    prior = ({t: PPA_KEEP * o0.get(t, 0) + PPA_TALENT * tz.get(t, 0) for t in teams},
+             {t: PPA_KEEP * d0.get(t, 0) - PPA_TALENT * tz.get(t, 0) for t in teams})
+    cur = [(norm(r[1]), norm(r[2]), r[3]) for r in cur_rows]
+    off, de = _ppa_fit(cur, prior) if cur else (prior[0], prior[1])
+    return off, de, prior
+
+
+def ppa_margin(P, home, away):
+    off, de, prior = P
+    o = lambda t: off.get(t, prior[0].get(t, 0)); d = lambda t: de.get(t, prior[1].get(t, 0))
+    return PPA_A * ((o(home) + d(away)) - (o(away) + d(home))) + PPA_B
+
+
 # Injury reports (see the injury notes in index.html): players listed Out, valued by player_values() and scaled by
 # the share of the team's games dated on or before the injury's start (ratings already reflect games he missed).
 def name_key(n):

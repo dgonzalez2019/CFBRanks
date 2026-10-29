@@ -10,6 +10,7 @@ ap = argparse.ArgumentParser(); ap.add_argument("--year", type=int, default=date
 ap.add_argument("--out", help="output file (default: data/games.json)")
 ap.add_argument("--lines", help="also write betting lines for the season's games (played and upcoming) here")
 ap.add_argument("--players", help="also write player value (season PPA per play, offensive players) here")
+ap.add_argument("--ppa", help="also write this season's per-game team PPA (play efficiency) here")
 a = ap.parse_args()
 key = os.environ.get("CFBD_API_KEY") or sys.exit("CFBD_API_KEY is not set")
 upcoming = []
@@ -159,3 +160,20 @@ if a.players:
             pp.write_text(json.dumps({"season": a.year, "updated": out["updated"], "players": rows}, separators=(",", ":")))
     except Exception as e:
         print(f"Player values unavailable: {e}")
+
+
+# This season's per-game team efficiency, same rows as data/history/<year>_ppa.json, for the top-confidence check.
+if a.ppa:
+    try:
+        rows = []
+        for seas in ["regular"] + (["postseason"] if any(g["week"] > 20 for g in games) else []):
+            for x in get(f"https://api.collegefootballdata.com/ppa/games?year={a.year}&seasonType={seas}&excludeGarbageTime=true"):
+                o, d = x.get("offense") or {}, x.get("defense") or {}
+                if o.get("overall") is None or d.get("overall") is None: continue
+                rows.append([x.get("week", 0) + (20 if seas == "postseason" else 0), x.get("team"), x.get("opponent"),
+                             o.get("overall"), o.get("passing"), o.get("rushing"), d.get("overall"), d.get("passing"), d.get("rushing")])
+        if rows:
+            pathlib.Path(a.ppa).write_text(json.dumps({"season": a.year, "updated": out["updated"], "games": rows}, separators=(",", ":")))
+        print(f"PPA: wrote {len(rows)} team-game rows")
+    except Exception as e:
+        print(f"PPA unavailable: {e}")

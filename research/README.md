@@ -17,6 +17,8 @@ python research/ppa_eval.py $W                            # vs opening and closi
 python research/situational.py .                          # rest, travel, last-week and line angles; no ratings
 python research/opening_2026.py $W .                      # pre-registered: does 2025's edge vs opening lines hold in 2026?
 python research/confidence.py $W .                        # what makes a top-10% pick: candidate confidence measures
+python research/criteria.py $W .                          # which yes/no criteria separated correct picks, 2025 <-> 2026
+python research/criteria_check.py $W .                    # leak-free check of the winner on 2022-25
 python research/summary.py $W .                          # -> data/research.json (shown on the Lines tab)
 ```
 
@@ -39,3 +41,9 @@ Confidence (research/confidence.py): top 10% by gap from the opening line went 5
 2025/2026. Scaling the gap by the model's typical miss, requiring the efficiency model to agree, skipping weeks 1-2
 and spreads of 21+, or requiring the line to move our way did no better on 2025-26 (41-57%). The site uses a fixed
 7.5-point gap (90th percentile of 2022-25): 188-175 (51.8%) over 2022-26.
+
+Top confidence (research/criteria.py, criteria_check.py): single criteria never beat 55% in both 2025 and 2026;
+the best pairs found on one season fell to 35-56% on the other. One pair found on 2026 held up elsewhere: our pick did
+worse against the spread in its last game than its opponent AND the play-efficiency model is on the other side of the
+line. Leak-free (efficiency scale fit on other seasons): 2022 51.9%, 2023 53.3%, 2024 59.7%, 2025 50.9%, so 238-202
+(54.1%) in 2022-25, about 15% of games. This is the site's top-confidence rating, tracked live.
