@@ -17,10 +17,15 @@ jobs:
       - run: python scripts/fetch_games.py --lines data/lines.json --players data/players.json
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+      - name: Fetch injuries (optional)
+        run: python scripts/fetch_injuries.py --out data/injuries.json || echo "Injury fetch failed; keeping the previous file."
+        env:
+          SPORTSDATAIO_API_KEY: ${{ secrets.SPORTSDATAIO_API_KEY }}
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add data/games.json data/lines.json
           if [ -f data/players.json ]; then git add data/players.json; fi
+          if [ -f data/injuries.json ]; then git add data/injuries.json; fi
           git diff --cached --quiet || (git commit -m "Update game results" && git push)
