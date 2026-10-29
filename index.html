@@ -288,6 +288,11 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 .pres{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font:700 13px/1.3 var(--body);margin-top:2px}
 .pick.won .pres{color:var(--win)} .pick.lost .pres{color:var(--loss)}
 .pres span{font:500 12px/1.3 var(--mono);color:var(--muted)}
+.pgame{font-size:13.5px;color:var(--muted)}
+.pgame .pickside{color:var(--accent);font-weight:700}
+.pstats{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pstats span{font:500 11.5px/1 var(--body);color:var(--muted);padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.pstats b{font:600 12px/1 var(--mono);color:var(--ink);margin-left:4px}
 .pick time{align-self:end;font:600 12px/1.2 var(--mono);color:var(--accent);white-space:nowrap;text-align:right}
 @media (max-width:640px){.pick{grid-template-columns:auto 1fr}.pick time{grid-column:1/-1;justify-self:end}.pconf{min-width:64px}.pconf b{font-size:24px}.ptext{font-size:19px}}
 /* ---------- game cards (Lines tab) ---------- */
@@ -458,7 +463,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
   <!-- PICKS -->
   <section id="v-picks" class="view" hidden>
     <div style="display:grid;gap:14px">
-      <div class="bar"><h2>Confidence picks</h2></div>
+      <div class="bar"><h2 id="ptitle">This week's confidence picks</h2></div>
       <div id="pout" style="display:grid;gap:14px"></div>
     </div>
   </section>
@@ -1195,59 +1200,46 @@ function renderLines(){
   $("#lout").querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { LMODE = b.dataset.lm; store.set("sor.lmode", LMODE); renderLines(); }));
 }
 
-// Picks tab: every tracked pick (spread and total) with confidence of 50% or more, most confident first. Finished
-// games are graded against the line saved at kickoff: green when the pick was right, red when it missed.
-let PMODE = "all", GMODE = "all";
+// Picks tab: a pre-game summary of the Lines tab's Spreads and Totals views, keeping only this week's picks rated 50%
+// or more (games not yet kicked off), most confident first. The side to take is the headline of each card.
+let PMODE = "all";
 function renderPicks(){
   const sgn = x => Math.abs(x) < .25 ? "PK" : (x > 0 ? "+" : "−") + (Math.round(Math.abs(x)*2)/2).toFixed(1);
-  const picks = [];
-  (TRACKER?.games||[]).forEach(g => {
-    const res = g.results, score = res ? `${esc(g.away)} ${g.away_pts}, ${esc(g.home)} ${g.home_pts}` : "";
+  const nowMs = Date.now(), picks = [];
+  (TRACKER?.games||[]).filter(g => !g.results && (!g.start || new Date(g.start).getTime() > nowMs)).forEach(g => {
+    const vs = g.neutral ? "vs" : "at";
     if(g.conf != null && g.line != null && g.conf >= .5){
-      const home = g.ours > g.line, team = home ? g.home : g.away;
-      picks.push({g, kind:"spread", conf:g.conf, top:g.top_conf, top5:g.top5, res:res?.model_close ?? null, score,
-        text:`${esc(team)} ${sgn(home ? -g.line : g.line)}`, sub:`${esc(g.away)} ${g.neutral ? "vs" : "at"} ${esc(g.home)}`,
-        detail:`Line ${lineStr(g.home, g.away, g.line)} · ours ${lineStr(g.home, g.away, g.ours)}`});
+      const home = g.ours > g.line, team = home ? g.home : g.away, hl = t => t === team ? `<b class="pickside">${esc(t)}</b>` : esc(t);
+      picks.push({g, kind:"spread", conf:g.conf, top:g.top_conf, top5:g.top5, text:`${esc(team)} ${sgn(home ? -g.line : g.line)}`,
+        game:`${hl(g.away)} ${vs} ${hl(g.home)}`,
+        stats:[["Betting line", lineStr(g.home, g.away, g.line)], ["Our line", lineStr(g.home, g.away, g.ours)], ["Off the line", `${Math.abs(g.ours - g.line).toFixed(1)} pts`]]});
     }
     if(g.tconf != null && g.total != null && g.tconf >= .5){
       const over = g.ours_total > g.total;
-      picks.push({g, kind:"total", conf:g.tconf, top:g.ttop_conf, top5:g.ttop5, res:res?.ou_model ?? null, score:res ? `${score} · total ${g.home_pts + g.away_pts}` : "",
-        text:`${over ? "Over" : "Under"} ${g.total.toFixed(1)}`, sub:`${esc(g.away)} ${g.neutral ? "vs" : "at"} ${esc(g.home)}`,
-        detail:`Betting total ${g.total.toFixed(1)} · ours ${g.ours_total}`});
+      picks.push({g, kind:"total", conf:g.tconf, top:g.ttop_conf, top5:g.ttop5, text:`${over ? "Over" : "Under"} ${g.total.toFixed(1)}`,
+        game:`${esc(g.away)} ${vs} ${esc(g.home)}`,
+        stats:[["Betting total", g.total.toFixed(1)], ["Our total", g.ours_total], ["Off the total", `${(g.ours_total - g.total > 0 ? "+" : "")}${(g.ours_total - g.total).toFixed(1)} pts`]]});
     }
   });
   const shown = picks.filter(p => PMODE === "all" || p.kind === PMODE).sort((a,b) => b.conf - a.conf);
-  const open = shown.filter(p => !p.g.results), graded = shown.filter(p => p.g.results && p.res);
-  const done = graded.filter(p => GMODE === "all" || (GMODE === "W") === (p.res === "W"));
-  const rec = l => { const w = l.filter(p => p.res === "W").length, ls = l.filter(p => p.res === "L").length;
-    return {w, l: ls, txt: `${w}–${ls}`, pct: w + ls ? `${Math.round(100*w/(w+ls))}%` : "—"}; };
-  const all = picks.filter(p => p.g.results && p.res), band = (lo, hi) => all.filter(p => p.conf >= lo && p.conf < hi);
-  const tiles = [["All picks 50%+", rec(all)], ["Spreads", rec(all.filter(p => p.kind === "spread"))], ["Totals", rec(all.filter(p => p.kind === "total"))],
-                 ["Top 10% flagged", rec(all.filter(p => p.top))], ["Rated 54%+", rec(band(.54, 1))]];
-  const card = (p, i) => { const r = p.res, cls = r === "W" ? " won" : r === "L" ? " lost" : r === "P" ? " push" : "";
-    return `<article class="pick${cls}${p.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
+  const nS = picks.filter(p => p.kind === "spread").length, nT = picks.length - nS, nTop = picks.filter(p => p.top).length;
+  const card = (p, i) => `<article class="pick${p.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
       <div class="pconf"><b>${(p.conf*100).toFixed(1)}%</b><span>${p.top5 ? "★ Top 5%" : p.top ? "★ Top 10%" : "confidence"}</span></div>
       <div class="pmain">
-        <div class="pkind ${p.kind}">${p.kind === "spread" ? "Spread" : "Total"}</div>
+        <div class="pkind ${p.kind}">${p.kind === "spread" ? "Spread" : "Over/under"}</div>
         <div class="ptext">${p.text}</div>
-        <div class="sub">${p.sub} · ${p.detail}</div>
-        ${r ? `<div class="pres">${r === "W" ? "✓ Correct" : r === "L" ? "✗ Missed" : "Push"}<span>${p.score}</span></div>` : ""}
+        <div class="pgame">${p.game}</div>
+        <div class="pstats">${p.stats.map(([k,v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>
       </div>
       <time${p.g.start ? ` datetime="${esc(p.g.start)}"` : ""}>${gameWhen(p.g.start)}</time>
-    </article>`; };
-  const seg = `<div class="seg" role="tablist" aria-label="Which picks">${[["all","All"],["spread","Spreads"],["total","Totals"]].map(([k,n]) =>
+    </article>`;
+  const seg = `<div class="seg" role="tablist" aria-label="Which picks">${[["all",`All (${picks.length})`],["spread",`Spreads (${nS})`],["total",`Totals (${nT})`]].map(([k,n]) =>
     `<button type="button" role="tab" data-pm="${k}" aria-selected="${PMODE===k}">${n}</button>`).join("")}</div>`;
-  $("#pout").innerHTML = seg + `
-    <div class="tiles">${tiles.map(([n, r]) => `<div class="tile"><b>${r.txt}</b><span>${n} · ${r.pct}</span></div>`).join("")}</div>
-    <div class="bar"><h2>Upcoming</h2><span class="sub">${open.length} pick${open.length===1?"":"s"} at 50%+, most confident first</span></div>
-    ${open.length ? `<div class="picks">${open.map(card).join("")}</div>` : `<div class="panel empty">No upcoming picks at 50% or more yet. Picks appear once a game is within 7 days of kickoff.</div>`}
-    <div class="bar"><h2>Graded</h2><span class="sub">${graded.length ? `${rec(graded).txt} (${rec(graded).pct}), green = correct, red = missed` : "none yet"}</span></div>
-    ${graded.length ? `<div class="seg" role="tablist" aria-label="Which graded picks">${[["all","All graded"],["W","Correct only"],["L","Missed only"]].map(([k,n]) =>
-      `<button type="button" role="tab" data-gm="${k}" aria-selected="${GMODE===k}">${n}</button>`).join("")}</div>` : ""}
-    ${done.length ? `<div class="picks">${done.map(card).join("")}</div>` : `<div class="panel empty">Picks are graded after each final against the line saved at kickoff.</div>`}
-    <p class="note">A pick's confidence is the model's chance it beats the betting line (spreads) or total (over/unders), saved before kickoff and frozen once the game starts. Only picks rated 50% or higher are listed. Even the best-rated picks are expected to win only about 55% of the time, and totals scores are much less proven than spread scores (see the Lines tab). This is the model's out-of-sample record, not betting advice.</p>`;
+  $("#pout").innerHTML = seg +
+    `<p class="note" style="margin:0">This week's picks from the Lines tab rated 50% or higher, before kickoff, most confident first. <b>${nTop}</b> are top confidence (★, the top 10% of the week in their market).</p>` +
+    (shown.length ? `<div class="picks">${shown.map(card).join("")}</div>` : `<div class="panel empty">No upcoming picks at 50% or more yet. Picks appear once a game is within 7 days of kickoff.</div>`) +
+    `<p class="note">Confidence is the model's chance the pick beats the betting line (spreads) or total (over/unders). Even the best-rated picks are expected to win only about 55% of the time, and totals scores are much less proven than spread scores. Results are tracked on the Lines tab. Not betting advice.</p>`;
   $("#pout").querySelectorAll("[data-pm]").forEach(b => b.addEventListener("click", () => { PMODE = b.dataset.pm; renderPicks(); }));
-  $("#pout").querySelectorAll("[data-gm]").forEach(b => b.addEventListener("click", () => { GMODE = b.dataset.gm; renderPicks(); }));
 }
 
 function renderTeam(name){
