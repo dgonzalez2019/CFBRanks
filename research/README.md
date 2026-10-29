@@ -15,6 +15,7 @@ python research/qb_rule.py $W .                           # QB-out betting rule 
 python research/ppa_model.py research $W .               # play-efficiency (PPA) ratings with talent priors -> $W/ppa_preds.json
 python research/ppa_eval.py $W                            # vs opening and closing lines, held-out seasons
 python research/situational.py .                          # rest, travel, last-week and line angles; no ratings
+python research/opening_2026.py $W .                      # pre-registered: does 2025's edge vs opening lines hold in 2026?
 python research/summary.py $W .                          # -> data/research.json (shown on the Lines tab)
 ```
 
@@ -26,3 +27,8 @@ steadiest single angle, conference-game underdogs, 53.2% over 2022-26 closing li
 
 `data/history/2026_qb.json` (and 2026's PPA, talent and returning files) are this season's data through the week it was fetched (extras-only run), kept so
 the QB rule's 2026 test can be reproduced; it does not update.
+
+NIL era (trained on 2025 only, tested on 2026): score model vs opening lines 51.1% at 3+ points (2025 was 55.8%);
+situational model 52.0%; spread picks 51.9%; totals 49.7%; score + PPA blend 46.9%. Only one angle beat 55% in both
+2025 and 2026: underdogs getting exactly 3 or 7 (+/-0.5), 46-38 and 23-16 (69-54, 56%), but 51% in 2022-24 and the
+best of 10 angles tried, so likely chance until it holds up live.
