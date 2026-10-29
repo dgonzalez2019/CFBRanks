@@ -418,6 +418,67 @@ tr.moved-up{animation:moveFlash 1.6s ease .9s both} tr.moved-down{animation:move
 .res.miss{color:var(--muted)} .res.miss i{color:var(--loss)}
 .res span{color:var(--muted);font-weight:500}
 .confetti{position:fixed;z-index:90;width:8px;height:12px;border-radius:2px;pointer-events:none;will-change:transform,opacity}
+/* ---------- game sheet (tap a pick card) ---------- */
+.pick{cursor:pointer}
+.pmeta{display:flex;gap:4px;align-items:baseline}
+.pmeta .pmore{margin-left:auto;padding-left:10px;flex:none;color:var(--accent);font-weight:600;font-size:13px}
+#sheet{border:0;padding:0;margin:auto;width:min(760px,100vw);max-height:min(92vh,980px);background:transparent;color:var(--ink);overflow:visible}
+#sheet::backdrop{background:rgba(20,16,8,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.sheet-in{position:relative;width:100%;overflow-x:hidden;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 40px 80px -30px rgba(0,0,0,.5);max-height:min(92vh,980px);overflow:auto;overscroll-behavior:contain;padding:22px 22px 26px}
+.sheet-x{position:sticky;top:0;z-index:2;width:36px;height:36px;margin:0 0 -36px auto;border-radius:50%;padding:0;font-size:15px;display:grid;place-items:center;background:var(--card);box-shadow:0 2px 8px -2px rgba(0,0,0,.15)}
+#sheetBody{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+#sheet .pbet,#sheet .why-row,#sheet .sh-grid,#sheet .sh-score{min-width:0}
+.sh-units{table-layout:auto}
+@media (max-width:640px){.sh-units{font-size:13px}.sh-units th{font-size:10.5px}.sh-units td,.sh-units th{padding:7px 4px}.sh-grid{grid-template-columns:1fr 1fr}.sh-grid b{font-size:14.5px}.why-row p{font-size:13.5px}}
+#sheetBody h3{font:650 21px/1.15 var(--display);margin:4px 0 0}
+.sh-game{display:grid;gap:6px;padding-right:44px}
+.sh-game .pgame{font-size:18px}
+.sh-when{font-size:13.5px;color:var(--muted)}
+.sh-sum{font-size:15px;line-height:1.5}
+.why{display:grid;gap:10px}
+.why-row{display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:start;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 2.5%,transparent)}
+.why-row b{font-weight:600}
+.why-row p{grid-column:1/-1;margin:0;font-size:14px;color:color-mix(in srgb,var(--ink) 80%,var(--muted))}
+.why-pts{font:700 14px/1 var(--body);white-space:nowrap;padding:5px 8px;border-radius:999px}
+.why-pts.up{color:var(--win);background:var(--win-soft)} .why-pts.down{color:var(--loss);background:var(--loss-soft)} .why-pts.flat{color:var(--muted);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.why-bar{grid-column:1/-1;height:4px;border-radius:2px;background:var(--line);position:relative;overflow:hidden}
+.why-bar i{position:absolute;top:0;bottom:0;left:50%;border-radius:2px;transform-origin:left;animation:grow .9s var(--ease) .25s both}
+.why-base{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;color:var(--muted);padding:0 2px}
+.why-base b{color:var(--ink)}
+.sh-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;text-align:center;padding:16px;border-radius:14px;background:#173d2d;color:#f3eee3}
+:root[data-theme="dark"] .sh-score{background:#123326}
+.sh-score b{display:block;font:800 46px/1 var(--body);letter-spacing:-.02em}
+.sh-score .w b{color:#f0c66b}
+.sh-score span{display:block;font:600 14px/1.2 var(--body);margin-top:4px}
+.sh-score em{font:italic 500 16px var(--display);color:#b6c4b9}
+.sh-score small{display:block;font-size:12.5px;color:#b6c4b9;margin-top:3px}
+.sh-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.sh-grid div{padding:10px 12px;border-radius:10px;border:1px solid var(--line)}
+.sh-grid span{display:block;font-size:12px;color:var(--muted)}
+.sh-grid b{font:700 16px/1.3 var(--body)}
+.sh-units{width:100%;border-collapse:collapse;font-size:14px}
+.sh-units th{font-size:11.5px;padding:8px 6px;text-align:right}
+.sh-units th:first-child,.sh-units td:first-child{text-align:left}
+.sh-units td{padding:8px 6px;text-align:right;white-space:nowrap}
+.sh-units td:first-child{white-space:normal}
+.sh-units .edge{font-weight:700;color:var(--accent)}
+.sh-units tbody tr{animation:none}
+.pbet.hotbet{background:var(--gold-soft)} .pbet.hotbet .ring{--rc:var(--gold)} .pbet.hotbet .pkind{color:color-mix(in srgb,var(--gold) 80%,var(--muted))}
+.sh-open{justify-self:start;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;padding:10px 16px}
+html.fx #sheet[open] .sheet-in{animation:sheetIn .5s var(--spring) both}
+html.fx #sheet.closing .sheet-in{animation:sheetOut .25s ease-in both}
+html.fx #sheet[open]::backdrop{animation:fadeIn .3s ease both}
+@keyframes sheetIn{from{opacity:0;transform:translateY(40px) scale(.97)}}
+@keyframes sheetOut{to{opacity:0;transform:translateY(30px) scale(.98)}}
+@media (max-width:640px){
+  #sheet{margin:auto 0 0;width:100vw;max-width:100vw;max-height:94vh}
+  .sheet-in{border-radius:20px 20px 0 0;max-height:94vh;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+  html.fx #sheet[open] .sheet-in{animation:sheetUp .5s var(--spring) both}
+  html.fx #sheet.closing .sheet-in{animation:sheetDown .25s ease-in both}
+  .sh-score b{font-size:38px}
+}
+@keyframes sheetUp{from{transform:translateY(100%)}}
+@keyframes sheetDown{to{transform:translateY(100%)}}
 /* Numbers and bets in the bold sans: the serif's old-style digits drop below the line in scores and spreads. */
 .ptext,.pcard .sc,.stat b,.tile b,.score .side b,.conf,.rk{font-family:var(--body);font-variant-numeric:lining-nums tabular-nums;letter-spacing:-.02em}
 .ptext{font-weight:800;font-size:30px}
@@ -591,6 +652,7 @@ tr.moved-up{animation:moveFlash 1.6s ease .9s both} tr.moved-down{animation:move
     </div>
   </section>
 </main>
+<dialog id="sheet" aria-label="Game details"><div class="sheet-in"><button class="sheet-x" type="button" aria-label="Close">✕</button><div id="sheetBody"></div></div></dialog>
 
 <script>
 /* ---------------- state ---------------- */
@@ -1077,6 +1139,93 @@ function rankMoves(){
   el.addEventListener("click", out); setTimeout(out, 2300);
 })();
 
+// ---------------- game sheet: why the confidence is what it is, and the matchup ----------------
+// Same models as scripts/track_picks.py (CONF_COEF from research/conf_score.py, TCONF_COEF from research/conf_total.py).
+const CONF_COEF = [0.08102, 0.018616, 0.047526, -0.059625, 0.063655];          // const, bad, dis, gap, both
+const TCONF_COEF = [-0.0018, 0.0605, 0.0039, 0.3163, 0.0626, 0.0974], PACE_AVG = 67.2;  // const, gap, last, form, pace, high
+const sigm = z => 1/(1+Math.exp(-z));
+// Each factor's effect = the score with everything minus the score without that factor, in percentage points.
+function factorPts(coef, x){ const z = coef[0] + x.reduce((s,v,i) => s + coef[i+1]*v, 0);
+  return {p: sigm(z), base: sigm(coef[0]), pts: x.map((v,i) => 100*(sigm(z) - sigm(z - coef[i+1]*v)))}; }
+const coverStr = v => v == null || v === 0 ? "had no betting line" : v > 0 ? `covered by ${Math.abs(v).toFixed(1)}` : `missed the spread by ${Math.abs(v).toFixed(1)}`;
+function explainSpread(t){
+  const side = t.ours > t.line ? 1 : -1, pick = side > 0 ? t.home : t.away, opp = side > 0 ? t.away : t.home;
+  const la = t.pick_last_ats ?? 0, lo = t.opp_last_ats ?? 0, pm = t.ppa_margin;
+  const bad = -(la - lo)/14, dis = pm == null ? 0 : -side*(pm - t.line)/7, gap = Math.abs(t.ours - t.line)/7, both = +(bad > 0 && dis > 0);
+  const f = factorPts(CONF_COEF, [bad, dis, gap, both]);
+  const rows = [
+    ["Last game against the spread", f.pts[0], `${esc(pick)} ${coverStr(t.pick_last_ats)}; ${esc(opp)} ${coverStr(t.opp_last_ats)}. ${bad > 0 ? `${esc(pick)} is coming off the worse result, and the market tends to overreact to a bad week, so its line may be a little too low.` : bad < 0 ? `${esc(pick)} is coming off the better result, which the market has probably already priced in.` : "No difference to work with."}`],
+    ["Play-by-play efficiency model", f.pts[1], pm == null ? "No efficiency rating for this game." : `This separate model (points added per play, adjusted for opponents) has ${byStr(t.home, t.away, pm)}, ${dis > 0 ? `on the other side of the line from our pick. In past seasons our picks covered more often when the two models disagreed like this.` : `on the same side as our pick, which past seasons showed adds little.`}`],
+    ["How far we are from the line", f.pts[2], `We have ${byStr(t.home, t.away, t.ours)} against a line of ${byStr(t.home, t.away, t.line)}, ${(Math.abs(t.ours - t.line)).toFixed(1)} points apart. Our biggest disagreements with the line have covered least often, so a larger gap lowers the score.`],
+    ["Both signals together", f.pts[3], both ? "The pick did worse last game and the efficiency model disagrees: the combination that held up best on past seasons." : "Not both at once, so no extra boost."]];
+  return {f, rows, pick, label:`${pick} ${signed(side > 0 ? -t.line : t.line)}`};
+}
+function explainTotal(t){
+  const over = t.ours_total > t.total, s = over ? 1 : -1, F = t.tfeat;
+  if(!F) return null;
+  const gap = Math.abs(t.ours_total - t.total)/7, last = -s*(F.last_h + F.last_a)/14, form = -s*(F.form_h + F.form_a - 1), pace = s*(F.pace - PACE_AVG)/10, high = -s*(t.total - 55)/10;
+  const f = factorPts(TCONF_COEF, [gap, last, form, pace, high]), ou = v => v > 0 ? `over by ${v.toFixed(1)}` : v < 0 ? `under by ${(-v).toFixed(1)}` : "had no total";
+  const side = over ? "over" : "under", pct = v => Math.round(v*100);
+  const rows = [
+    ["Over/under record this season", f.pts[2], `${esc(t.home)} games have gone over about ${pct(F.form_h)}% of the time and ${esc(t.away)} games ${pct(F.form_a)}% (shrunk toward 50% for small samples). Totals tend to overcorrect for teams that keep going one way, so ${form > 0 ? `this backs the ${side}` : `this works against the ${side}`}.`],
+    ["Size of the total", f.pts[4], `The total is ${t.total.toFixed(1)}. In past seasons high totals leaned under and low ones leaned over; ${high > 0 ? `that backs the ${side}` : `that works against the ${side}`}.`],
+    ["Pace", f.pts[3], `The two teams average ${F.pace.toFixed(1)} plays a game (${F.pace >= PACE_AVG ? "faster" : "slower"} than the ${PACE_AVG} average), which ${pace > 0 ? "supports" : "works against"} the ${side}.`],
+    ["How far we are from the total", f.pts[0], `We expect ${t.ours_total} points against ${t.total.toFixed(1)}, ${Math.abs(t.ours_total - t.total).toFixed(1)} apart.`],
+    ["Last game", f.pts[1], `${esc(t.home)}'s last game went ${ou(F.last_h)}; ${esc(t.away)}'s went ${ou(F.last_a)}.`]];
+  return {f, rows, label:`${over ? "Over" : "Under"} ${t.total.toFixed(1)}`};
+}
+const MU_UNITS = [["ypa","Passing","yds per attempt",v => v.toFixed(1)], ["ypc","Rushing","yds per carry",v => v.toFixed(1)],
+  ["sack","Sacks","per dropback",v => (v*100).toFixed(1)+"%"], ["to","Turnovers","per play",v => (v*100).toFixed(1)+"%"], ["third","Third downs","converted",v => (v*100).toFixed(1)+"%"]];
+function openSheet(kind, key){
+  const t = (TRACKER?.games||[]).find(g => g.key === key), [wk, home, away] = key.split("|"), l = LINES.find(x => `${x.week}|${x.home}|${x.away}` === key);
+  if(!home || !away || !PRED.T[home] || !PRED.T[away]) return;
+  const neutral = l ? l.neutral : !!t?.neutral, ih = autoModelOut(home), ia = autoModelOut(away);
+  const pr = predict(PRED, home, away, neutral ? "N" : "A", ih, ia), hw = pr.margin >= 0;
+  const ex = t ? (kind === "total" ? explainTotal(t) : explainSpread(t)) : null, conf = kind === "total" ? t?.tconf : t?.conf;
+  const rk = n => RESULT.byTeam[n], rec = n => rk(n) ? `${rk(n).w}–${rk(n).l}` : "—";
+  const whyRows = ex ? ex.rows.slice().sort((a,b) => Math.abs(b[1]) - Math.abs(a[1])).map(([h, pts, txt]) => {
+      const cls = pts > .05 ? "up" : pts < -.05 ? "down" : "flat", w = Math.min(50, Math.abs(pts)*12);
+      return `<div class="why-row"><b>${h}</b><span class="why-pts ${cls}">${pts >= 0 ? "+" : "−"}${Math.abs(pts).toFixed(1)} pts</span>
+        <div class="why-bar"><i style="width:${w}%;${pts < 0 ? `left:auto;right:50%;background:var(--loss)` : `background:var(--win)`}"></i></div><p>${txt}</p></div>`; }).join("") : "";
+  const U = UNITS, uRow = (o, d, home) => MU_UNITS.filter(([u]) => U?.[o]?.[u+"off"] && U?.[d]?.[u+"def"]).map(([u, lab, unit, fm]) => {
+      const off = U[o][u+"off"], def = U[d][u+"def"], edge = off.rank < def.rank ? o : d;
+      return `<tr><td>${lab} <span class="sub">${unit}</span></td><td class="${edge === o ? "edge" : ""}">${fm(off.v)} <span class="sub">#${off.rank}</span></td><td class="${edge === d ? "edge" : ""}">${fm(def.v)} <span class="sub">#${def.rank}</span></td></tr>`; }).join("");
+  const units = (o, d) => { const r = uRow(o, d); return r ? `<table class="sh-units"><thead><tr><th>${esc(o)} offense vs. ${esc(d)} defense</th><th>Off.</th><th>Def.</th></tr></thead><tbody>${r}</tbody></table>` : ""; };
+  const injured = n => [...outSet(n)].map(x => esc(x)).join(", ");
+  const base = ex ? `<div class="why-base"><span>An average pick starts at <b>${(ex.f.base*100).toFixed(1)}%</b></span><span>This pick: <b>${(conf*100).toFixed(1)}%</b></span></div>` : "";
+  $("#sheetBody").innerHTML = `
+    <div class="sh-game"><div class="pgame">${gameLine(away, home, neutral, kind === "spread" && ex ? ex.pick : null)}</div><div class="sh-when">${l?.start ? gameWhen(l.start) : `Week ${esc(wk)}`}${neutral ? " · neutral site" : ""}</div></div>
+    ${conf != null && ex ? `<div class="pbet${(kind === "total" ? t.ttop_conf : t.top_conf) ? " hotbet" : ""}"><div><span class="pkind">${kind === "spread" ? "Spread" : "Over/under"}</span><b class="ptext">${ex.label}</b></div>
+      <div class="pconf"><div class="ringwrap"><div class="ring" style="--v:${(conf*100).toFixed(1)}"></div><b>${(conf*100).toFixed(1)}%</b></div><span>chance to hit</span></div></div>` : ""}
+    ${ex ? `<h3>Why ${(conf*100).toFixed(1)}%</h3>${base}<div class="why">${whyRows}</div>
+      <p class="note" style="margin:0">Confidence scores run from about 48% to 56%. On seasons the model wasn't trained on, the top 10% of ${kind === "total" ? "totals picks hit 55.0%, but unevenly (44–72% by season)" : "spread picks covered 54.6%"}. A pick is never a sure thing.</p>`
+      : `<p class="note" style="margin:0">No confidence score for this game yet: scores are saved once a game is within 7 days of kickoff.</p>`}
+    <h3>Our prediction</h3>
+    <div class="sh-score"><div class="${hw ? "" : "w"}"><b>${pr.sb}</b><span>${esc(away)}</span><small>${Math.round((1-pr.pa)*100)}% to win</small></div><em>${neutral ? "vs" : "at"}</em><div class="${hw ? "w" : ""}"><b>${pr.sa}</b><span>${esc(home)}</span><small>${Math.round(pr.pa*100)}% to win</small></div></div>
+    <div class="sh-grid">
+      ${l ? `<div><span>Betting line</span><b>${lineStr(home, away, -l.spread)}</b></div><div><span>Our line</span><b>${lineStr(home, away, pr.margin)}</b></div>` : ""}
+      ${l?.total != null ? `<div><span>Betting total</span><b>${l.total.toFixed(1)}</b></div><div><span>Our total</span><b>${pr.sa + pr.sb}</b></div>` : ""}
+      <div><span>${esc(away)}</span><b>${rec(away)} · #${rk(away)?.rank ?? "—"}</b><span>power #${rk(away)?.power ?? "—"}</span></div>
+      <div><span>${esc(home)}</span><b>${rec(home)} · #${rk(home)?.rank ?? "—"}</b><span>power #${rk(home)?.power ?? "—"}</span></div>
+    </div>
+    ${ih >= .5 || ia >= .5 ? `<p class="sh-sum" style="margin:0"><b>Injuries counted:</b> ${[[away, ia], [home, ih]].filter(([,v]) => v >= .5).map(([n,v]) => `${esc(n)} −${v.toFixed(1)} pts (${injured(n)})`).join("; ")}.</p>` : ""}
+    ${U ? `<h3>Matchups by unit</h3>${units(away, home)}${units(home, away)}<p class="note" style="margin:0">Each unit adjusted for the opponents it faced; # is the national rank (1 = best). The better side of each matchup is highlighted.</p>` : ""}
+    <button class="sh-open" type="button" data-open="${esc(away)}|${esc(home)}|${neutral ? "N" : "B"}">Open in the Matchup tab</button>`;
+  const d = $("#sheet"); d.classList.remove("closing"); if(!d.open) d.showModal(); d.querySelector(".sheet-in").scrollTop = 0;
+}
+function closeSheet(){ const d = $("#sheet"); if(!d.open) return;
+  if(REDUCED){ d.close(); return; } d.classList.add("closing"); setTimeout(() => { d.close(); d.classList.remove("closing"); }, 240); }
+document.addEventListener("click", e => {
+  const c = e.target.closest?.(".pick[data-k]");
+  if(c){ const [kind, ...k] = c.dataset.k.split("|"); openSheet(kind, k.join("|")); return; }
+  if(e.target.closest?.(".sheet-x")) closeSheet();
+  if(e.target.id === "sheet") closeSheet();  // the backdrop
+  const o = e.target.closest?.("[data-open]");
+  if(o){ const [a, b, v] = o.dataset.open.split("|"); closeSheet(); $("#ma").value = a; $("#mb").value = b; $("#mv").value = v; location.hash = "matchup"; renderMatchup(true); window.scrollTo({top:0}); }
+});
+document.addEventListener("keydown", e => { const c = e.target.closest?.(".pick[data-k]"); if(c && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); c.click(); } });
+$("#sheet").addEventListener("cancel", e => { e.preventDefault(); closeSheet(); });
+
 function renderTop(){
   const rows = SHOWALL ? RESULT.rows : RESULT.rows.slice(0,25);
   $("#t25title").textContent = SHOWALL ? "All FBS Power Rankings" : "Top 25 Power Rankings";
@@ -1354,13 +1503,13 @@ let PMODE = "all";
 const shortWhen = s => { if(!s) return "Date TBA"; const d = new Date(s), et = {timeZone:"America/New_York"};
   const mid = d.toLocaleTimeString("en-US", {...et, hour12:false, hour:"2-digit", minute:"2-digit"});
   return `${d.toLocaleDateString([], {...et, weekday:"short"})} ${/^(00|24):00$/.test(mid) ? "TBA" : d.toLocaleTimeString([], {...et, hour:"numeric", minute:"2-digit"}) + " ET"}`; };
-const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" data-k="${p.kind}|${esc(p.key || "")}" style="--i:${Math.min(i,20)}">
+const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" data-k="${p.kind}|${esc(p.key || "")}" role="button" tabindex="0" aria-label="Details for this pick" style="--i:${Math.min(i,20)}">
     <div class="pgame">${p.game}</div>
     <div class="pbet">
       <div><span class="pkind">${p.kind === "spread" ? "Spread" : "Over/under"}</span><b class="ptext">${p.text}</b></div>
       <div class="pconf">${p.conf != null ? `<div class="ringwrap"><div class="ring" style="--v:${(p.conf*100).toFixed(1)}"></div><b>${(p.conf*100).toFixed(1)}%</b></div>${p.top5 ? `<em>★ Top 5%</em>` : p.top ? `<em>★ Top 10%</em>` : `<span>chance to hit</span>`}` : `<div class="ringwrap"><b class="none">—</b></div><span>no score yet</span>`}</div>
     </div>
-    <p class="pmeta" title="${esc(String(p.why).replace(/<[^>]+>/g, ""))}${p.note ? " · " + esc(p.note.replace(/<[^>]+>/g, "")) : ""}"><time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${shortWhen(p.start)}</time> · ${p.why}${p.note ? " · injuries counted" : ""}</p>
+    <p class="pmeta" title="${esc(String(p.why).replace(/<[^>]+>/g, ""))}${p.note ? " · " + esc(p.note.replace(/<[^>]+>/g, "")) : ""}"><time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${shortWhen(p.start)}</time> · ${p.why}${p.note ? " · injuries counted" : ""}<span class="pmore" aria-hidden="true">Details ›</span></p>
   </article>`;
 // "Ours UNLV −23.0 · Line −24.5": the line's team is left out when it's the same favorite as ours.
 const oursVsLine = (home, away, ours, line) => { const same = Math.abs(line) >= .25 && Math.abs(ours) >= .25 && (ours > 0) === (line > 0);

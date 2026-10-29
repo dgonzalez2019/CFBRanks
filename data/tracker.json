@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-29T16:22:36+00:00",
+ "updated": "2026-10-29T17:01:01+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -15,7 +15,7 @@
    "open": 19.25,
    "inj_home": 0.9,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 17.82,
    "pick_last_ats": -15.8,
    "opp_last_ats": -20.5,
@@ -26,7 +26,14 @@
    "ours_total": 56,
    "tconf": 0.5388,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 8.5,
+    "last_a": -15.5,
+    "form_h": 0.6,
+    "form_a": 0.222,
+    "pace": 69.1
+   }
   },
   {
    "key": "9|North Texas|Florida Atlantic",
@@ -36,12 +43,12 @@
    "neutral": false,
    "start": "2026-10-29T23:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 21.22,
+   "ours": 21.21,
    "line": 14.0,
    "open": 12.75,
    "inj_home": 0.15,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 21.06,
    "pick_last_ats": 7.0,
    "opp_last_ats": -7.5,
@@ -52,7 +59,14 @@
    "ours_total": 83,
    "tconf": 0.4169,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 27.5,
+    "last_a": 44.8,
+    "form_h": 0.778,
+    "form_a": 0.778,
+    "pace": 73.4
+   }
   },
   {
    "key": "9|Charlotte|Tulane",
@@ -67,7 +81,7 @@
    "open": -11.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -12.84,
    "pick_last_ats": -20.0,
    "opp_last_ats": 25.5,
@@ -78,7 +92,14 @@
    "ours_total": 46,
    "tconf": 0.4984,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 22.2,
+    "last_a": 8.8,
+    "form_h": 0.556,
+    "form_a": 0.444,
+    "pace": 59.0
+   }
   },
   {
    "key": "9|UCF|Baylor",
@@ -93,7 +114,7 @@
    "open": 1.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -1.83,
    "pick_last_ats": 15.5,
    "opp_last_ats": 0.5,
@@ -104,7 +125,14 @@
    "ours_total": 50,
    "tconf": 0.5342,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 26.2,
+    "last_a": -5.5,
+    "form_h": 0.556,
+    "form_a": 0.333,
+    "pace": 71.8
+   }
   },
   {
    "key": "9|Sacramento State|Kent State",
@@ -114,23 +142,30 @@
    "neutral": false,
    "start": "2026-10-31T02:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": -7.46,
+   "ours": -7.5,
    "line": -8.5,
    "open": -10.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -2.59,
    "pick_last_ats": -2.5,
    "opp_last_ats": 12.0,
    "top_conf": false,
-   "conf": 0.5128,
+   "conf": 0.5129,
    "top5": false,
    "total": 46.5,
    "ours_total": 44,
    "tconf": 0.4902,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -0.5,
+    "last_a": 6.8,
+    "form_h": 0.4,
+    "form_a": 0.6,
+    "pace": 63.7
+   }
   },
   {
    "key": "9|Duke|Boston College",
@@ -145,7 +180,7 @@
    "open": 7.25,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 8.31,
    "pick_last_ats": 5.5,
    "opp_last_ats": 28.5,
@@ -156,7 +191,14 @@
    "ours_total": 41,
    "tconf": 0.4838,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -12.2,
+    "last_a": 25.5,
+    "form_h": 0.444,
+    "form_a": 0.333,
+    "pace": 66.1
+   }
   },
   {
    "key": "9|Iowa|Wisconsin",
@@ -166,23 +208,30 @@
    "neutral": false,
    "start": "2026-10-31T16:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 3.86,
+   "ours": 3.8,
    "line": 3.5,
    "open": 4.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 3.95,
    "pick_last_ats": -10.8,
    "opp_last_ats": 19.0,
    "top_conf": false,
-   "conf": 0.5286,
+   "conf": 0.5287,
    "top5": false,
    "total": 36.5,
    "ours_total": 38,
    "tconf": 0.5574,
    "ttop_conf": true,
-   "ttop5": true
+   "ttop5": true,
+   "tfeat": {
+    "last_h": -17.8,
+    "last_a": -19.8,
+    "form_h": 0.333,
+    "form_a": 0.444,
+    "pace": 60.6
+   }
   },
   {
    "key": "9|Maryland|Illinois",
@@ -197,7 +246,7 @@
    "open": -2.75,
    "inj_home": 0.0,
    "inj_away": 0.02,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 1.58,
    "pick_last_ats": 21.2,
    "opp_last_ats": -12.8,
@@ -208,7 +257,14 @@
    "ours_total": 60,
    "tconf": 0.4741,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 11.5,
+    "last_a": -18.2,
+    "form_h": 0.778,
+    "form_a": 0.667,
+    "pace": 64.7
+   }
   },
   {
    "key": "9|NC State|California",
@@ -223,7 +279,7 @@
    "open": 8.5,
    "inj_home": 0.22,
    "inj_away": 0.01,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 13.28,
    "pick_last_ats": -10.5,
    "opp_last_ats": -20.5,
@@ -234,7 +290,14 @@
    "ours_total": 60,
    "tconf": 0.5007,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 4.5,
+    "last_a": 23.8,
+    "form_h": 0.667,
+    "form_a": 0.4,
+    "pace": 70.1
+   }
   },
   {
    "key": "9|Navy|Notre Dame",
@@ -249,7 +312,7 @@
    "open": -29.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -34.13,
    "pick_last_ats": -7.0,
    "opp_last_ats": -14.5,
@@ -260,7 +323,14 @@
    "ours_total": 52,
    "tconf": 0.5424,
    "ttop_conf": true,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 27.5,
+    "last_a": 4.8,
+    "form_h": 0.667,
+    "form_a": 0.667,
+    "pace": 67.3
+   }
   },
   {
    "key": "9|South Florida|UAB",
@@ -270,12 +340,12 @@
    "neutral": false,
    "start": "2026-10-31T16:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 13.17,
+   "ours": 13.18,
    "line": 7.75,
    "open": 8.5,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 15.67,
    "pick_last_ats": 6.5,
    "opp_last_ats": 18.2,
@@ -286,7 +356,14 @@
    "ours_total": 41,
    "tconf": 0.4512,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -15.0,
+    "last_a": -2.2,
+    "form_h": 0.444,
+    "form_a": 0.222,
+    "pace": 63.2
+   }
   },
   {
    "key": "9|Syracuse|SMU",
@@ -301,7 +378,7 @@
    "open": -11.0,
    "inj_home": 1.33,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -9.14,
    "pick_last_ats": 9.2,
    "opp_last_ats": 20.5,
@@ -312,7 +389,14 @@
    "ours_total": 58,
    "tconf": 0.4952,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 11.5,
+    "last_a": 23.8,
+    "form_h": 0.667,
+    "form_a": 0.444,
+    "pace": 74.8
+   }
   },
   {
    "key": "9|Texas Tech|Arizona",
@@ -327,7 +411,7 @@
    "open": 5.5,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 5.6,
    "pick_last_ats": -23.8,
    "opp_last_ats": 24.0,
@@ -338,7 +422,14 @@
    "ours_total": 52,
    "tconf": 0.5111,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 3.5,
+    "last_a": -9.5,
+    "form_h": 0.667,
+    "form_a": 0.444,
+    "pace": 67.9
+   }
   },
   {
    "key": "9|Western Michigan|Bowling Green",
@@ -348,23 +439,30 @@
    "neutral": false,
    "start": "2026-10-31T16:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 20.23,
+   "ours": 20.65,
    "line": 13.25,
    "open": 14.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 14.72,
    "pick_last_ats": -4.5,
    "opp_last_ats": -4.0,
    "top_conf": false,
-   "conf": 0.5031,
+   "conf": 0.5022,
    "top5": false,
    "total": 44.25,
    "ours_total": 46,
    "tconf": 0.4981,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 34.8,
+    "last_a": 10.2,
+    "form_h": 0.5,
+    "form_a": 0.7,
+    "pace": 59.2
+   }
   },
   {
    "key": "9|Rutgers|Michigan",
@@ -374,23 +472,30 @@
    "neutral": false,
    "start": "2026-10-31T16:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": -15.87,
+   "ours": -15.39,
    "line": -14.75,
    "open": -14.0,
    "inj_home": 7.48,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -15.47,
    "pick_last_ats": 0.5,
    "opp_last_ats": -12.5,
    "top_conf": false,
-   "conf": 0.5123,
+   "conf": 0.5134,
    "top5": false,
    "total": 45.25,
-   "ours_total": 44,
-   "tconf": 0.4739,
+   "ours_total": 43,
+   "tconf": 0.476,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -2.8,
+    "last_a": -24.5,
+    "form_h": 0.667,
+    "form_a": 0.222,
+    "pace": 63.4
+   }
   },
   {
    "key": "9|Ole Miss|Auburn",
@@ -405,7 +510,7 @@
    "open": 12.0,
    "inj_home": 0.41,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 8.21,
    "pick_last_ats": -14.0,
    "opp_last_ats": -4.0,
@@ -416,7 +521,14 @@
    "ours_total": 55,
    "tconf": 0.5074,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 6.2,
+    "last_a": 3.0,
+    "form_h": 0.556,
+    "form_a": 0.444,
+    "pace": 69.9
+   }
   },
   {
    "key": "9|Old Dominion|Marshall",
@@ -431,18 +543,25 @@
    "open": -2.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 5.27,
    "pick_last_ats": -12.5,
    "opp_last_ats": 8.5,
    "top_conf": false,
-   "conf": 0.4899,
+   "conf": 0.4898,
    "top5": false,
    "total": 43.5,
    "ours_total": 40,
    "tconf": 0.4658,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -17.5,
+    "last_a": -33.2,
+    "form_h": 0.4,
+    "form_a": 0.444,
+    "pace": 65.6
+   }
   },
   {
    "key": "9|Colorado|Kansas State",
@@ -457,7 +576,7 @@
    "open": -3.25,
    "inj_home": 0.04,
    "inj_away": 11.49,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 1.25,
    "pick_last_ats": -20.0,
    "opp_last_ats": -12.5,
@@ -468,7 +587,14 @@
    "ours_total": 38,
    "tconf": 0.5034,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 25.5,
+    "last_a": -6.5,
+    "form_h": 0.556,
+    "form_a": 0.556,
+    "pace": 70.4
+   }
   },
   {
    "key": "9|Georgia State|Coastal Carolina",
@@ -483,7 +609,7 @@
    "open": 6.5,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 9.72,
    "pick_last_ats": -8.5,
    "opp_last_ats": -1.8,
@@ -494,7 +620,14 @@
    "ours_total": 58,
    "tconf": 0.4748,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 11.5,
+    "last_a": 18.2,
+    "form_h": 0.667,
+    "form_a": 0.556,
+    "pace": 66.4
+   }
   },
   {
    "key": "9|Air Force|UConn",
@@ -504,12 +637,12 @@
    "neutral": false,
    "start": "2026-10-31T19:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": -5.16,
+   "ours": -5.17,
    "line": 1.25,
    "open": 3.0,
    "inj_home": 3.7,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -5.65,
    "pick_last_ats": 6.2,
    "opp_last_ats": -21.0,
@@ -520,7 +653,14 @@
    "ours_total": 53,
    "tconf": 0.5226,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -4.5,
+    "last_a": -2.8,
+    "form_h": 0.444,
+    "form_a": 0.444,
+    "pace": 69.2
+   }
   },
   {
    "key": "9|East Carolina|Temple",
@@ -530,12 +670,12 @@
    "neutral": false,
    "start": "2026-10-31T19:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 7.13,
+   "ours": 7.14,
    "line": 6.0,
    "open": 5.25,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 6.83,
    "pick_last_ats": 3.5,
    "opp_last_ats": -25.5,
@@ -546,7 +686,14 @@
    "ours_total": 51,
    "tconf": 0.523,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 19.5,
+    "last_a": 22.2,
+    "form_h": 0.333,
+    "form_a": 0.444,
+    "pace": 62.9
+   }
   },
   {
    "key": "9|South Alabama|Louisiana Tech",
@@ -561,7 +708,7 @@
    "open": -4.5,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -10.6,
    "pick_last_ats": -8.5,
    "opp_last_ats": 12.5,
@@ -572,7 +719,14 @@
    "ours_total": 65,
    "tconf": 0.486,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -33.2,
+    "last_a": -17.5,
+    "form_h": 0.667,
+    "form_a": 0.667,
+    "pace": 69.6
+   }
   },
   {
    "key": "9|Louisville|Stanford",
@@ -587,7 +741,7 @@
    "open": 22.0,
    "inj_home": 0.32,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 24.66,
    "pick_last_ats": -6.5,
    "opp_last_ats": 10.5,
@@ -598,7 +752,14 @@
    "ours_total": 61,
    "tconf": 0.449,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 3.8,
+    "last_a": 4.5,
+    "form_h": 0.778,
+    "form_a": 0.7,
+    "pace": 64.2
+   }
   },
   {
    "key": "9|BYU|Arizona State",
@@ -613,7 +774,7 @@
    "open": 16.75,
    "inj_home": 0.2,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 16.94,
    "pick_last_ats": -15.5,
    "opp_last_ats": 12.5,
@@ -624,7 +785,14 @@
    "ours_total": 58,
    "tconf": 0.5232,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 26.2,
+    "last_a": -6.5,
+    "form_h": 0.556,
+    "form_a": 0.556,
+    "pace": 65.6
+   }
   },
   {
    "key": "9|Georgia|Florida",
@@ -634,12 +802,12 @@
    "neutral": true,
    "start": "2026-10-31T19:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 9.68,
+   "ours": 9.67,
    "line": 12.25,
    "open": 12.0,
    "inj_home": 0.0,
    "inj_away": 0.29,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 14.43,
    "pick_last_ats": 16.0,
    "opp_last_ats": -22.5,
@@ -650,7 +818,14 @@
    "ours_total": 63,
    "tconf": 0.4879,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 0.8,
+    "last_a": -0.2,
+    "form_h": 0.778,
+    "form_a": 0.556,
+    "pace": 66.3
+   }
   },
   {
    "key": "9|Indiana|Minnesota",
@@ -660,12 +835,12 @@
    "neutral": false,
    "start": "2026-10-31T19:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 26.12,
+   "ours": 26.13,
    "line": 20.75,
    "open": 21.25,
    "inj_home": 0.08,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 24.03,
    "pick_last_ats": -0.5,
    "opp_last_ats": 10.8,
@@ -676,7 +851,14 @@
    "ours_total": 40,
    "tconf": 0.4642,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -24.5,
+    "last_a": -17.8,
+    "form_h": 0.4,
+    "form_a": 0.444,
+    "pace": 61.2
+   }
   },
   {
    "key": "9|Liberty|Florida International",
@@ -686,12 +868,12 @@
    "neutral": false,
    "start": "2026-10-31T19:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 15.81,
+   "ours": 15.8,
    "line": 14.0,
    "open": 12.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 10.82,
    "pick_last_ats": 19.5,
    "opp_last_ats": -13.2,
@@ -702,7 +884,14 @@
    "ours_total": 34,
    "tconf": 0.4808,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -10.5,
+    "last_a": 2.5,
+    "form_h": 0.333,
+    "form_a": 0.444,
+    "pace": 66.5
+   }
   },
   {
    "key": "9|North Dakota State|UTEP",
@@ -712,23 +901,30 @@
    "neutral": false,
    "start": "2026-10-31T19:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 21.71,
+   "ours": 21.77,
    "line": 24.25,
    "open": 26.5,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 24.89,
    "pick_last_ats": -6.2,
    "opp_last_ats": -0.2,
    "top_conf": true,
-   "conf": 0.5338,
+   "conf": 0.5339,
    "top5": false,
    "total": 42.75,
    "ours_total": 46,
    "tconf": 0.5489,
    "ttop_conf": true,
-   "ttop5": true
+   "ttop5": true,
+   "tfeat": {
+    "last_h": -2.5,
+    "last_a": -11.0,
+    "form_h": 0.3,
+    "form_a": 0.444,
+    "pace": 61.8
+   }
   },
   {
    "key": "9|Oregon|Northwestern",
@@ -738,12 +934,12 @@
    "neutral": false,
    "start": "2026-10-31T19:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 3.0,
+   "ours": 3.01,
    "line": 3.5,
    "open": 5.5,
    "inj_home": 1.73,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 5.58,
    "pick_last_ats": 12.5,
    "opp_last_ats": -21.2,
@@ -754,7 +950,14 @@
    "ours_total": 49,
    "tconf": 0.505,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -18.2,
+    "last_a": -2.8,
+    "form_h": 0.556,
+    "form_a": 0.667,
+    "pace": 67.2
+   }
   },
   {
    "key": "9|TCU|Kansas",
@@ -769,7 +972,7 @@
    "open": 4.75,
    "inj_home": 0.0,
    "inj_away": 0.03,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 3.27,
    "pick_last_ats": -14.0,
    "opp_last_ats": -0.5,
@@ -780,7 +983,14 @@
    "ours_total": 42,
    "tconf": 0.4727,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -14.5,
+    "last_a": -5.5,
+    "form_h": 0.222,
+    "form_a": 0.667,
+    "pace": 70.1
+   }
   },
   {
    "key": "9|UL Monroe|Southern Miss",
@@ -795,7 +1005,7 @@
    "open": -3.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -6.38,
    "pick_last_ats": 15.5,
    "opp_last_ats": 20.5,
@@ -806,7 +1016,14 @@
    "ours_total": 58,
    "tconf": 0.4905,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -15.5,
+    "last_a": 13.5,
+    "form_h": 0.556,
+    "form_a": 0.556,
+    "pace": 67.2
+   }
   },
   {
    "key": "9|Utah State|Colorado State",
@@ -821,7 +1038,7 @@
    "open": 5.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 5.83,
    "pick_last_ats": 11.2,
    "opp_last_ats": 7.2,
@@ -832,7 +1049,14 @@
    "ours_total": 62,
    "tconf": 0.5355,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -21.8,
+    "last_a": 47.5,
+    "form_h": 0.222,
+    "form_a": 0.889,
+    "pace": 65.5
+   }
   },
   {
    "key": "9|Cincinnati|Utah",
@@ -847,7 +1071,7 @@
    "open": -8.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -8.49,
    "pick_last_ats": 1.5,
    "opp_last_ats": 23.8,
@@ -858,7 +1082,14 @@
    "ours_total": 59,
    "tconf": 0.4867,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 3.5,
+    "last_a": -23.2,
+    "form_h": 0.667,
+    "form_a": 0.556,
+    "pace": 68.2
+   }
   },
   {
    "key": "9|Wake Forest|Virginia",
@@ -873,7 +1104,7 @@
    "open": 13.75,
    "inj_home": 0.0,
    "inj_away": 0.08,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 13.04,
    "pick_last_ats": 24.0,
    "opp_last_ats": -5.5,
@@ -884,7 +1115,14 @@
    "ours_total": 45,
    "tconf": 0.4833,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -6.0,
+    "last_a": -12.2,
+    "form_h": 0.444,
+    "form_a": 0.4,
+    "pace": 66.6
+   }
   },
   {
    "key": "9|San Jos\u00e9 State|New Mexico",
@@ -899,7 +1137,7 @@
    "open": -14.75,
    "inj_home": 0.0,
    "inj_away": 0.61,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -11.66,
    "pick_last_ats": -9.2,
    "opp_last_ats": 0.2,
@@ -910,7 +1148,14 @@
    "ours_total": 45,
    "tconf": 0.5626,
    "ttop_conf": true,
-   "ttop5": true
+   "ttop5": true,
+   "tfeat": {
+    "last_h": -5.2,
+    "last_a": -2.5,
+    "form_h": 0.2,
+    "form_a": 0.444,
+    "pace": 64.3
+   }
   },
   {
    "key": "9|Oklahoma|South Carolina",
@@ -920,23 +1165,30 @@
    "neutral": false,
    "start": "2026-10-31T20:15:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 4.82,
+   "ours": 4.75,
    "line": 4.75,
    "open": 5.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 9.26,
    "pick_last_ats": 6.5,
    "opp_last_ats": 0.5,
    "top_conf": false,
-   "conf": 0.5104,
+   "conf": 0.5106,
    "top5": false,
    "total": 44.25,
    "ours_total": 47,
    "tconf": 0.5329,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -11.0,
+    "last_a": 0.5,
+    "form_h": 0.333,
+    "form_a": 0.667,
+    "pace": 67.6
+   }
   },
   {
    "key": "9|Penn State|Purdue",
@@ -946,23 +1198,30 @@
    "neutral": false,
    "start": "2026-10-31T20:15:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 12.14,
+   "ours": 12.1,
    "line": 9.5,
    "open": 8.25,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 11.49,
    "pick_last_ats": 3.0,
    "opp_last_ats": -15.0,
    "top_conf": false,
-   "conf": 0.5053,
+   "conf": 0.5054,
    "top5": false,
    "total": 54.5,
-   "ours_total": 59,
-   "tconf": 0.493,
+   "ours_total": 60,
+   "tconf": 0.4951,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -4.2,
+    "last_a": 13.5,
+    "form_h": 0.444,
+    "form_a": 0.778,
+    "pace": 67.6
+   }
   },
   {
    "key": "9|UCLA|Nevada",
@@ -972,23 +1231,30 @@
    "neutral": false,
    "start": "2026-10-31T20:15:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 26.13,
+   "ours": 26.14,
    "line": 22.75,
    "open": 23.0,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 27.39,
    "pick_last_ats": 1.5,
    "opp_last_ats": 9.2,
    "top_conf": false,
-   "conf": 0.5078,
+   "conf": 0.5077,
    "top5": false,
    "total": 44.5,
    "ours_total": 48,
    "tconf": 0.5421,
    "ttop_conf": true,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -5.5,
+    "last_a": -5.2,
+    "form_h": 0.444,
+    "form_a": 0.444,
+    "pace": 67.2
+   }
   },
   {
    "key": "9|Georgia Southern|App State",
@@ -1003,7 +1269,7 @@
    "open": 4.0,
    "inj_home": 0.11,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 6.04,
    "pick_last_ats": 5.0,
    "opp_last_ats": 15.8,
@@ -1014,7 +1280,14 @@
    "ours_total": 50,
    "tconf": 0.5145,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -6.5,
+    "last_a": 8.5,
+    "form_h": 0.444,
+    "form_a": 0.556,
+    "pace": 69.1
+   }
   },
   {
    "key": "9|Florida State|Clemson",
@@ -1029,7 +1302,7 @@
    "open": 2.25,
    "inj_home": 0.19,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 8.62,
    "pick_last_ats": 12.2,
    "opp_last_ats": -7.0,
@@ -1040,7 +1313,14 @@
    "ours_total": 45,
    "tconf": 0.4884,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 21.0,
+    "last_a": -14.2,
+    "form_h": 0.444,
+    "form_a": 0.444,
+    "pace": 66.6
+   }
   },
   {
    "key": "9|Iowa State|Oklahoma State",
@@ -1055,7 +1335,7 @@
    "open": -9.5,
    "inj_home": 0.01,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 2.18,
    "pick_last_ats": -24.0,
    "opp_last_ats": 20.0,
@@ -1066,7 +1346,14 @@
    "ours_total": 57,
    "tconf": 0.5175,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -9.5,
+    "last_a": 25.5,
+    "form_h": 0.444,
+    "form_a": 0.667,
+    "pace": 66.6
+   }
   },
   {
    "key": "9|San Diego State|Washington State",
@@ -1081,7 +1368,7 @@
    "open": 2.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 3.65,
    "pick_last_ats": -7.2,
    "opp_last_ats": -6.2,
@@ -1092,7 +1379,14 @@
    "ours_total": 51,
    "tconf": 0.5044,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 47.5,
+    "last_a": -11.5,
+    "form_h": 0.7,
+    "form_a": 0.4,
+    "pace": 63.4
+   }
   },
   {
    "key": "9|North Carolina|Miami",
@@ -1107,7 +1401,7 @@
    "open": -14.5,
    "inj_home": 0.0,
    "inj_away": 0.04,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -14.75,
    "pick_last_ats": 8.5,
    "opp_last_ats": -9.2,
@@ -1118,7 +1412,14 @@
    "ours_total": 60,
    "tconf": 0.4967,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 11.5,
+    "last_a": 24.5,
+    "form_h": 0.444,
+    "form_a": 0.778,
+    "pace": 64.7
+   }
   },
   {
    "key": "9|Pittsburgh|Georgia Tech",
@@ -1133,7 +1434,7 @@
    "open": 7.25,
    "inj_home": 5.08,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 13.67,
    "pick_last_ats": -8.5,
    "opp_last_ats": -28.5,
@@ -1144,7 +1445,14 @@
    "ours_total": 50,
    "tconf": 0.5252,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 24.5,
+    "last_a": 25.5,
+    "form_h": 0.5,
+    "form_a": 0.667,
+    "pace": 66.1
+   }
   },
   {
    "key": "9|Texas|Mississippi State",
@@ -1154,12 +1462,12 @@
    "neutral": false,
    "start": "2026-10-31T23:30:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 27.28,
+   "ours": 27.29,
    "line": 20.5,
    "open": 20.75,
    "inj_home": 0.0,
    "inj_away": 13.94,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 9.53,
    "pick_last_ats": 4.0,
    "opp_last_ats": -6.5,
@@ -1170,7 +1478,14 @@
    "ours_total": 40,
    "tconf": 0.5002,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 6.2,
+    "last_a": -11.0,
+    "form_h": 0.444,
+    "form_a": 0.444,
+    "pace": 68.4
+   }
   },
   {
    "key": "9|USC|Ohio State",
@@ -1185,7 +1500,7 @@
    "open": -7.25,
    "inj_home": 0.02,
    "inj_away": 14.71,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -7.33,
    "pick_last_ats": -19.0,
    "opp_last_ats": 1.2,
@@ -1196,7 +1511,14 @@
    "ours_total": 45,
    "tconf": 0.5037,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -19.8,
+    "last_a": -15.8,
+    "form_h": 0.5,
+    "form_a": 0.556,
+    "pace": 69.3
+   }
   },
   {
    "key": "9|Arkansas|Missouri",
@@ -1211,7 +1533,7 @@
    "open": -10.25,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -10.94,
    "pick_last_ats": 15.8,
    "opp_last_ats": -23.5,
@@ -1222,7 +1544,14 @@
    "ours_total": 45,
    "tconf": 0.4747,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 3.2,
+    "last_a": -24.0,
+    "form_h": 0.333,
+    "form_a": 0.444,
+    "pace": 68.6
+   }
   },
   {
    "key": "9|Memphis|Army",
@@ -1237,7 +1566,7 @@
    "open": 6.5,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 5.86,
    "pick_last_ats": 1.5,
    "opp_last_ats": -3.5,
@@ -1248,7 +1577,14 @@
    "ours_total": 63,
    "tconf": 0.4724,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 19.5,
+    "last_a": 19.8,
+    "form_h": 0.6,
+    "form_a": 0.667,
+    "pace": 67.9
+   }
   },
   {
    "key": "9|Nebraska|Washington",
@@ -1258,12 +1594,12 @@
    "neutral": false,
    "start": "2026-11-01T00:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 12.83,
+   "ours": 12.84,
    "line": 7.5,
    "open": 8.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 7.89,
    "pick_last_ats": 3.8,
    "opp_last_ats": 15.0,
@@ -1274,7 +1610,14 @@
    "ours_total": 51,
    "tconf": 0.5172,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -20.0,
+    "last_a": 13.5,
+    "form_h": 0.444,
+    "form_a": 0.556,
+    "pace": 68.3
+   }
   },
   {
    "key": "9|Boise State|Texas State",
@@ -1284,23 +1627,30 @@
    "neutral": false,
    "start": "2026-11-01T02:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": 7.71,
+   "ours": 7.76,
    "line": 10.75,
    "open": 11.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 7.27,
    "pick_last_ats": -11.2,
    "opp_last_ats": 6.2,
    "top_conf": false,
-   "conf": 0.5137,
+   "conf": 0.5138,
    "top5": false,
    "total": 63.75,
    "ours_total": 64,
    "tconf": 0.4637,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": -11.5,
+    "last_a": -21.8,
+    "form_h": 0.667,
+    "form_a": 0.667,
+    "pace": 72.9
+   }
   },
   {
    "key": "9|UNLV|Northern Illinois",
@@ -1315,18 +1665,25 @@
    "open": 24.25,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": 24.43,
    "pick_last_ats": -32.0,
    "opp_last_ats": -9.8,
    "top_conf": true,
-   "conf": 0.541,
+   "conf": 0.5411,
    "top5": true,
    "total": 54.25,
    "ours_total": 49,
    "tconf": 0.5093,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 23.0,
+    "last_a": 28.2,
+    "form_h": 0.333,
+    "form_a": 0.556,
+    "pace": 63.7
+   }
   },
   {
    "key": "9|Fresno State|Oregon State",
@@ -1336,12 +1693,12 @@
    "neutral": false,
    "start": "2026-11-01T03:00:00.000Z",
    "first_saved": "2026-10-29T15:19:58+00:00",
-   "ours": -2.58,
+   "ours": -2.56,
    "line": -5.75,
    "open": -6.75,
    "inj_home": 0.0,
    "inj_away": 0.0,
-   "saved_at": "2026-10-29T16:22:36+00:00",
+   "saved_at": "2026-10-29T17:01:01+00:00",
    "ppa_margin": -3.85,
    "pick_last_ats": -9.8,
    "opp_last_ats": -0.5,
@@ -1352,7 +1709,14 @@
    "ours_total": 57,
    "tconf": 0.5387,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tfeat": {
+    "last_h": 3.0,
+    "last_a": 25.8,
+    "form_h": 0.556,
+    "form_a": 0.778,
+    "pace": 65.6
+   }
   }
  ]
 }

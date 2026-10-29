@@ -132,7 +132,8 @@ for r in lines:
         ours_t = pr["sa"] + pr["sb"]
         if total is not None and ours_t != total:
             (lh, fh, ph), (la_, fa, pa_) = ou_form(home, wk), ou_form(away, wk)
-            t.update(total=total, ours_total=ours_t, tconf=round(total_confidence(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2), 4))
+            t.update(total=total, ours_total=ours_t, tconf=round(total_confidence(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2), 4),
+                     tfeat=dict(last_h=round(lh, 1), last_a=round(la_, 1), form_h=round(fh, 3), form_a=round(fa, 3), pace=round((ph + pa_) / 2, 1)))
         else: t.update(total=total, ours_total=ours_t, tconf=None)
     elif hp is not None and t is not None and "results" not in t:
         act = hp - ap
