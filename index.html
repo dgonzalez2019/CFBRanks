@@ -301,6 +301,11 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 .seg button:hover{color:var(--ink)}
 .seg button[aria-selected="true"]{color:var(--paper);background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--gold)));box-shadow:0 6px 20px -8px var(--glow)}
 :root[data-theme="light"] .seg button[aria-selected="true"]{color:#fff}
+.seg.sm{background:transparent;border:0;padding:0;gap:6px;align-items:center;flex-wrap:wrap;-webkit-backdrop-filter:none;backdrop-filter:none;margin-top:-4px}
+.seg.sm .seglabel{font:600 10.5px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.seg.sm button{padding:7px 12px;font:600 12.5px/1 var(--body);letter-spacing:0;text-transform:none;border:1px solid var(--line)}
+.seg.sm button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:none}
+:root[data-theme="light"] .seg.sm button[aria-selected="true"]{color:var(--accent)}
 .gcards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,480px),1fr))}
 .gcard{position:relative;display:grid;gap:14px;padding:16px 16px 12px;border-radius:18px;background:var(--card);border:1px solid var(--line);
   -webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);box-shadow:var(--shadow);transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;
@@ -374,7 +379,6 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
       <a href="#results" data-view="results">Results only</a>
       <a href="#matchup" data-view="matchup">Matchup</a>
       <a href="#lines" data-view="lines">Lines</a>
-      <a href="#picks" data-view="picks">Picks</a>
       <a href="#teams" data-view="teams">Team lookup</a>
       <a href="#method" data-view="method">How it works</a>
     </nav>
@@ -460,14 +464,6 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
     </div>
   </section>
 
-  <!-- PICKS -->
-  <section id="v-picks" class="view" hidden>
-    <div style="display:grid;gap:14px">
-      <div class="bar"><h2 id="ptitle">This week's confidence picks</h2></div>
-      <div id="pout" style="display:grid;gap:14px"></div>
-    </div>
-  </section>
-
   <!-- TEAM LOOKUP -->
   <section id="v-teams" class="view" hidden>
     <div style="display:grid;gap:16px">
@@ -526,11 +522,11 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "spread", db = null, canSave = false;
+let TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-LMODE = store.get("sor.lmode") === "total" ? "total" : "spread";
+LMODE = ["spread","total"].includes(store.get("sor.lmode")) ? store.get("sor.lmode") : "picks";
 
 /* ---------------- sample season (invented schools) ---------------- */
 function sampleSeason(){
@@ -1073,7 +1069,12 @@ const gameWhen = s => { if(!s) return "Date TBA"; const d = new Date(s), et = {t
   const t = d.toLocaleTimeString([], {...et, hour:"numeric", minute:"2-digit"}), mid = d.toLocaleTimeString("en-US", {...et, hour12:false, hour:"2-digit", minute:"2-digit"});
   return `${gameDay(s)} · ${/^(00|24):00$/.test(mid) ? "Time TBA" : t + " ET"}`; };
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
+// Lines tab switch: Top picks (the summary, default) | Spreads | Totals.
+const lineSeg = () => `<div class="seg" role="tablist" aria-label="Top picks, spreads or totals">${[["picks","Top picks"],["spread","Spreads"],["total","Totals"]].map(([k,n]) =>
+  `<button type="button" role="tab" data-lm="${k}" aria-selected="${LMODE===k}">${n}</button>`).join("")}</div>`;
+const bindLineSeg = () => $("#lout").querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { LMODE = b.dataset.lm; store.set("sor.lmode", LMODE); renderLines(); }));
 function renderLines(){
+  if(LMODE === "picks"){ renderPicks(); return; }
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
   const up = LINES.filter(l => l.hp==null && PRED.T[l.home] && PRED.T[l.away]).map(l => {
     const ih = autoModelOut(l.home), ia = autoModelOut(l.away);
@@ -1175,8 +1176,7 @@ function renderLines(){
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   const wkName = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: ` : "";
   $("#ltitle").textContent = LMODE === "total" ? `${wkName}our totals vs. betting totals` : `${wkName}our spreads vs. betting spreads`;
-  const seg = `<div class="seg" role="tablist" aria-label="Spreads or totals">${[["spread","Spreads"],["total","Totals (over/under)"]].map(([k,n]) =>
-    `<button type="button" role="tab" data-lm="${k}" aria-selected="${LMODE===k}">${n}</button>`).join("")}</div>`;
+  const seg = lineSeg();
   if(LMODE === "total"){
     const tnow = totalsOf(now), tlater = totalsOf(later), tw = TOTCONF_RECORD.reduce((s,r)=>s+r[1],0), tl = TOTCONF_RECORD.reduce((s,r)=>s+r[2],0);
     $("#lout").innerHTML = seg + (tnow.length ? ttable(tnow) : `<div class="panel empty">No upcoming games with a betting total.</div>`) +
@@ -1190,14 +1190,14 @@ function renderLines(){
       </tbody></table></div>
       <p class="note"><b>How totals confidence works:</b> every game with a total gets a score, the chance our side (over when our total is above the line, under when below) wins. It rises when both teams have mostly gone the other way this season (the market may have overreacted to them), when the total is high and we lean under or low and we lean over, when the two teams' pace agrees with our side, and a little as our gap from the total grows. Each week the top 10% are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Scores run about 42–56%.</p>
       <p class="note"><b>Be careful with these:</b> on seasons the model wasn't trained on, the top 10% went ${TOTCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${tw}–${tl} (${(100*tw/(tw+tl)).toFixed(1)}%) overall, but almost all of that is 2024; three of five seasons were below 50%. The spread score was steadier (54.6%, four of five seasons above 50%). Our side of the total with no filter went 47–52% by season. This week: ${TG.filter(g => !g.results && g.ttop_conf).sort((x,y)=>y.tconf-x.tconf).map(g => `<b>${g.ours_total > g.total ? "Over" : "Under"} ${g.total.toFixed(1)}</b> ${esc(g.away)}–${esc(g.home)} ${(g.tconf*100).toFixed(1)}%${g.ttop5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>`;
-    $("#lout").querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { LMODE = b.dataset.lm; store.set("sor.lmode", LMODE); renderLines(); }));
+    bindLineSeg();
     return;
   }
   $("#lout").innerHTML = seg + (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines.</div>`) +
     `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by confidence, highest first (games without a confidence score last, by difference). The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
     (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : "") +
     tracker + record + past;
-  $("#lout").querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { LMODE = b.dataset.lm; store.set("sor.lmode", LMODE); renderLines(); }));
+  bindLineSeg();
 }
 
 // Picks tab: a pre-game summary of the Lines tab's Spreads and Totals views, keeping only this week's picks rated 50%
@@ -1233,13 +1233,15 @@ function renderPicks(){
       </div>
       <time${p.g.start ? ` datetime="${esc(p.g.start)}"` : ""}>${gameWhen(p.g.start)}</time>
     </article>`;
-  const seg = `<div class="seg" role="tablist" aria-label="Which picks">${[["all",`All (${picks.length})`],["spread",`Spreads (${nS})`],["total",`Totals (${nT})`]].map(([k,n]) =>
+  const seg = `<div class="seg sm" role="tablist" aria-label="Which picks"><span class="seglabel">Show</span>${[["all",`All ${picks.length}`],["spread",`Spread picks ${nS}`],["total",`Total picks ${nT}`]].map(([k,n]) =>
     `<button type="button" role="tab" data-pm="${k}" aria-selected="${PMODE===k}">${n}</button>`).join("")}</div>`;
-  $("#pout").innerHTML = seg +
-    `<p class="note" style="margin:0">This week's picks from the Lines tab rated 50% or higher, before kickoff, most confident first. <b>${nTop}</b> are top confidence (★, the top 10% of the week in their market).</p>` +
+  $("#ltitle").textContent = "This week's top confidence picks";
+  $("#lout").innerHTML = lineSeg() + seg +
+    `<p class="note" style="margin:0">This week's spread and total picks rated 50% or higher, before kickoff, most confident first. <b>${nTop}</b> are top confidence (★, the top 10% of the week in their market).</p>` +
     (shown.length ? `<div class="picks">${shown.map(card).join("")}</div>` : `<div class="panel empty">No upcoming picks at 50% or more yet. Picks appear once a game is within 7 days of kickoff.</div>`) +
-    `<p class="note">Confidence is the model's chance the pick beats the betting line (spreads) or total (over/unders). Even the best-rated picks are expected to win only about 55% of the time, and totals scores are much less proven than spread scores. Results are tracked on the Lines tab. Not betting advice.</p>`;
-  $("#pout").querySelectorAll("[data-pm]").forEach(b => b.addEventListener("click", () => { PMODE = b.dataset.pm; renderPicks(); }));
+    `<p class="note">Confidence is the model's chance the pick beats the betting line (spreads) or total (over/unders). Even the best-rated picks are expected to win only about 55% of the time, and totals scores are much less proven than spread scores. Results are tracked under Spreads and Totals. Not betting advice.</p>`;
+  $("#lout").querySelectorAll("[data-pm]").forEach(b => b.addEventListener("click", () => { PMODE = b.dataset.pm; renderPicks(); }));
+  bindLineSeg();
 }
 
 function renderTeam(name){
@@ -1292,7 +1294,6 @@ function recompute(){
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));
   renderResults();
   renderLines();
-  renderPicks();
   if(!$("#ma").value){ $("#ma").value = store.get("sor.ma") || RESULT.rows[0]?.team || ""; $("#mb").value = store.get("sor.mb") || RESULT.rows[1]?.team || ""; }
   renderMatchup(true);
   $("#teamlist").innerHTML = RESULT.rows.map(r=>`<option value="${esc(r.team)}">`).join("");
@@ -1304,7 +1305,9 @@ function recompute(){
 
 /* ---------------- routing ---------------- */
 function route(){
-  const v = (location.hash||"#top25").slice(1), view = ["top25","results","matchup","lines","picks","teams","method"].includes(v)?v:"top25";
+  let v = (location.hash||"#top25").slice(1);
+  if(v === "picks"){ v = "lines"; if(LMODE !== "picks"){ LMODE = "picks"; renderLines(); } history.replaceState(null, "", "#lines"); }
+  const view = ["top25","results","matchup","lines","teams","method"].includes(v)?v:"top25";
   document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-"+view);
   document.querySelectorAll("nav a").forEach(a => a.dataset.view===view ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
   moveInd();
