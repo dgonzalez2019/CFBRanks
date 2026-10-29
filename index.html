@@ -687,8 +687,8 @@ function renderMatchup(force){
   const cg = trackedGame(a, b);
   $("#mout").innerHTML = `
     <div class="panel" style="position:relative">
-      ${cg ? `<div style="position:absolute;top:10px;right:12px">${confBadge(cg)}</div>` : `<div style="position:absolute;top:10px;right:12px"><span class="conf none" title="Confidence is shown for games this week that have a betting line.">Confidence —</span></div>`}
-      <div class="score" style="padding-top:34px">${side(a, p.sa, ra, winA)}<div class="dash">–</div>${side(b, p.sb, rb, !winA)}</div>
+      ${cg ? `<div style="display:flex;justify-content:flex-end;padding:12px 16px 0">${confBadge(cg)}</div>` : `<div style="display:flex;justify-content:flex-end;padding:12px 16px 0"><span class="conf none" title="Confidence is shown for games this week that have a betting line.">Confidence —</span></div>`}
+      <div class="score" style="padding-top:8px">${side(a, p.sa, ra, winA)}<div class="dash">–</div>${side(b, p.sb, rb, !winA)}</div>
       <div style="padding:0 16px 18px;display:grid;gap:8px">
         <div class="pbar" role="img" aria-label="${esc(a)} ${Math.round(p.pa*100)}%, ${esc(b)} ${Math.round((1-p.pa)*100)}%"><i style="width:${p.pa*100}%;background:var(${winA?"--accent":"--muted"})"></i><i style="width:${(1-p.pa)*100}%;background:var(${winA?"--muted":"--accent"})"></i></div>
         <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px"><span>${esc(a)} ${Math.round(p.pa*100)}%</span><span>${esc(b)} ${Math.round((1-p.pa)*100)}%</span></div>
@@ -709,22 +709,19 @@ function renderMatchup(force){
 // model made it worse, so when a game has a line the Matchup tab leads with it. MKT_SD: spread of results
 // around the line (15.2 on 3,174 games; win chances from it matched actual rates within ~2 points).
 const MKT_SD = 15.2;
-// TOP CONFIDENCE (flagged before kickoff by scripts/track_picks.py, read from data/tracker.json): our pick did worse
-// against the spread in its last game than its opponent did, AND the play-efficiency model sides against our pick.
-// Found by searching 2026 for the criteria that best separated correct picks (research/criteria.py) and checked
-// leak-free on seasons it wasn't found on (research/criteria_check.py). About 15% of games.
-// Confidence % shown on each game = how often picks in the same group covered on seasons the rule wasn't found on
-// (2022-25, research/criteria_check.py): top confidence 238-202, every other pick 1234-1205.
-const CONF_PCT = {top: 238/440, other: 1234/2439};
-// The tracked record for a game (either team order), with our pick and its confidence group, or null.
+// Confidence (scripts/track_picks.py, research/conf_score.py): every game with a line gets its own score, the
+// probability our pick covers, from how much worse our pick did against the spread last game than its opponent, how
+// far the play-efficiency model sits on the other side of the line, and how far we are from the line (bigger gaps
+// cover less). Each week the top 10% of scores are Top confidence and the top 5% Top 5%. Held out (trained on other
+// seasons), the top 10% went: 2022 38-33, 2023 33-39, 2024 44-27, 2025 40-33, 2026 23-16.
+const TOPCONF_RECORD = [["2022", 38, 33], ["2023", 33, 39], ["2024", 44, 27], ["2025", 40, 33], ["2026", 23, 16]];
 function trackedGame(a, b){
   const t = (TRACKER?.games||[]).find(g => (g.home===a && g.away===b) || (g.home===b && g.away===a));
-  if(!t || t.line==null || t.ours===t.line) return null;
-  const pick = t.ours > t.line ? t.home : t.away, opp = pick===t.home ? t.away : t.home;
-  return {t, pick, opp, pts: Math.abs(t.line), getsPts: (pick===t.home) === (t.line < 0), top: !!t.top_conf, pct: t.top_conf ? CONF_PCT.top : CONF_PCT.other};
+  if(!t || t.line==null || t.conf==null) return null;
+  const pick = t.ours > t.line ? t.home : t.away;
+  return {t, pick, pts: Math.abs(t.line), getsPts: (pick===t.home) === (t.line < 0), top: !!t.top_conf, top5: !!t.top5, pct: t.conf};
 }
-const confBadge = (c, compact) => !c ? "" : `<span class="conf${c.top ? " top" : ""}" title="Our pick against the spread: ${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}. Picks in this group covered ${Math.round(c.pct*100)}% of the time on past seasons (2022–25).${c.top ? " Top confidence: our pick did worse against the spread last game than its opponent, and the efficiency model sides against it." : ""}">${compact ? "" : `<small>${c.top ? "Top confidence" : "Confidence"}</small>`}${Math.round(c.pct*100)}%${compact ? "" : `<small>${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}</small>`}</span>`;
-const TOPCONF_RECORD = [["2022", 55, 51], ["2023", 56, 49], ["2024", 71, 48], ["2025", 56, 54]], TOPCONF_FOUND = ["2026", 33, 23];
+const confBadge = c => !c ? "" : `<span class="conf${c.top ? " top" : ""}" title="Chance our pick covers: ${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}. ${c.top ? (c.top5 ? "Top 5% of this week's games by confidence." : "Top 10% of this week's games by confidence.") : "Not in this week's top 10%."} Scores run about 48–56%; games scored 54–56% covered 55% on past seasons.">${`<small>${c.top5 ? "Top 5% confidence" : c.top ? "Top confidence" : "Confidence"}</small>`}${(c.pct*100).toFixed(1)}%<small>${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}</small></span>`;
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 function renderLines(){
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
@@ -740,7 +737,7 @@ function renderLines(){
       <tbody>${rows.map(l => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
         return `<tr>
         <td class="rk" style="font-size:17px">${Math.abs(l.diff).toFixed(1)}</td>
-        <td><span style="float:right;margin-left:8px">${confBadge(trackedGame(l.home, l.away))}</span><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${(() => { const t = (TRACKER?.games||[]).find(g => g.key===`${l.week}|${l.home}|${l.away}`); return t?.top_conf ? `<span class="tag top10">Top confidence: ${esc(t.ours>t.line?t.home:t.away)}</span> ` : ""; })()}${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
+        <td><span style="float:right;margin-left:8px">${confBadge(trackedGame(l.home, l.away))}</span><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${(() => { const t = (TRACKER?.games||[]).find(g => g.key===`${l.week}|${l.home}|${l.away}`); return t?.top_conf ? `<span class="tag top10">${t.top5 ? "Top 5%" : "Top 10%"} confidence: ${esc(t.ours>t.line?t.home:t.away)}</span> ` : ""; })()}${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
           <span class="show-sm" style="font-size:13px;margin-top:4px">Line ${lineStr(l.home, l.away, l.mkt)} · Ours <b>${lineStr(l.home, l.away, l.ours)}</b><br>${esc(fav)} wins ${Math.round(fp*100)}%${l.total!=null?` · Total ${l.total.toFixed(1)} vs ${l.ourTotal}`:""}</span></td>
         <td class="hide-sm">${lineStr(l.home, l.away, l.mkt)}</td><td class="hide-sm"><b>${lineStr(l.home, l.away, l.ours)}</b></td>
         <td class="num hide-sm">${esc(fav)} ${Math.round(fp*100)}%</td>
@@ -783,10 +780,11 @@ function renderLines(){
     <div class="panel scroll"><table><thead><tr><th>Strategy (fixed in advance)</th><th class="num">All</th><th class="num">Edge 3+</th><th class="num">Edge 5+</th></tr></thead><tbody>
       <tr><td>Our side of the line at kickoff</td><td class="num">${rec("model_close")}</td><td class="num">${rec("model_close",3)}</td><td class="num">${rec("model_close",5)}</td></tr>
       <tr><td>Our side of the opening line</td><td class="num">${rec("model_open")}</td><td class="num">${rec("model_open",3)}</td><td class="num">${rec("model_open",5)}</td></tr>
-      <tr><td><b>Top confidence</b> <span class="sub">see below</span></td><td class="num">${rec("top_conf")}</td><td class="num">—</td><td class="num">—</td></tr>
+      <tr><td><b>Top confidence</b> <span class="sub">top 10% of each week by score</span></td><td class="num">${rec("top_conf")}</td><td class="num">—</td><td class="num">—</td></tr>
+      <tr><td><b>Top 5% confidence</b></td><td class="num">${rec("top5")}</td><td class="num">—</td><td class="num">—</td></tr>
       <tr><td>Favorite when the line is 3 or 7</td><td class="num">${rec("fav37")}</td><td class="num">—</td><td class="num">—</td></tr>
     </tbody></table></div>
-    <p class="note"><b>What "top confidence" means:</b> our pick did worse against the spread in its last game than its opponent did, and our separate play-by-play efficiency model sides against our pick. Our score model is backing a team the market has just soured on, while the efficiency numbers agree with the market. That's the pattern that best separated correct picks from wrong ones when searching 2026, and it held up on seasons it wasn't found on: ${TOPCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${(() => { const w = TOPCONF_RECORD.reduce((s,r)=>s+r[1],0), l = TOPCONF_RECORD.reduce((s,r)=>s+r[2],0); return `${w}–${l} (${(100*w/(w+l)).toFixed(1)}%)`; })()} in 2022–25 (2026, where it was found: ${TOPCONF_FOUND[1]}–${TOPCONF_FOUND[2]}). About 15% of games qualify. It's the best criterion found, but 2025 was a coin flip; treat the live record as the real test. This week: ${TG.filter(g => !g.results && g.top_conf).map(g => `<b>${esc(g.ours>g.line?g.home:g.away)}</b> vs ${esc(g.ours>g.line?g.away:g.home)}`).join(", ") || "none"}.</p>
+    <p class="note"><b>How confidence works:</b> every game with a line gets its own score, the chance our pick covers. It rises when our pick did worse against the spread last game than its opponent (the market may have overreacted), and when our separate play-by-play efficiency model sits on the other side of the line from us. It falls as our disagreement with the line grows, because our biggest disagreements have covered least often. Each week the top 10% of scores are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Scores run about 48–56%, which is all the data can honestly separate; games scored 54–56% covered 55% in 2025–26. Top 10% on seasons the model wasn't trained on: ${TOPCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${(() => { const w = TOPCONF_RECORD.reduce((s,r)=>s+r[1],0), l = TOPCONF_RECORD.reduce((s,r)=>s+r[2],0); return `${w}–${l} (${(100*w/(w+l)).toFixed(1)}%)`; })()}. This week: ${TG.filter(g => !g.results && g.top_conf).sort((x,y)=>y.conf-x.conf).map(g => `<b>${esc(g.ours>g.line?g.home:g.away)}</b> ${(g.conf*100).toFixed(1)}%${g.top5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>
     <p class="note">Predictions are saved before kickoff by each data update (with players listed Out), frozen at kickoff and graded after the final${firstSaved ? `; tracking since ${new Date(firstSaved).toLocaleDateString([], {month:"short", day:"numeric"})}` : ""}. ${graded.length} graded, ${openN} waiting. Unlike the past-season numbers below, nothing here could have been tuned on the results. A few hundred graded games are needed before the percentages mean much; 52.4% is break-even at standard odds.</p>`;
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   $("#ltitle").textContent = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: our lines vs. betting lines` : "Our lines vs. betting lines";

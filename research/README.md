@@ -19,6 +19,7 @@ python research/opening_2026.py $W .                      # pre-registered: does
 python research/confidence.py $W .                        # what makes a top-10% pick: candidate confidence measures
 python research/criteria.py $W .                          # which yes/no criteria separated correct picks, 2025 <-> 2026
 python research/criteria_check.py $W .                    # leak-free check of the winner on 2022-25
+python research/conf_score.py $W .                      # continuous confidence score, held-out top 10%/5% (-> work/conf_coef.json)
 python research/summary.py $W .                          # -> data/research.json (shown on the Lines tab)
 ```
 
@@ -46,4 +47,10 @@ Top confidence (research/criteria.py, criteria_check.py): single criteria never 
 the best pairs found on one season fell to 35-56% on the other. One pair found on 2026 held up elsewhere: our pick did
 worse against the spread in its last game than its opponent AND the play-efficiency model is on the other side of the
 line. Leak-free (efficiency scale fit on other seasons): 2022 51.9%, 2023 53.3%, 2024 59.7%, 2025 50.9%, so 238-202
-(54.1%) in 2022-25, about 15% of games. This is the site's top-confidence rating, tracked live.
+(54.1%) in 2022-25, about 15% of games.
+
+Confidence score (research/conf_score.py): a logistic model on that pair's two inputs (last-game cover difference,
+efficiency model vs the line), their AND, and the gap from the line gives every game a probability our pick covers.
+Each week's top 10% is the site's Top confidence, top 5% Top 5%. Trained on the other seasons, the top 10% went
+2022 54%, 2023 46%, 2024 62%, 2025 55%, 2026 59%: 178-148 (54.6%); top 5% 87-74 (54.0%). Scores span about 48-56%;
+games scored 54-56% covered 55.1% in 2025-26. Final coefficients (fit on 2022-25) are in scripts/track_picks.py.

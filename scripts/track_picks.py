@@ -12,9 +12,15 @@ Strategies (home margin convention: line = -home spread):
   model_close  our side of the last line saved before kickoff (edge = |ours - line|)
   model_open   our side of the opening line
   fav37        the favorite when the line is within 0.5 of 3 or 7 (best NIL-era angle in research, 53.9%)
-  top_conf     TOP CONFIDENCE: our pick did worse against the spread in its last game than its opponent did in its
-               last game (no earlier lined game counts as 0) AND the play-efficiency model is on the other side of the line (research/criteria.py, leak-free check research/criteria_check.py: found on 2026,
-               2022-25 went 238-202, 54.1%); graded like model_close
+  top_conf     TOP CONFIDENCE: the top 10% of each week's games by confidence score (top5 marks the top 5%)
+
+Confidence score = probability our pick covers, from a logistic model (research/conf_score.py, fit on 2022-25) on:
+  bad  = how much worse our pick did against the spread last game than its opponent (no lined last game = 0) / 14
+  dis  = how far the play-efficiency model sits on the other side of the line from our pick / 7
+  gap  = |our margin - line| / 7
+  both = bad > 0 and dis > 0
+Held out, the top 10% went 178-148 (54.6%) over 2022-26; games scored 54-56% won 55.1% in 2025-26.
+top_conf and top5 are graded like model_close.
 
 data/tracker.json = {updated, model, games: [{key, week, home, away, neutral, start, ours, line, open, inj_home,
                      inj_away, first_saved, saved_at, home_pts, away_pts, results: {strategy: "W"|"L"|"P"|null},
@@ -22,6 +28,17 @@ data/tracker.json = {updated, model, games: [{key, week, home, away, neutral, st
 import datetime, json, pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import cfb_sor as m
+import math
+
+CONF_COEF = (0.08102, 0.018616, 0.047526, -0.059625, 0.063655)  # const, bad, dis, gap, both
+TOP_SHARE, TOP5_SHARE = 0.10, 0.05
+
+
+def confidence(la, lo, pm, line, ours):
+    side = 1 if ours > line else -1
+    bad = -((la or 0.0) - (lo or 0.0)) / 14; dis = -side * (pm - line) / 7; gap = abs(ours - line) / 7
+    z = CONF_COEF[0] + CONF_COEF[1] * bad + CONF_COEF[2] * dis + CONF_COEF[3] * gap + CONF_COEF[4] * float(bad > 0 and dis > 0)
+    return 1 / (1 + math.exp(-z))
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 D = ROOT / "data"
@@ -82,11 +99,11 @@ for r in lines:
         line = -spread; pick = home if ours > line else away
         opp = away if pick == home else home
         pm = m.ppa_margin(P, home, away); la, lo = last_ats(pick, wk), last_ats(opp, wk)
-        top = ours != line and ((la or 0.0) - (lo or 0.0)) < 0 and ((pm > line) != (ours > line))
+        conf = confidence(la, lo, pm, line, ours) if ours != line else None
         t.update(ours=round(ours, 2), line=line, open=(-opening if opening is not None else None),
                  inj_home=round(ih, 2), inj_away=round(ia, 2), ppa_margin=round(pm, 2),
                  pick_last_ats=None if la is None else round(la, 1), opp_last_ats=None if lo is None else round(lo, 1),
-                 top_conf=bool(top), saved_at=stamp)
+                 conf=None if conf is None else round(conf, 4), saved_at=stamp)
     elif hp is not None and t is not None and "results" not in t:
         act = hp - ap
         side = lambda line: None if line is None or t["ours"] == line else (1 if t["ours"] > line else -1)
@@ -99,9 +116,18 @@ for r in lines:
             g = grade(act, t["line"]); fav37 = g if g == "P" else ("W" if (g == "W") == (t["line"] > 0) else "L")
         res["fav37"] = fav37
         res["top_conf"] = res["model_close"] if t.get("top_conf") else None
+        res["top5"] = res["model_close"] if t.get("top5") else None
         t.update(home_pts=hp, away_pts=ap, results=res,
                  edges=dict(model_close=round(abs(t["ours"] - t["line"]), 2),
                             model_open=round(abs(t["ours"] - t["open"]), 2) if t["open"] is not None else None))
+
+# Each week, the top 10% (and 5%) of games by confidence. Games that have kicked off keep the flag they had.
+for wk in {g["week"] for g in track.values()}:
+    wg = [g for g in track.values() if g["week"] == wk and g.get("conf") is not None]
+    ranked = sorted(wg, key=lambda g: -g["conf"]); n10 = max(1, round(len(wg) * TOP_SHARE)); n5 = max(1, round(len(wg) * TOP5_SHARE))
+    for i, g in enumerate(ranked):
+        if "results" in g or (when(g["start"]) and when(g["start"]) <= now and "top_conf" in g): continue
+        g["top_conf"] = i < n10; g["top5"] = i < n5
 
 ordered = sorted(track.values(), key=lambda g: (g["start"] or "", g["key"]))
 OUT.write_text(json.dumps({"updated": stamp, "model": "Matchup model with last-season prior, passing/rushing efficiency "
@@ -109,5 +135,5 @@ OUT.write_text(json.dumps({"updated": stamp, "model": "Matchup model with last-s
 done = [g for g in ordered if "results" in g]
 rec = lambda s: f"{sum(g['results'][s] == 'W' for g in done)}-{sum(g['results'][s] == 'L' for g in done)}"
 print(f"tracker: {len(ordered) - len(done)} open, {len(done)} graded; model vs close {rec('model_close')}, "
-      f"vs open {rec('model_open')}, favorites at 3/7 {rec('fav37')}, top confidence {rec('top_conf')}; "
+      f"vs open {rec('model_open')}, favorites at 3/7 {rec('fav37')}, top confidence {rec('top_conf')}, top 5% {rec('top5')}; "
       f"{sum(1 for g in ordered if g.get('top_conf') and 'results' not in g)} open top-confidence picks")
