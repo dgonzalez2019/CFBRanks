@@ -702,7 +702,7 @@ h1 small b{font-weight:inherit}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], ROLES = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
+let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], ROLES = [], TSTATS = null, TSP = null, PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -782,7 +782,7 @@ async function setLeague(l){
   LEAGUE = l; store.set("sor.league", l);
   const go = async () => {
     applyLeague();
-    SCHED = []; TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; ROLES = []; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
+    SCHED = []; TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; ROLES = []; TSTATS = null; TSP = null; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
     MKEY = ""; Object.keys(FLIPPED).forEach(k => delete FLIPPED[k]);
     $("#ma").value = store.get(SK("sor.ma")) || ""; $("#mb").value = store.get(SK("sor.mb")) || ""; $("#q").value = "";
     await loadData();
@@ -1415,6 +1415,64 @@ function unitRatings(E, teams){
   return out;
 }
 
+// Season stat profiles from play-by-play (teamstats.json, NFL only): each team's offense from its own rows, its
+// defense from its opponents' rows. Raw season numbers, not adjusted for opponents. Rank 1 = best.
+const f2s = v => (v>=0?"+":"−")+Math.abs(v).toFixed(2), pctS = v => (v*100).toFixed(1)+"%";
+const TS_METRICS = [  // [key, label, detail, value, format, higher is better for the offense, offense only]
+  ["epa","EPA per play","expected points added",a => a.epa/a.plays,f2s,true],
+  ["sr","Success rate","plays that kept the offense on schedule",a => a.success/a.plays,pctS,true],
+  ["ypp","Yards per play","",a => a.yds/a.plays,v => v.toFixed(2),true],
+  ["pepa","Passing","EPA per dropback",a => a.pass_epa/a.dropbacks,f2s,true],
+  ["repa","Rushing","EPA per carry",a => a.rush_epa/a.rushes,f2s,true],
+  ["exp","Explosive plays","20+ yd passes, 10+ yd runs",a => a.explosive/a.plays,pctS,true],
+  ["ppd","Points per drive","touchdown = 7",a => a.drive_pts/a.drives,v => v.toFixed(2),true],
+  ["rz","Red zone","trips ending in a touchdown",a => a.rz_td/a.rz_trips,pctS,true],
+  ["third","Third downs","converted",a => a.third_conv/a.third_att,pctS,true],
+  ["fourth","Fourth downs","converted",a => a.fourth_conv/a.fourth_att,pctS,true],
+  ["sack","Sacks","per dropback",a => a.sacks_allowed/a.dropbacks,pctS,false],
+  ["hit","QB hits","per dropback",a => a.hits_allowed/a.dropbacks,pctS,false],
+  ["to","Turnovers","per game (defense: takeaways)",a => a.turnovers/a.g,v => v.toFixed(1),false],
+  ["proe","Pass rate over expected","how often they throw vs. a typical team in the same spot",a => a.proe_sum/a.proe_n,v => (v>=0?"+":"−")+Math.abs(v).toFixed(1)+"%",true,true],
+  ["adot","Air yards per pass","how far downfield they throw",a => a.air_yds/a.pass_att,v => v.toFixed(1),true,true],
+  ["pen","Penalty yards","per game, all phases",a => a.penalty_yds/a.g,v => v.toFixed(0),false,true],
+  ["top","Time of possession","per game",a => a.top_sec/a.g,v => `${Math.floor(v/60)}:${String(Math.round(v%60)).padStart(2,"0")}`,true,true]];
+function tsProfiles(){
+  if(!TSTATS?.games?.length) return null;
+  const cols = TSTATS.cols, sum = {off:{}, def:{}};
+  TSTATS.games.forEach(r => [["off", r[1]], ["def", r[2]]].forEach(([side, t]) => {
+    const a = sum[side][t] ||= {g:0}; a.g++; cols.forEach((c,i) => a[c] = (a[c]||0) + (+r[3+i]||0));
+  }));
+  // a team's penalties live on its own rows only, so the defense side keeps the offense's number
+  const out = {off:{}, def:{}}, teams = Object.keys(sum.off);
+  TS_METRICS.forEach(([k,,, f,, hi, offOnly]) => ["off","def"].forEach(side => {
+    if(side === "def" && offOnly) return;
+    const dir = (side === "off") === hi ? -1 : 1, vals = teams.filter(t => sum[side][t]).map(t => [t, f(sum[side][t])]).filter(([,v]) => isFinite(v));
+    vals.sort((x,y) => dir*(x[1]-y[1])).forEach(([t,v],i) => (out[side][t] ||= {})[k] = {v, rank:i+1});
+  }));
+  out.n = teams.length;
+  return out;
+}
+const tsRank = r => `<span class="sub ${r.rank <= Math.ceil(TSP.n/4) ? "pos" : r.rank > TSP.n - Math.ceil(TSP.n/4) ? "neg" : ""}">#${r.rank}</span>`;
+function teamStatsPanel(t){
+  if(!TSP?.off[t]) return "";
+  const o = TSP.off[t], d = TSP.def[t] || {};
+  return `<div class="bar"><h2>Team stats</h2><span class="sub">season, from play-by-play · rank of ${TSP.n}</span></div>
+    <div class="panel scroll"><table class="eff"><thead><tr><th></th><th class="num">Offense</th><th class="num">Defense</th></tr></thead><tbody>
+    ${TS_METRICS.filter(m => o[m[0]]).map(([k, label, detail,, fmt]) => `<tr><td>${label}${detail ? ` <span class="sub">${detail}</span>` : ""}</td>
+      <td class="num">${fmt(o[k].v)} ${tsRank(o[k])}</td><td class="num">${d[k] ? `${fmt(d[k].v)} ${tsRank(d[k])}` : `<span class="sub">—</span>`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="note">Every play this season (nflverse play-by-play), not adjusted for opponents. Defense = what opponents' offenses did against this team. Green ranks are the league's top quarter, red the bottom quarter.</p>`;
+}
+function statMatchup(a, b){
+  if(!TSP?.off[a] || !TSP?.off[b]) return "";
+  const half = (off, def) => `<thead><tr><th>${esc(off)} offense vs. ${esc(def)} defense</th><th class="num">Off.</th><th class="num">Def.</th><th class="num">Edge</th></tr></thead><tbody>
+    ${TS_METRICS.filter(m => !m[6] && TSP.off[off][m[0]] && TSP.def[def]?.[m[0]]).map(([k, label, detail,, fmt]) => { const x = TSP.off[off][k], y = TSP.def[def][k], e = y.rank - x.rank;
+      return `<tr><td>${label}${detail ? ` <span class="sub">${detail}</span>` : ""}</td><td class="num">${fmt(x.v)} ${tsRank(x)}</td><td class="num">${fmt(y.v)} ${tsRank(y)}</td>
+        <td class="num">${Math.abs(e) < 4 ? `<span class="sub">even</span>` : e > 0 ? `<b>Off.</b>` : `<b>Def.</b>`}</td></tr>`; }).join("")}</tbody>`;
+  return `<div class="panel scroll"><table class="eff">${half(a,b)}${half(b,a)}</table></div>
+    <p class="note" style="margin:0">Season stats from every play, with league ranks (1 = best of ${TSP.n}). Edge goes to whichever side ranks at least 4 places better. Not adjusted for opponents, and not part of the predicted score.</p>`;
+}
+
 let MKEY = "";
 function renderMatchup(force){
   const a = $("#ma").value, b = $("#mb").value, ok = t => RESULT.byTeam[t];
@@ -1484,7 +1542,7 @@ function renderMatchup(force){
         <p style="margin:6px 0 0"><b>${esc(w)}</b> wins ${Math.round(wp*100)}% of the time by about <b>${Math.max(1,Math.round(Math.abs(p.margin)))}</b> point${Math.max(1,Math.round(Math.abs(p.margin)))===1?"":"s"}${v==="N"?" on a neutral field":` with ${esc(v==="A"?a:b)} at home`}.</p>
         ${met.map(g=>`<p class="sub" style="margin:0">Already played, week ${g.week}: ${esc(g.away)} ${g.ap} ${g.neutral?"vs.":"at"} ${esc(g.home)} ${g.hp}${g.neutral?" (neutral site)":""}.</p>`).join("")}
       </div>
-    </div>${mkt}${inj}${eff}`;
+    </div>${mkt}${inj}${eff}${statMatchup(a, b)}`;
   $("#injbox")?.addEventListener("toggle", e => INJOPEN = e.target.open);
   $("#mout").querySelectorAll(".inj input").forEach(cb => cb.addEventListener("change", () => {
     const t = cb.dataset.team, s = outSet(t);
@@ -1745,7 +1803,8 @@ function renderTeam(name){
         <td>${bar(x.value)} <span class="num ${x.value>=0?"pos":"neg"}" style="margin-left:6px">${x.value>=0?"+":""}${x.value.toFixed(2)}</span></td></tr>`).join("")}
       </tbody></table></div>
     <p class="note">Bench win is how often the benchmark team (${esc(RESULT.benchTeam)}) would win that game at that venue. A win is worth 100% minus that number; a loss costs that number. Tap an opponent to open their page.</p>
-    ${upcomingFor(r.team)}`;
+    ${upcomingFor(r.team)}
+    ${teamStatsPanel(r.team)}`;
 }
 // The rest of a team's schedule: games in the schedule file not yet in the results, with our prediction and the line.
 function upcomingFor(team){
@@ -1782,6 +1841,7 @@ function recompute(){
   RONLY = colley(GAMES.filter(g => g.hf || g.af));
   PRED = RESULT.M;
   PVAL = estimateValues(playerValues(PLAYERS, GAMES));
+  TSP = tsProfiles();
   BT = backtest(GAMES.filter(g => g.hf || g.af));
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));
   renderResults();
@@ -1907,6 +1967,10 @@ async function loadData(){
       const pr = await fetch(`${LG.dir}players.json`, {cache:"no-store"});
       if(pr.ok) PLAYERS = ((await pr.json()).players || []).map(r => ({team:r[0], name:r[1], pos:r[2], plays:r[3], ppa:r[4]}));
     }catch(e){ PLAYERS = []; }
+    try{
+      const tr2 = await fetch(`${LG.dir}teamstats.json`, {cache:"no-store"});
+      TSTATS = tr2.ok ? await tr2.json() : null;
+    }catch(e){ TSTATS = null; }
     try{
       const rl = await fetch(`${LG.dir}roles.json`, {cache:"no-store"});
       ROLES = rl.ok ? ((await rl.json()).players || []) : [];

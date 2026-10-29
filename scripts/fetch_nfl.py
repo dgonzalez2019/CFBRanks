@@ -11,6 +11,10 @@ Writes, in the same shapes as the CFB files (see CLAUDE.md), under data/nfl/:
   players.json   [team, name, position, plays, EPA per play] for QBs, RBs, WRs, TEs
   injuries.json  this week's injury report: [team, player, pos, status, body part, date, date, note]
   teams.json     {v: 2, teams: [[name, logo, dark logo, color, alt color]]}
+  teamstats.json each team's offense in each game from play-by-play: {season, updated, cols, games: [[week, team,
+                 opp, ...cols]]} (a team's defense = its opponents' rows); also the games' 10th element (matchup
+                 stats: sacks, tackles for loss, QB hits made, turnovers, 3rd-down conversions and tries)
+  roles.json     [team, name, position, snap share] for injured-player estimates
 With --history Y1-Y2 it also writes data/nfl/history/<year>.json, <year>_lines.json and <year>_ppa.json.
 
 Weeks are nflverse's (playoffs continue as weeks 19-22). Usage:
@@ -92,11 +96,59 @@ def team_stats(season):
     return out
 
 
+PBP_COLS = ["plays", "epa", "success", "dropbacks", "pass_epa", "pass_success", "rushes", "rush_epa", "rush_success",
+            "explosive", "third_conv", "third_att", "fourth_conv", "fourth_att", "rz_trips", "rz_td", "drives", "drive_pts",
+            "sacks_allowed", "hits_allowed", "tfl_allowed", "turnovers", "penalty_yds", "proe_sum", "proe_n", "air_yds",
+            "pass_att", "yds", "first_downs", "top_sec"]
+
+
+def pbp(season):
+    """Per (week, team) offense totals from nflverse play-by-play (PBP_COLS). Scrimmage plays only: dropbacks
+    (passes, sacks, scrambles) and designed runs; explosive = 20+ yard pass or 10+ yard run; red-zone trip = a
+    drive that reached the opponent's 20; drive points count a touchdown as 7."""
+    try: R = list(csv.DictReader(io.StringIO(get(f"{REL}/pbp/play_by_play_{season}.csv.gz"))))
+    except Exception as e: print(f"  play-by-play {season} unavailable: {e}"); return {}
+    print(f"  play-by-play {season}: {len(R)} plays")
+    out = defaultdict(lambda: defaultdict(float)); drives = {}
+    f = lambda r, k: num(r.get(k)) or 0.0
+    for r in R:
+        if (r.get("season_type") or "REG") not in ("REG", "POST"): continue
+        t, o = name(r.get("posteam")), name(r.get("defteam"))
+        if not t or not o or not r.get("week"): continue
+        wk = int(r["week"]); s = out[(wk, t)]; s["_opp"] = o
+        pt = name(r.get("penalty_team"))
+        if r.get("penalty") == "1" and pt in (t, o): out[(wk, pt)]["penalty_yds"] += f(r, "penalty_yards")
+        d = (r.get("game_id"), t, r.get("fixed_drive"))
+        if r.get("fixed_drive") and d not in drives:
+            drives[d] = 1; res = r.get("fixed_drive_result") or ""
+            s["drives"] += 1; s["drive_pts"] += 7 if res == "Touchdown" else 3 if res == "Field goal" else 0
+            if r.get("drive_inside20") == "1": s["rz_trips"] += 1; s["rz_td"] += res == "Touchdown"
+            tp = r.get("drive_time_of_possession") or ""
+            if ":" in tp: m_, s_ = tp.split(":")[:2]; s["top_sec"] += int(m_) * 60 + int(s_)
+        if r.get("down") == "3" and (r.get("third_down_converted") == "1" or r.get("third_down_failed") == "1"):
+            s["third_att"] += 1; s["third_conv"] += r.get("third_down_converted") == "1"
+        if r.get("down") == "4" and (r.get("fourth_down_converted") == "1" or r.get("fourth_down_failed") == "1"):
+            s["fourth_att"] += 1; s["fourth_conv"] += r.get("fourth_down_converted") == "1"
+        if r.get("play_type") not in ("pass", "run") or r.get("epa") in (None, "", "NA"): continue
+        epa, yds, ok = f(r, "epa"), f(r, "yards_gained"), r.get("success") == "1"
+        s["plays"] += 1; s["epa"] += epa; s["success"] += ok; s["yds"] += yds; s["first_downs"] += r.get("first_down") == "1"
+        if r.get("qb_dropback") == "1" or r.get("pass") == "1":
+            s["dropbacks"] += 1; s["pass_epa"] += epa; s["pass_success"] += ok; s["explosive"] += yds >= 20
+            if r.get("pass_attempt") == "1" and r.get("sack") != "1": s["pass_att"] += 1; s["air_yds"] += f(r, "air_yards")
+        else:
+            s["rushes"] += 1; s["rush_epa"] += epa; s["rush_success"] += ok; s["explosive"] += yds >= 10
+        s["sacks_allowed"] += r.get("sack") == "1"; s["hits_allowed"] += r.get("qb_hit") == "1"
+        s["tfl_allowed"] += r.get("tackled_for_loss") == "1"
+        s["turnovers"] += (r.get("interception") == "1") + (r.get("fumble_lost") == "1")
+        if r.get("pass_oe") not in (None, "", "NA"): s["proe_sum"] += f(r, "pass_oe"); s["proe_n"] += 1
+    return out
+
+
 def season_files(season, write_dir, current):
     G = [g for g in rows(GAMES_URL) if g.get("season") == str(season)]
     print(f"Season {season}: {len(G)} games in the schedule")
     if not G: return None
-    ts = team_stats(season)
+    ts = team_stats(season); pb = pbp(season)
     games, lines, ppa = [], [], []
     for g in G:
         wk = int(g["week"]); h, a = name(g["home_team"]), name(g["away_team"])
@@ -112,6 +164,10 @@ def season_files(season, write_dir, current):
             if sh and sa and None not in (sh["pass_yds"], sh["pass_att"], sh["rush_yds"], sh["rush_att"], sa["pass_yds"], sa["pass_att"], sa["rush_yds"], sa["rush_att"]):
                 row.append([round(sh["pass_yds"]), round(sh["pass_att"]), round(sh["rush_yds"]), round(sh["rush_att"]),
                             round(sa["pass_yds"]), round(sa["pass_att"]), round(sa["rush_yds"]), round(sa["rush_att"])])
+            ph, pa_ = pb.get((wk, h)), pb.get((wk, a))
+            if len(row) > 8 and ph and pa_:  # matchup stats, CFB order: [sacks made, TFL made, QB hits made, turnovers, 3rd conv, 3rd att] x2
+                mu = lambda me, op: [round(op["sacks_allowed"]), round(op["tfl_allowed"]), round(op["hits_allowed"]), round(me["turnovers"]), round(me["third_conv"]), round(me["third_att"])]
+                row.append(mu(ph, pa_) + mu(pa_, ph))
             games.append(row)
             for me, op in ((h, a), (a, h)):
                 s, o = ts.get((wk, me)), ts.get((wk, op))
@@ -132,6 +188,11 @@ def season_files(season, write_dir, current):
         sched = [[int(g["week"]), name(g["home_team"]), name(g["away_team"]), int((g.get("location") or "").lower() == "neutral"),
                   start_utc(g.get("gameday"), g.get("gametime")), 1, 1] for g in G if name(g["home_team"]) and name(g["away_team"])]
         (write_dir / "schedule.json").write_text(json.dumps({"season": season, "updated": stamp, "games": sched}, separators=(",", ":")))
+    if pb:
+        tsr = [[wk, t, v["_opp"]] + [round(v[c], 3) if isinstance(v[c], float) and c in ("epa", "pass_epa", "rush_epa", "proe_sum") else int(v[c]) for c in PBP_COLS]
+               for (wk, t), v in sorted(pb.items()) if v["plays"]]
+        (write_dir / ("teamstats.json" if current else f"{season}_teamstats.json")).write_text(json.dumps({"season": season, "updated": stamp, "cols": PBP_COLS, "games": tsr}, separators=(",", ":")))
+        print(f"  wrote {len(tsr)} team-game stat lines")
     (write_dir / ("ppa.json" if current else f"{season}_ppa.json")).write_text(json.dumps({"season": season, "updated": stamp, "games": ppa}, separators=(",", ":")))
     print(f"  wrote {len(games)} games ({sum(len(r) > 8 for r in games)} with box scores), {len(lines)} lines "
           f"({sum(r[6] is None for r in lines)} upcoming), {len(ppa)} EPA rows")
