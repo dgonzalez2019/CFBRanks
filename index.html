@@ -480,12 +480,17 @@ function playerValues(players, games){
 const nameKey = n => n.toLowerCase().replace(/[^a-z ]/g,"").replace(/\b(jr|sr|ii|iii|iv)\b/g,"").replace(/\s+/g," ").trim();
 const injuryOf = (team, name) => (INJURIES[team]||[]).find(r => nameKey(r.name) === nameKey(name)) || null;
 const publicOut = (team, name) => injuryOf(team, name)?.status === "Out";
-function weekDates(){ const d = {}; LINES.forEach(l => { if(l.start && (!d[l.week] || l.start < d[l.week])) d[l.week] = l.start.slice(0,10); }); return d; }
+function gameDates(){  // each game's date from the lines file, falling back to the earliest date in its week
+  const g = {}, w = {};
+  LINES.forEach(l => { if(!l.start) return; const d = l.start.slice(0,10); g[`${l.week}|${l.home}|${l.away}`] = d; if(!w[l.week] || d < w[l.week]) w[l.week] = d; });
+  return game => g[`${game.week}|${game.home}|${game.away}`] || w[game.week];
+}
 function shareBefore(team, start){  // share of the team's games played before the injury started
   if(!start) return 1;
-  const wd = weekDates(), gs = GAMES.filter(g => g.home===team || g.away===team);
+  const dateOf = gameDates(), gs = GAMES.filter(g => g.home===team || g.away===team);
   if(!gs.length) return 1;
-  return gs.filter(g => wd[g.week] && wd[g.week] < start).length / gs.length;
+  // A game on the injury's start date counts as played: injuries are dated by the game they happened in.
+  return gs.filter(g => { const d = dateOf(g); return d && d <= start; }).length / gs.length;
 }
 function outSet(team){ if(!OUT[team]) OUT[team] = new Set((PVAL[team]||[]).filter(x => publicOut(team, x.name)).map(x => x.name)); return OUT[team]; }
 const modelOut = team => (PVAL[team]||[]).filter(x => outSet(team).has(x.name)).reduce((s,x) => s + x.value * (publicOut(team, x.name) ? shareBefore(team, injuryOf(team, x.name).start) : 1), 0);
