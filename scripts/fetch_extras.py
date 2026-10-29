@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Pull a past season's betting lines and per-game passers from collegefootballdata.com, for tuning.
-Writes <dir>/<year>_lines.json, <dir>/<year>_qb.json and <dir>/<year>_players.json; skips files that exist.
+Writes <dir>/<year>_lines.json, _qb.json, _players.json, _ppa.json, _talent.json and _returning.json; skips
+files that exist.
 Usage: CFBD_API_KEY=... python scripts/fetch_extras.py --year 2024 [--dir data/history]"""
 import argparse, json, os, sys, pathlib, urllib.request
 
@@ -81,3 +82,36 @@ if not pp.exists():
             rows.append([x["team"], x["name"], x.get("position") or "", int(plays), round(float(avg), 4)])
     pp.write_text(json.dumps({"season": a.year, "players": rows}, separators=(",", ":")))
     print(f"{a.year}: wrote {len(rows)} player values")
+
+# Per-game team efficiency (predicted points added per play, garbage time excluded), for opponent-adjusted
+# efficiency ratings: [week, team, opponent, offense PPA/play, offense pass PPA, offense rush PPA,
+#                      defense PPA/play allowed, defense pass, defense rush]
+ep = out_dir / f"{a.year}_ppa.json"
+if not ep.exists():
+    rows = []
+    for seas in ("regular", "postseason"):
+        try: data = get(f"https://api.collegefootballdata.com/ppa/games?year={a.year}&seasonType={seas}&excludeGarbageTime=true")
+        except Exception as e: print(f"{a.year} ppa {seas}: {e}"); continue
+        for x in data:
+            o, d = x.get("offense") or {}, x.get("defense") or {}
+            if o.get("overall") is None or d.get("overall") is None: continue
+            rows.append([x.get("week", 0) + (20 if seas == "postseason" else 0), x.get("team"), x.get("opponent"),
+                         o.get("overall"), o.get("passing"), o.get("rushing"), d.get("overall"), d.get("passing"), d.get("rushing")])
+        if data and not rows: print("  First ppa item, for debugging:", json.dumps(data[0])[:600])
+    ep.write_text(json.dumps({"season": a.year, "games": rows}, separators=(",", ":")))
+    print(f"{a.year}: wrote {len(rows)} team-game PPA rows")
+
+# Recruiting talent composite (247Sports) and returning production, for preseason ratings.
+tp = out_dir / f"{a.year}_talent.json"
+if not tp.exists():
+    t = get(f"https://api.collegefootballdata.com/talent?year={a.year}")
+    rows = [[x.get("team", x.get("school")), float(x.get("talent"))] for x in t if x.get("talent") is not None]
+    tp.write_text(json.dumps({"season": a.year, "talent": rows}, separators=(",", ":")))
+    print(f"{a.year}: wrote talent for {len(rows)} teams")
+rp = out_dir / f"{a.year}_returning.json"
+if not rp.exists():
+    r = get(f"https://api.collegefootballdata.com/player/returning?year={a.year}")
+    rows = [[x.get("team"), x.get("percentPPA", x.get("percent_ppa")), x.get("percentPassingPPA", x.get("percent_passing_ppa")),
+             x.get("percentRushingPPA", x.get("percent_rushing_ppa")), x.get("percentReceivingPPA", x.get("percent_receiving_ppa"))] for x in r]
+    rp.write_text(json.dumps({"season": a.year, "returning": rows}, separators=(",", ":")))
+    print(f"{a.year}: wrote returning production for {len(rows)} teams")
