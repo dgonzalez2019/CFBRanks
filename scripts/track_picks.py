@@ -92,14 +92,15 @@ def last_ats(team, week):
     if not prev: return None
     g = max(prev, key=lambda g: g["week"]); sp = line_of.get((g["week"], g["home"], g["away"]))
     if sp is None: return 0.0
-    cover = (g["hp"] - g["ap"]) + sp  # home margin minus expected home margin (-spread)
+    hp, ap = g.get("official") or (g["hp"], g["ap"])  # betting results use the official score (data/overrides.json aside)
+    cover = (hp - ap) + sp  # home margin minus expected home margin (-spread)
     return cover if team == g["home"] else -cover
 
 # Totals: each team's games before a week, with the actual total minus the closing total, and plays per game.
 total_of = {(r[0], r[1], r[2]): r[5] for r in lines if r[5] is not None}
 def ou_form(team, week):
     prev = sorted((g for g in games if g["week"] < week and team in (g["home"], g["away"])), key=lambda g: g["week"])
-    ou = [(g["hp"] + g["ap"]) - total_of[(g["week"], g["home"], g["away"])] for g in prev if (g["week"], g["home"], g["away"]) in total_of]
+    ou = [sum(g.get("official") or (g["hp"], g["ap"])) - total_of[(g["week"], g["home"], g["away"])] for g in prev if (g["week"], g["home"], g["away"]) in total_of]
     plays = [g["box"][4 * s + 1] + g["box"][4 * s + 3] for g in prev if g.get("box") for s in (0 if g["home"] == team else 1,)]
     return (ou[-1] if ou else 0.0), (sum(v > 0 for v in ou) + 1) / (len(ou) + 2), (sum(plays) / len(plays) if plays else PACE_AVG)
 

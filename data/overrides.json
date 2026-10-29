@@ -1,0 +1,8 @@
+{
+ "season": 2026,
+ "about": "Results counted differently from the official score. Applied when games are loaded (site and scripts); betting-line grading in the tracker keeps the official score.",
+ "games": [
+  {"week": 1, "home": "Michigan", "away": "Western Michigan", "home_pts": 7, "away_pts": 12,
+   "note": "Counted as a 12–7 Western Michigan win: Western Michigan had won before Michigan got extra time it should not have had. Official result: Michigan 13–12."}
+ ]
+}

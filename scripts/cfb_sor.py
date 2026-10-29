@@ -45,7 +45,7 @@ Usage
 
   Options: --benchmark 25  --top 25  --team "Miami"  --out results.csv
 """
-import argparse, csv, json, math, os, sys, urllib.request
+import argparse, csv, json, math, os, pathlib, sys, urllib.request
 from collections import defaultdict
 
 import numpy as np
@@ -90,13 +90,28 @@ def load_csv(path):
     return games
 
 
+def apply_overrides(games, path):
+    """Results counted differently from the official score (data/overrides.json next to games.json, same season).
+    Each game keeps its official score in `official` and gets the reason in `note`."""
+    op = pathlib.Path(path).with_name("overrides.json")
+    try:
+        ov = json.loads(op.read_text()); season = json.loads(pathlib.Path(path).read_text()).get("season")
+    except (OSError, ValueError): return games
+    if ov.get("season") != season: return games
+    for o in ov.get("games", []):
+        for g in games:
+            if (g["week"], g["home"], g["away"]) == (o["week"], o["home"], o["away"]):
+                g["official"] = (g["hp"], g["ap"]); g["hp"], g["ap"] = o["home_pts"], o["away_pts"]; g["note"] = o.get("note", "")
+    return games
+
+
 def load_json(path):
     """The site's data/games.json, including box scores when present."""
     games = []
     for r in json.load(open(path))["games"]:
         games.append(dict(week=r[0], home=r[1], away=r[2], hp=r[3], ap=r[4], neutral=bool(r[5]),
                           home_fbs=bool(r[6]), away_fbs=bool(r[7]), box=r[8] if len(r) > 8 else None))
-    return games
+    return apply_overrides(games, path)
 
 
 def load_cfbd(year, key, upcoming=None):

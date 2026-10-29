@@ -881,7 +881,7 @@ function compute(games, benchRank, prior=null){
       const venue = g.neutral?"neutral":side, adj = venue==="home"?hfa:venue==="road"?-hfa:0;
       const pb = wp(bench+adj-R[opp]), won = pf>pa;
       recs[me][won?0:1]++;
-      sched[me].push({week:g.week,opp,oppName:opp===FCS?oppName:opp,venue,pf,pa,won,opp_rank:prank[opp]||null,quad:quad(prank[opp]),pb,value:won?1-pb:-pb,expMargin:R[me]+adj-R[opp]});
+      sched[me].push({note:g.note||null,week:g.week,opp,oppName:opp===FCS?oppName:opp,venue,pf,pa,won,opp_rank:prank[opp]||null,quad:quad(prank[opp]),pb,value:won?1-pb:-pb,expMargin:R[me]+adj-R[opp]});
     });
   });
   const pbAtLeast = (ps,k) => { let d=[1]; ps.forEach(p=>{const nd=new Array(d.length+1).fill(0); d.forEach((v,i)=>{nd[i]+=v*(1-p); nd[i+1]+=v*p}); d=nd;}); return d.slice(k).reduce((a,c)=>a+c,0); };
@@ -1448,7 +1448,7 @@ function renderTeam(name){
         <td class="num">${x.opp_rank?"#"+x.opp_rank:"FCS"}</td>
         <td class="hide-sm sub">${recOf(x.opp)}</td>
         <td><span class="chip ${x.quad}">${x.quad}</span></td>
-        <td class="num">${x.pf}–${x.pa}</td>
+        <td class="num">${x.pf}–${x.pa}${x.note ? ` <span class="tag" title="${esc(x.note)}">adjusted</span>` : ""}</td>
         <td class="num">${Math.round(x.pb*100)}%</td>
         <td>${bar(x.value)} <span class="num ${x.value>=0?"pos":"neg"}" style="margin-left:6px">${x.value>=0?"+":""}${x.value.toFixed(2)}</span></td></tr>`).join("")}
       </tbody></table></div>
@@ -1548,6 +1548,13 @@ async function loadData(){
     const d = await res.json();
     if(!d.games || !d.games.length) return;
     GAMES = d.games.map(a => unpack(a[0], a.slice(1)));
+    // Results counted differently from the official score (data/overrides.json); the official score is kept on the game.
+    try{
+      const or = await fetch("data/overrides.json", {cache:"no-store"});
+      if(or.ok){ const o = await or.json();
+        if(o.season === d.season) (o.games||[]).forEach(x => { const g = GAMES.find(g => g.week===x.week && g.home===x.home && g.away===x.away);
+          if(g){ g.official = [g.hp, g.ap]; g.hp = x.home_pts; g.ap = x.away_pts; g.note = x.note || ""; } }); }
+    }catch(e){}
     SOURCE = {kind:"live", label:`${d.season} season`, updated:d.updated};
     try{
       const lr = await fetch("data/lines.json", {cache:"no-store"});
