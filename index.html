@@ -82,7 +82,8 @@ h1 small{display:block;font:600 10.5px/1.4 var(--body);letter-spacing:.22em;colo
 .dot.live::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--win);animation:ping 1.8s var(--ease) infinite}
 @keyframes ping{to{transform:scale(3);opacity:0}}
 .dot.sample{background:var(--gold)}
-.theme{width:36px;height:36px;border-radius:50%;padding:0;display:grid;place-items:center;font-size:16px;background:var(--card);border:1px solid var(--line)}
+.theme{height:36px;border-radius:999px;padding:0 14px;display:inline-flex;align-items:center;gap:7px;font:500 13px/1 var(--body);background:var(--card);border:1px solid var(--line);white-space:nowrap}
+.theme b{font-size:15px;font-weight:400}
 .theme:hover{border-color:var(--accent)}
 nav{position:relative;display:flex;gap:2px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
 nav::-webkit-scrollbar{display:none}
@@ -304,15 +305,17 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 .pick time{align-self:end;font:600 12px/1.2 var(--mono);color:var(--accent);white-space:nowrap;text-align:right}
 @media (max-width:640px){.pick{grid-template-columns:auto 1fr}.pick time{grid-column:1/-1;justify-self:end}.pconf{min-width:64px}.pconf b{font-size:24px}.ptext{font-size:19px}}
 /* ---------- game cards (Lines tab) ---------- */
-.seg{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);justify-self:start;max-width:100%}
-.seg button{border:0;background:transparent;border-radius:999px;padding:9px 16px;font:700 14px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.seg button:hover{color:var(--ink)}
-.seg button[aria-selected="true"]{color:var(--paper);background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--gold)));box-shadow:0 6px 20px -8px var(--glow)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;width:100%;max-width:560px;border-radius:14px;background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
+.seg button{border:0;background:transparent;border-radius:10px;padding:12px 8px;font:600 15px/1.1 var(--body);color:var(--muted);white-space:nowrap;transition:background .2s,color .2s}
+.seg button:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.seg button[aria-selected="true"]{color:var(--paper);background:var(--accent);box-shadow:0 4px 14px -6px var(--glow)}
 :root[data-theme="light"] .seg button[aria-selected="true"]{color:#fff}
-.seg.sm{background:transparent;border:0;padding:0;gap:6px;align-items:center;flex-wrap:wrap;-webkit-backdrop-filter:none;backdrop-filter:none;margin-top:-4px}
-.seg.sm .seglabel{font:600 10.5px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px}
-.seg.sm button{padding:7px 12px;font:600 12.5px/1 var(--body);letter-spacing:0;text-transform:none;border:1px solid var(--line)}
-.seg.sm button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:none}
+.seg.sm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:auto;max-width:none;background:transparent;border:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.seg.sm .seglabel{font:500 13px/1 var(--body);color:var(--muted)}
+.seg.sm button{flex:none;padding:8px 14px;border-radius:999px;font:500 13.5px/1 var(--body);border:1px solid var(--line);background:var(--card)}
+.seg.sm button i{font-style:normal;color:var(--muted);margin-left:5px}
+.seg.sm button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent);box-shadow:none}
+.seg.sm button[aria-selected="true"] i{color:var(--accent)}
 :root[data-theme="light"] .seg.sm button[aria-selected="true"]{color:var(--accent)}
 .gcards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,480px),1fr))}
 .gcard{position:relative;display:grid;gap:14px;padding:16px 16px 12px;border-radius:18px;background:var(--card);border:1px solid var(--line);
@@ -346,7 +349,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
   .pcard .sc{font-size:34px}
   .pcard:not(.p1) .bars{display:none}
 }
-@media (max-width:640px){.hide-sm{display:none}.show-sm{display:block}h1{font-size:23px}h1 small{display:none}.logo{width:32px;height:32px}
+@media (max-width:640px){.hide-sm{display:none}.show-sm{display:block}.theme{padding:0;width:36px;justify-content:center}h1{font-size:23px}h1 small{display:none}.logo{width:32px;height:32px}
   .status{font-size:11.5px}
   .top th,.top td{padding-left:6px;padding-right:6px}
   .top tr>:first-child,.top tr>:nth-child(2){position:sticky;z-index:1;background:var(--solid)}
@@ -378,7 +381,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
       </a>
       <div class="hright">
         <div class="status" id="status"><i class="dot"></i> Loading…</div>
-        <button class="theme" id="theme" type="button" aria-label="Switch between night and day themes" title="Night / day">☾</button>
+        <button class="theme" id="theme" type="button" aria-label="Switch between night and day themes" >☀</button>
       </div>
     </div>
     <nav aria-label="Sections">
@@ -907,7 +910,8 @@ function moveInd(){
 }
 addEventListener("resize", moveInd); document.fonts?.ready.then(moveInd);
 function setThemeIcon(){ const light = document.documentElement.dataset.theme === "light";
-  $("#theme").textContent = light ? "☀" : "☾"; document.querySelector('meta[name="theme-color"]').content = light ? "#e9eef4" : "#05070b"; }
+  $("#theme").innerHTML = light ? `<b aria-hidden="true">☾</b><span class="hide-sm">Dark mode</span>` : `<b aria-hidden="true">☀</b><span class="hide-sm">Light mode</span>`;
+  $("#theme").setAttribute("aria-label", light ? "Switch to dark mode" : "Switch to light mode"); document.querySelector('meta[name="theme-color"]').content = light ? "#e9eef4" : "#05070b"; }
 $("#theme").addEventListener("click", () => { const r = document.documentElement;
   if(r.dataset.theme === "light") delete r.dataset.theme; else r.dataset.theme = "light";
   store.set("sor.theme", r.dataset.theme || ""); setThemeIcon(); });
@@ -1082,7 +1086,7 @@ const gameWhen = s => { if(!s) return "Date TBA"; const d = new Date(s), et = {t
   return `${gameDay(s)} · ${/^(00|24):00$/.test(mid) ? "Time TBA" : t + " ET"}`; };
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 // Lines tab switch: Top picks (the summary, default) | Spreads | Totals.
-const lineSeg = () => `<div class="seg" role="tablist" aria-label="Top picks, spreads or totals">${[["picks","Top picks"],["spread","Spreads"],["total","Totals"]].map(([k,n]) =>
+const lineSeg = () => `<div class="seg" role="tablist" aria-label="Top picks, spreads or totals">${[["picks","Top picks"],["spread","Spreads"],["total","Totals (O/U)"]].map(([k,n]) =>
   `<button type="button" role="tab" data-lm="${k}" aria-selected="${LMODE===k}">${n}</button>`).join("")}</div>`;
 const bindLineSeg = () => $("#lout").querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { LMODE = b.dataset.lm; store.set("sor.lmode", LMODE); renderLines(); }));
 function renderLines(){
@@ -1225,7 +1229,7 @@ function renderPicks(){
   const shown = keep.filter(p => PMODE === "all" || p.kind === PMODE);
   const nS = keep.filter(p => p.kind === "spread").length, nT = keep.length - nS;
   const card = pickCard;
-  const seg = `<div class="seg sm" role="tablist" aria-label="Which picks"><span class="seglabel">Show</span>${[["all",`All ${keep.length}`],["spread",`Spread picks ${nS}`],["total",`Total picks ${nT}`]].map(([k,n]) =>
+  const seg = `<div class="seg sm" role="tablist" aria-label="Which picks"><span class="seglabel">Show</span>${[["all",`All<i>${keep.length}</i>`],["spread",`Spreads<i>${nS}</i>`],["total",`Totals<i>${nT}</i>`]].map(([k,n]) =>
     `<button type="button" role="tab" data-pm="${k}" aria-selected="${PMODE===k}">${n}</button>`).join("")}</div>`;
   $("#ltitle").textContent = "This week's top confidence picks";
   $("#lout").innerHTML = lineSeg() + seg +
