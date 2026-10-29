@@ -24,6 +24,7 @@ def total_x(g):
     pace = ((g["pace_h"] or 0) + (g["pace_a"] or 0) - 140) / 20 if g["pace_h"] and g["pace_a"] else 0
     return [1, et / 10, en / 10, pace, g["week"] / 10, (g["total"] - 55) / 10]
 
+SUMMARY = {}
 def run(name, xf, target, valid):
     rows = [g for g in G if valid(g)]
     def XY(ss):
@@ -43,6 +44,8 @@ def run(name, xf, target, valid):
         top = np.argsort(-conf)[:max(1, len(conf) // 10)]
         print(f"     top 10% most confident: {hit[top].mean():.1%} of {len(top)}  (avg confidence {conf[top].mean():.1%})")
         out[tuple(ss)] = (p, y, r)
+        SUMMARY.setdefault(name.split()[0].lower(), {})["+".join(map(str, ss))] = dict(
+            all=[int(hit.sum()), int((~hit).sum())], top10=[int(hit[top].sum()), int(len(top) - hit[top].sum())])
     return b, out
 
 run("SPREAD (home covers)", spread_x, lambda g: float(g["act"] > g["mkt"]), lambda g: g["act"] != g["mkt"])
@@ -59,3 +62,5 @@ for name, f in [("our total above line by 5+ -> over", lambda g: 1 if g["tot_pri
         r = [(s, g) for s, g in r if s is not None]; w = sum((g["act_total"] > g["total"]) == bool(s) for s, g in r)
         cells.append(f"{w}-{len(r)-w} {w/max(1,len(r)):.0%}")
     print(f"  {name:<36} " + " | ".join(cells))
+
+json.dump(SUMMARY, open(f"{W}/picks_summary.json", "w"))

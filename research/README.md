@@ -9,7 +9,13 @@ W=/tmp/cfb-work; mkdir -p $W
 python research/predictions.py research $W/preds.json   # our week-by-week predictions, 2022-26 (uses tune.py)
 python research/vs_market.py $W .                         # vs. betting lines -> $W/joined.json
 python research/qb_injuries.py $W .                      # games a starting QB missed -> $W/qb_first_missed.json
+python research/picks_features.py research $W .           # pre-game features for spread / total picks -> $W/picks.json
+python research/picks_model.py $W .                       # picks trained on 2022-24, tested on 2025-26
+python research/qb_rule.py $W .                           # QB-out betting rule with the starter named pre-game
 python research/summary.py $W .                          # -> data/research.json (shown on the Lines tab)
 ```
 
 `tune.py` also holds the backtest harness used to choose the prior, margin cap and efficiency weight.
+
+`data/history/2026_qb.json` is this season's passers through the week it was fetched (extras-only run), kept so
+the QB rule's 2026 test can be reproduced; it does not update.
