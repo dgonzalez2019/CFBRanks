@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Pull completed FBS games from collegefootballdata.com into data/games.json, plus each game's
 passing and rushing box score where available.
-Usage: CFBD_API_KEY=... python scripts/fetch_games.py [--year 2026] [--out data/games.json]"""
+Usage: CFBD_API_KEY=... python scripts/fetch_games.py [--year 2026] [--out data/games.json] [--lines data/lines.json]"""
 import argparse, json, os, sys, datetime, pathlib, urllib.request
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from cfb_sor import load_cfbd
 
 ap = argparse.ArgumentParser(); ap.add_argument("--year", type=int, default=datetime.date.today().year)
 ap.add_argument("--out", help="output file (default: data/games.json)")
+ap.add_argument("--lines", help="also write betting lines for the season's games (played and upcoming) here")
 a = ap.parse_args()
 key = os.environ.get("CFBD_API_KEY") or sys.exit("CFBD_API_KEY is not set")
-games = load_cfbd(a.year, key)
+upcoming = []
+games = load_cfbd(a.year, key, upcoming)
 if not games: sys.exit("No completed games returned; leaving data/games.json unchanged.")
 path = pathlib.Path(a.out) if a.out else pathlib.Path(__file__).resolve().parent.parent / "data" / "games.json"
 path.parent.mkdir(parents=True, exist_ok=True)
@@ -80,3 +82,38 @@ for g in games:
 out = {"season": a.year, "updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "games": rows}
 path.write_text(json.dumps(out, separators=(",", ":")))
 print(f"Wrote {len(rows)} games ({sum(len(r) > 8 for r in rows)} with box scores) to {path}")
+
+
+# Betting lines: one /lines call per season type covers every game. Spreads use the API's convention
+# (home team's spread, negative = home favored); we store the median across sportsbooks.
+if a.lines:
+    def median(xs):
+        xs = sorted(xs); n = len(xs)
+        return None if not n else xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) / 2
+    def num_or_none(v):
+        try: return float(v)
+        except (TypeError, ValueError): return None
+    info = {key_of(g["week"], g["home"], g["away"]): g for g in games + upcoming}
+    seasons = ["regular"] + (["postseason"] if any(g["week"] > 20 for g in games + upcoming) else [])
+    out_lines = []
+    for seas in seasons:
+        try:
+            L = get(f"https://api.collegefootballdata.com/lines?year={a.year}&seasonType={seas}")
+        except Exception as e:
+            print(f"Lines ({seas}) unavailable: {e}"); continue
+        for item in L:
+            wk = item.get("week", 0) + (20 if seas == "postseason" else 0)
+            h = item.get("homeTeam", item.get("home_team")); aw = item.get("awayTeam", item.get("away_team"))
+            g = info.get(key_of(wk, h, aw))
+            if not g: continue
+            books = item.get("lines") or []
+            spread = median([x for x in (num_or_none(b.get("spread")) for b in books) if x is not None])
+            total = median([x for x in (num_or_none(b.get("overUnder", b.get("over_under"))) for b in books) if x is not None])
+            if spread is None: continue
+            out_lines.append([wk, h, aw, int(g["neutral"]), spread, total, g.get("hp"), g.get("ap"),
+                              g.get("start"), sorted({b.get("provider") for b in books if b.get("provider")})])
+        print(f"Lines ({seas}): {len(L)} games returned, {len(out_lines)} matched so far")
+        if L and not out_lines: print("  First line item, for debugging:", json.dumps(L[0])[:600])
+    lp = pathlib.Path(a.lines); lp.parent.mkdir(parents=True, exist_ok=True)
+    lp.write_text(json.dumps({"season": a.year, "updated": out["updated"], "games": out_lines}, separators=(",", ":")))
+    print(f"Wrote {len(out_lines)} lines ({sum(r[6] is None for r in out_lines)} upcoming) to {lp}")

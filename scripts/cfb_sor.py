@@ -103,7 +103,8 @@ def load_json(path):
     return games
 
 
-def load_cfbd(year, key):
+def load_cfbd(year, key, upcoming=None):
+    """Completed games involving an FBS team. Pass a list as `upcoming` to also collect unplayed ones."""
     def get(url):
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {key}"})
         with urllib.request.urlopen(req, timeout=30) as r:
@@ -115,11 +116,16 @@ def load_cfbd(year, key):
             # API field names have used both camelCase and snake_case over time
             hp = g.get("homePoints", g.get("home_points"))
             ap = g.get("awayPoints", g.get("away_points"))
-            if hp is None or ap is None:
-                continue
             h = g.get("homeTeam", g.get("home_team")); a = g.get("awayTeam", g.get("away_team"))
             if h not in fbs and a not in fbs:
                 continue  # no FBS team involved
+            if hp is None or ap is None:
+                if upcoming is not None:
+                    upcoming.append(dict(week=g.get("week", 0) + (20 if seas == "postseason" else 0), home=h, away=a,
+                                         neutral=bool(g.get("neutralSite", g.get("neutral_site"))),
+                                         home_fbs=h in fbs, away_fbs=a in fbs,
+                                         start=g.get("startDate", g.get("start_date"))))
+                continue
             games.append(dict(week=g.get("week", 0) + (20 if seas == "postseason" else 0),
                               home=h, away=a, hp=hp, ap=ap,
                               neutral=bool(g.get("neutralSite", g.get("neutral_site"))),
