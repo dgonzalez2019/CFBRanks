@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f2ea">
-<script>(()=>{let t=null;try{t=localStorage.getItem("sor.theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"||t==="light"?t:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")})()</script>
+<script>(()=>{const R=document.documentElement,still=matchMedia("(prefers-reduced-motion: reduce)").matches;if(!still)R.classList.add("fx");try{const d=new Date().toDateString();if(!still&&localStorage.getItem("sor.intro")!==d){R.classList.add("intro");localStorage.setItem("sor.intro",d)}}catch(e){}})();
+(()=>{let t=null;try{t=localStorage.getItem("sor.theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"||t==="light"?t:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")})()</script>
 <title>CFB Power Rankings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap">
@@ -38,7 +39,7 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;overflow-x:clip}
-body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);font-variant-numeric:tabular-nums;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 ::selection{background:var(--accent);color:var(--accent-ink)}
 .stage{display:none}
 
@@ -170,7 +171,7 @@ tr:nth-child(1)>.rk.medal{color:var(--gold)} tr:nth-child(2)>.rk.medal{color:var
 .podium{display:grid;grid-template-columns:1fr 1.18fr 1fr;align-items:end;gap:14px;perspective:1200px}
 .pcard{position:relative;display:grid;gap:10px;padding:22px 20px 20px;border-radius:16px;cursor:pointer;text-align:left;overflow:hidden;
   background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);box-shadow:var(--shadow);
-  transform-style:preserve-3d;transition:transform .5s var(--spring),box-shadow .4s;animation:pop 1s var(--ease) both;animation-delay:var(--dl)}
+  transform-style:preserve-3d;transition:transform .5s var(--spring),box-shadow .4s;animation:pop 1s var(--ease) backwards;animation-delay:var(--dl)}
 .pcard:hover{box-shadow:var(--shadow-lg)}
 .pcard.p1{--c:var(--gold);min-height:268px;--dl:.3s;padding-top:34px;background:linear-gradient(180deg,var(--gold-soft),var(--card) 60%)}
 .pcard.p2{--c:var(--silver);min-height:226px;--dl:.45s} .pcard.p3{--c:var(--bronze);min-height:206px;--dl:.6s}
@@ -342,12 +343,81 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;backgrou
   .method{padding:20px 18px}
 }
 @media (prefers-reduced-motion:reduce){
+  #intro{display:none!important}
   *,*::before,*::after{animation:none!important;transition:none!important}
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
   html{scroll-behavior:auto}
   .hero-art path,.hero-art line,.hero-art rect{stroke-dashoffset:0}
   .hero-art text{opacity:1}
 }
+/* ---------- kickoff intro (first visit of the day) ---------- */
+#intro{display:none;position:fixed;inset:0;z-index:100;background:var(--paper);place-items:center;align-content:center;gap:14px;cursor:pointer;text-align:center;padding:24px}
+html.intro #intro{display:grid}
+html.intro body{overflow:hidden}
+.intro-field{width:min(720px,94vw);color:var(--accent);transform:perspective(900px) rotateX(52deg);margin-bottom:-40px}
+.intro-field rect,.intro-field line{fill:none;stroke:currentColor;stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .9s var(--ease) both;animation-delay:calc(var(--d) * 55ms + .1s)}
+.intro-field text{fill:currentColor;font:600 16px var(--display);opacity:0;animation:fadeIn .6s ease both;animation-delay:calc(var(--d) * 55ms + .6s)}
+.intro-title{font:700 clamp(38px,7.5vw,76px)/1 var(--display);letter-spacing:-.025em;animation:introRise .9s var(--spring) .55s both}
+.intro-title em{color:var(--accent);font-weight:500}
+.intro-sub{font:500 15px/1 var(--body);color:var(--muted);animation:introRise .8s var(--ease) .85s both}
+@keyframes introRise{from{opacity:0;transform:translateY(26px) scale(.96)}}
+
+/* ---------- split-flap scoreboard digits ---------- */
+.score .side b{perspective:500px;display:flex;justify-content:center;gap:5px}
+.fd{font-style:normal;display:inline-block;position:relative;min-width:.62em;padding:.04em .06em;border-radius:8px;background:rgba(0,0,0,.22);box-shadow:inset 0 -2px 0 rgba(0,0,0,.18);transform-origin:50% 50%;backface-visibility:hidden}
+.fd::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(0,0,0,.28)}
+
+/* ---------- pick cards: the bet flips down as the card comes into view, then the ring fills ---------- */
+html.fx .pick .pbet{transform-origin:50% 0;transform:perspective(700px) rotateX(-92deg);opacity:0}
+html.fx .pick.in .pbet{animation:flipDown .8s var(--spring) both;animation-delay:calc(var(--i,0) % 6 * 60ms)}
+html.fx .picks.flip .pick .pbet{transform:none;opacity:1;animation:none}
+@keyframes flipDown{0%{transform:perspective(700px) rotateX(-92deg);opacity:0}35%{opacity:1}100%{transform:perspective(700px) rotateX(0);opacity:1}}
+html.fx .pick .ring{animation-play-state:paused}
+html.fx .pick.in .ring{animation-play-state:running;animation-delay:calc(var(--i,0) % 6 * 60ms + .55s)}
+html.fx .picks.flip .pick .ring{animation:none}
+
+/* ---------- scroll-driven depth on the home page ---------- */
+@supports (animation-timeline: scroll()){
+  html.fx .hero-art{animation:fieldScroll linear both;animation-timeline:scroll(root);animation-range:0 760px}
+  html.fx .mega{animation:paraSlow linear both;animation-timeline:scroll(root);animation-range:0 600px}
+  html.fx .lede{animation:viewIn .8s var(--ease) .5s both,paraMid linear both;animation-timeline:auto,scroll(root);animation-range:normal,0 600px}
+  html.fx .pcard{animation:pop 1s var(--ease) backwards,paraCard linear both;animation-delay:var(--dl),0s;animation-timeline:auto,scroll(root);animation-range:normal,0 700px}
+}
+@keyframes fieldScroll{to{transform:perspective(900px) rotateX(72deg) rotateZ(-18deg) scale(1.5);translate:-60px 260px;opacity:0}}
+@keyframes paraSlow{to{translate:0 90px;opacity:.35}}
+@keyframes paraMid{to{translate:0 50px}}
+@keyframes paraCard{to{translate:0 var(--pv,-30px)}}
+.pcard.p1{--pv:-70px} .pcard.p2{--pv:-36px} .pcard.p3{--pv:-14px}
+
+/* ---------- team-color wash on hover / tap ---------- */
+tbody tr.click{transition:background .35s,box-shadow .35s}
+tbody tr.click.tc{background:color-mix(in srgb,var(--tc) 13%,transparent);box-shadow:inset 4px 0 0 var(--tc)}
+tbody tr.click.tc .tm{color:color-mix(in srgb,var(--tc) 75%,var(--ink))}
+.pcard{background-image:radial-gradient(600px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--tc,transparent) 0%,transparent),transparent 60%)}
+.pcard.tc{background-image:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--tc) 22%,transparent),transparent 70%)}
+.pick{background-image:linear-gradient(120deg,color-mix(in srgb,var(--tc,transparent) 0%,transparent),transparent)}
+.pick.tc{background-image:linear-gradient(120deg,color-mix(in srgb,var(--tc) 16%,transparent),transparent 55%);border-color:color-mix(in srgb,var(--tc) 45%,var(--line))}
+.pteam{cursor:default;border-radius:8px;transition:color .3s}
+.pteam.tcs{color:color-mix(in srgb,var(--tc) 80%,var(--ink))}
+.teamhead{position:relative;padding:18px 20px;border-radius:16px;background:linear-gradient(110deg,color-mix(in srgb,var(--tc,var(--accent)) 20%,transparent),transparent 70%);overflow:hidden}
+.teamhead::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.25) 45%,transparent 60%);transform:translateX(-100%);animation:sweep 1.4s var(--ease) .3s both;pointer-events:none}
+@keyframes sweep{to{transform:translateX(100%)}}
+
+/* ---------- rank movement ---------- */
+.mv{display:inline-block;margin-left:5px;font:700 11px/1 var(--body);letter-spacing:-.01em;vertical-align:3px}
+.mv.up{color:var(--win)} .mv.down{color:var(--loss)}
+tr.moved-up{animation:moveFlash 1.6s ease .9s both} tr.moved-down{animation:moveFlashD 1.6s ease .9s both}
+@keyframes moveFlash{30%{background:color-mix(in srgb,var(--win) 14%,transparent)}}
+@keyframes moveFlashD{30%{background:color-mix(in srgb,var(--loss) 11%,transparent)}}
+
+/* ---------- recent results + confetti ---------- */
+.results{display:flex;flex-wrap:wrap;gap:8px}
+.res{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:999px;font:600 13.5px/1 var(--body);border:1px solid var(--line2);background:var(--card)}
+.res i{font-style:normal;font-weight:800}
+.res.hit{border-color:color-mix(in srgb,var(--win) 50%,var(--line));background:var(--win-soft);color:var(--win)}
+.res.miss{color:var(--muted)} .res.miss i{color:var(--loss)}
+.res span{color:var(--muted);font-weight:500}
+.confetti{position:fixed;z-index:90;width:8px;height:12px;border-radius:2px;pointer-events:none;will-change:transform,opacity}
 /* Numbers and bets in the bold sans: the serif's old-style digits drop below the line in scores and spreads. */
 .ptext,.pcard .sc,.stat b,.tile b,.score .side b,.conf,.rk{font-family:var(--body);font-variant-numeric:lining-nums tabular-nums;letter-spacing:-.02em}
 .ptext{font-weight:800;font-size:30px}
@@ -360,6 +430,8 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;backgrou
 
 </head>
 <body>
+<div id="intro" aria-hidden="true"><svg class="intro-field" viewBox="0 0 600 300"><rect x="20" y="20" width="560" height="260" rx="6" pathLength="1" style="--d:0"/><line x1="70" y1="20" x2="70" y2="280" pathLength="1" style="--d:0"/><line x1="116" y1="20" x2="116" y2="280" pathLength="1" style="--d:1"/><line x1="162" y1="20" x2="162" y2="280" pathLength="1" style="--d:2"/><line x1="208" y1="20" x2="208" y2="280" pathLength="1" style="--d:3"/><line x1="254" y1="20" x2="254" y2="280" pathLength="1" style="--d:4"/><line x1="300" y1="20" x2="300" y2="280" pathLength="1" style="--d:5"/><line x1="346" y1="20" x2="346" y2="280" pathLength="1" style="--d:6"/><line x1="392" y1="20" x2="392" y2="280" pathLength="1" style="--d:7"/><line x1="438" y1="20" x2="438" y2="280" pathLength="1" style="--d:8"/><line x1="484" y1="20" x2="484" y2="280" pathLength="1" style="--d:9"/><line x1="530" y1="20" x2="530" y2="280" pathLength="1" style="--d:10"/><text x="116" y="66" text-anchor="middle" style="--d:1">10</text><text x="116" y="246" text-anchor="middle" style="--d:1">10</text><text x="162" y="66" text-anchor="middle" style="--d:2">20</text><text x="162" y="246" text-anchor="middle" style="--d:2">20</text><text x="208" y="66" text-anchor="middle" style="--d:3">30</text><text x="208" y="246" text-anchor="middle" style="--d:3">30</text><text x="254" y="66" text-anchor="middle" style="--d:4">40</text><text x="254" y="246" text-anchor="middle" style="--d:4">40</text><text x="300" y="66" text-anchor="middle" style="--d:5">50</text><text x="300" y="246" text-anchor="middle" style="--d:5">50</text><text x="346" y="66" text-anchor="middle" style="--d:6">40</text><text x="346" y="246" text-anchor="middle" style="--d:6">40</text><text x="392" y="66" text-anchor="middle" style="--d:7">30</text><text x="392" y="246" text-anchor="middle" style="--d:7">30</text><text x="438" y="66" text-anchor="middle" style="--d:8">20</text><text x="438" y="246" text-anchor="middle" style="--d:8">20</text><text x="484" y="66" text-anchor="middle" style="--d:9">10</text><text x="484" y="246" text-anchor="middle" style="--d:9">10</text></svg>
+  <div class="intro-title">CFB <em>Power</em> Rankings</div><div class="intro-sub">Every FBS team, every week</div></div>
 <header>
   <div class="wrap">
     <div class="head">
@@ -887,11 +959,30 @@ function countUp(el){
     el.textContent = (from + (to-from)*e).toFixed(dec); if(k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
+// Split-flap digits: each changed digit folds away and the new one drops in, left to right.
+const FLIPPED = {};
+function flipBoard(el){
+  const to = el.dataset.flip, key = el.dataset.key, from = FLIPPED[key] ?? ""; FLIPPED[key] = to;
+  const w = Math.max(to.length, from.length), T = to.padStart(w, " "), F = from.padStart(w, " ");
+  el.innerHTML = [...T].map(c => `<i class="fd">${c.trim() ? c : ""}</i>`).join("");
+  [...el.children].forEach((d, i) => { if(!T[i].trim()){ d.remove(); return; }
+    if(REDUCED || (from && F[i] === T[i])) return;
+    d.textContent = F[i].trim() || "0";
+    d.animate([{transform:"rotateX(0)"}, {transform:"rotateX(-90deg)"}], {duration:170, delay:i*110, easing:"ease-in", fill:"forwards"}).onfinish = () => {
+      d.textContent = T[i];
+      d.animate([{transform:"rotateX(90deg)"}, {transform:"rotateX(0)"}], {duration:420, easing:"cubic-bezier(.3,1.5,.5,1)", fill:"forwards"}); };
+  });
+}
+// Pick cards flip their bet in once they scroll into view.
+const pickIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); pickIO.unobserve(e.target); } }), {rootMargin:"0px 0px -8% 0px"}) : null;
 // New content: stagger table rows and tiles, start count-ups.
 new MutationObserver(() => {
   document.querySelectorAll("main tbody").forEach(tb => [...tb.rows].forEach((r,i) => r.style.getPropertyValue("--i") || r.style.setProperty("--i", i)));
   document.querySelectorAll("main .tiles").forEach(t => [...t.children].forEach((c,i) => c.style.setProperty("--i", i)));
   document.querySelectorAll("main [data-count]:not([data-done])").forEach(el => { el.dataset.done = 1; countUp(el); });
+  document.querySelectorAll("main [data-flip]:not([data-done])").forEach(el => { el.dataset.done = 1; flipBoard(el); });
+  document.querySelectorAll("main .pick:not([data-seen])").forEach(el => { el.dataset.seen = 1; pickIO ? pickIO.observe(el) : el.classList.add("in"); });
+  document.querySelectorAll("main .res.hit:not([data-seen])").forEach(el => { el.dataset.seen = 1; cheerIO?.observe(el); });
 }).observe(document.querySelector("main"), {childList:true, subtree:true});
 function moveInd(){
   const a = document.querySelector('nav a[aria-current="page"]'), ind = document.querySelector("nav .ind");
@@ -918,7 +1009,6 @@ setThemeIcon();
 // Podium cards open the team page; on mouse devices panels get a cursor spotlight and podium cards tilt.
 const openCard = e => { const c = e.target.closest(".pcard"); if(c && (e.type === "click" || e.key === "Enter")) openTeam(c.dataset.team); };
 document.addEventListener("click", openCard); document.addEventListener("keydown", openCard);
-document.addEventListener("animationend", e => { if(e.target.classList?.contains("pcard") && e.animationName === "pop") e.target.style.animation = "none"; });
 if(HOVER && !REDUCED){
   document.addEventListener("pointermove", e => {
     const p = e.target.closest?.(".panel"); if(p){ const b = p.getBoundingClientRect(); p.style.setProperty("--mx", (e.clientX-b.left)+"px"); p.style.setProperty("--my", (e.clientY-b.top)+"px"); }
@@ -928,11 +1018,72 @@ if(HOVER && !REDUCED){
   document.addEventListener("pointerout", e => { const c = e.target.closest?.(".pcard"); if(c && !c.contains(e.relatedTarget)) c.style.transform = ""; });
 }
 
+// Team colors: the API's primary color, or a hue from the name when it has none.
+function teamColor(t){ const c = TEAMS[t]?.color; if(c && /^#[0-9a-f]{6}$/i.test(c) && !/^#(000000|ffffff)$/i.test(c)) return c;
+  let h = 0; for(const ch of String(t)) h = (h*31 + ch.charCodeAt(0)) % 360; return `hsl(${h} 45% 42%)`; }
+// Hovering (or tapping) a team row, podium card or team name washes it in that team's color.
+const washOff = el => { el.classList.remove("tc"); };
+document.addEventListener("pointerover", e => {
+  const t = e.target.closest?.(".pteam[data-team]");
+  if(t){ const card = t.closest(".pick"); t.style.setProperty("--tc", teamColor(t.dataset.team)); t.classList.add("tcs");
+    if(card){ card.style.setProperty("--tc", teamColor(t.dataset.team)); card.classList.add("tc"); } }
+  const r = e.target.closest?.("tr.click[data-team], .pcard[data-team]");
+  if(r){ r.style.setProperty("--tc", teamColor(r.dataset.team)); r.classList.add("tc"); }
+});
+document.addEventListener("pointerout", e => {
+  const t = e.target.closest?.(".pteam[data-team]");
+  if(t && !t.contains(e.relatedTarget)){ t.classList.remove("tcs"); const card = t.closest(".pick"); if(card && !card.querySelector(".pteam:hover")) washOff(card); }
+  const r = e.target.closest?.("tr.click[data-team], .pcard[data-team]");
+  if(r && !r.contains(e.relatedTarget)) washOff(r);
+});
+// Confetti: a short burst from the middle of an element, in the accent, gold and win colors.
+function burst(el, colors){
+  if(REDUCED) return; const b = el.getBoundingClientRect(), x = b.left + b.width/2, y = b.top + b.height/2;
+  const cs = getComputedStyle(document.documentElement), pal = colors || ["--accent","--gold","--win"].map(v => cs.getPropertyValue(v).trim());
+  for(let i = 0; i < 26; i++){
+    const c = document.createElement("i"); c.className = "confetti"; c.style.left = x+"px"; c.style.top = y+"px"; c.style.background = pal[i % pal.length];
+    document.body.appendChild(c);
+    const a = Math.random()*Math.PI*2, v = 60 + Math.random()*110, dx = Math.cos(a)*v, dy = Math.sin(a)*v - 70, r = (Math.random()-.5)*720;
+    c.animate([{transform:"translate(-50%,-50%) rotate(0)", opacity:1}, {transform:`translate(${dx}px,${dy}px) rotate(${r/2}deg)`, opacity:1, offset:.55},
+               {transform:`translate(${dx*1.15}px,${dy+130}px) rotate(${r}deg)`, opacity:0}], {duration:1100 + Math.random()*600, easing:"cubic-bezier(.15,.7,.3,1)"}).onfinish = () => c.remove();
+  }
+}
+// Each pick that hit gets one burst, the first time it is seen.
+let CHEERED = new Set(); try{ CHEERED = new Set(JSON.parse(store.get("sor.cheered") || "[]")); }catch(e){}
+const cheerIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach((e, i) => { if(!e.isIntersecting) return; cheerIO.unobserve(e.target);
+  const k = e.target.dataset.k; if(CHEERED.has(k)) return; CHEERED.add(k); store.set("sor.cheered", JSON.stringify([...CHEERED].slice(-400)));
+  setTimeout(() => burst(e.target, [teamColor(e.target.dataset.team || ""), getComputedStyle(document.documentElement).getPropertyValue("--gold").trim(), getComputedStyle(document.documentElement).getPropertyValue("--win").trim()]), 250 + i*160); }), {threshold:.8}) : null;
+// Rank movement since the previous data update. The last two updates' ranks are kept in this browser; when a new
+// update is seen, rows start at their old spots and slide to the new ones, and ▲/▼ show the change.
+function rankMoves(){
+  if(SOURCE.kind !== "live") return {moves:{}, fresh:false};
+  let st = {}; try{ st = JSON.parse(store.get("sor.ranks") || "{}"); }catch(e){}
+  const cur = Object.fromEntries(RESULT.rows.map(r => [r.team, r.rank])); let fresh = false;
+  if(st.cur?.updated !== SOURCE.updated){ if(st.cur) st.prev = st.cur; st.cur = {updated:SOURCE.updated, ranks:cur}; store.set("sor.ranks", JSON.stringify(st)); fresh = !!st.prev; }
+  const prev = st.prev?.ranks || {}, moves = {};
+  RESULT.rows.forEach(r => { if(prev[r.team] != null) moves[r.team] = prev[r.team] - r.rank; });
+  return {moves, fresh};
+}
+// Kickoff intro: the field draws, the title rises, then the whole card shrinks into the header logo.
+(function intro(){
+  const R = document.documentElement, el = $("#intro"); if(!R.classList.contains("intro") || !el) return;
+  let done = false;
+  const out = () => { if(done) return; done = true;
+    const lg = document.querySelector(".logo").getBoundingClientRect(), x = lg.left + lg.width/2, y = lg.top + lg.height/2;
+    el.animate([{clipPath:`circle(150% at ${x}px ${y}px)`}, {clipPath:`circle(0px at ${x}px ${y}px)`}], {duration:850, easing:"cubic-bezier(.65,0,.35,1)", fill:"forwards"})
+      .onfinish = () => { R.classList.remove("intro"); el.remove(); };
+    el.querySelector(".intro-field").animate([{transform:"perspective(900px) rotateX(52deg) scale(1)"}, {transform:"perspective(900px) rotateX(70deg) scale(1.6)", opacity:0}], {duration:850, easing:"ease-in", fill:"forwards"});
+  };
+  el.addEventListener("click", out); setTimeout(out, 2300);
+})();
+
 function renderTop(){
   const rows = SHOWALL ? RESULT.rows : RESULT.rows.slice(0,25);
   $("#t25title").textContent = SHOWALL ? "All FBS Power Rankings" : "Top 25 Power Rankings";
-  $("#t25").innerHTML = rows.map(r => `<tr class="click" data-team="${esc(r.team)}" tabindex="0">
-    <td class="rk medal">${r.rank}</td>
+  const {moves, fresh} = rankMoves();
+  const mv = t => { const d = moves[t]; return !d ? "" : `<span class="mv ${d > 0 ? "up" : "down"}" title="${d > 0 ? "Up" : "Down"} ${Math.abs(d)} since the last update">${d > 0 ? "▲" : "▼"}${Math.abs(d)}</span>`; };
+  $("#t25").innerHTML = rows.map(r => `<tr class="click${fresh && moves[r.team] ? (moves[r.team] > 0 ? " moved-up" : " moved-down") : ""}" data-team="${esc(r.team)}" tabindex="0">
+    <td class="rk medal">${r.rank}${mv(r.team)}</td>
     <td>${mono(r.team)}<span class="tm">${esc(r.team)}</span><span class="rec">${r.w}-${r.l}</span></td>
     <td class="num meter" style="--w:${Math.max(4, 100*r.score/Math.max(1e-9, RESULT.rows[0].score)).toFixed(0)}px">${r.score.toFixed(1)}</td>
     <td class="num">${r.power}</td>
@@ -940,6 +1091,9 @@ function renderTop(){
     ${["Q1","Q2","Q3","Q4"].map(k=>`<td><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
     <td class="hide-sm">${gameStr(r.W[0])}</td>
     <td class="hide-sm">${gameStr(r.L[0])}</td></tr>`).join("");
+  if(fresh && !REDUCED){ const h = $("#t25").rows[0]?.getBoundingClientRect().height || 50;
+    [...$("#t25").rows].forEach((tr, i) => { const d = moves[tr.dataset.team]; if(!d) return;
+      tr.animate([{transform:`translateY(${d*h}px)`, zIndex:2}, {transform:"none", zIndex:2}], {duration:1100, delay:500 + Math.min(i,25)*25, easing:"cubic-bezier(.3,1.2,.4,1)", fill:"backwards"}); }); }
   renderHero();
   $("#hfaNote").innerHTML = `Score = power rating + résumé. Power is the Matchup model's rating: how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
@@ -1026,7 +1180,7 @@ function renderMatchup(force){
       <p class="sub" style="margin:6px 0 0">Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse. The score above is our model's, for comparison and for games without a line. Injuries on the public report are assumed to be in the line already; only your changes to the report move it.</p></div>`;
   }
   const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
-  const side = (t, s, r, win) => `<div class="side${win?" win":""}">${mono(t)}<b data-count="${s}" data-key="m${t===a?"a":"b"}">${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
+  const side = (t, s, r, win) => `<div class="side${win?" win":""}">${mono(t)}<b data-flip="${s}" data-key="m${t===a?"a":"b"}" aria-label="${s}">${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
   const cg = trackedGame(a, b);
   $("#mout").innerHTML = `
     <div class="panel board"><div class="scan"></div>
@@ -1160,12 +1314,22 @@ function renderLines(){
   const wkName = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: ` : "";
   $("#ltitle").textContent = LMODE === "total" ? `${wkName}our totals vs. betting totals` : `${wkName}our spreads vs. betting spreads`;
   const seg = lineSeg();
+  // Recent results: picks graded in the last 10 days, newest first; hits get a confetti burst the first time they show.
+  const recent = kind => { const cut = Date.now() - 10*864e5;
+    const g = (TRACKER?.games||[]).filter(x => x.results && x.start && new Date(x.start).getTime() > cut && (kind === "total" ? x.results.ou_model : x.results.model_close) in {W:1,L:1})
+      .sort((a,b) => b.start.localeCompare(a.start));
+    if(!g.length) return "";
+    const chip = x => { const r = kind === "total" ? x.results.ou_model : x.results.model_close, home = x.ours > x.line;
+      const txt = kind === "total" ? `${x.ours_total > x.total ? "Over" : "Under"} ${x.total.toFixed(1)}` : `${esc(home ? x.home : x.away)} ${signed(home ? -x.line : x.line)}`;
+      return `<span class="res ${r === "W" ? "hit" : "miss"}" data-k="${kind}|${esc(x.key)}" data-team="${esc(kind === "total" ? x.home : (home ? x.home : x.away))}"><i>${r === "W" ? "✓" : "✗"}</i>${txt}<span>${x.away_pts}–${x.home_pts}</span></span>`; };
+    const w = g.filter(x => (kind === "total" ? x.results.ou_model : x.results.model_close) === "W").length;
+    return `<div class="bar"><h2>Recent results</h2><span class="sub">${w}–${g.length - w} in the last 10 days</span></div><div class="results">${g.map(chip).join("")}</div>`; };
   if(LMODE === "total"){
     const tnow = totalsOf(now), tlater = totalsOf(later), tw = TOTCONF_RECORD.reduce((s,r)=>s+r[1],0), tl = TOTCONF_RECORD.reduce((s,r)=>s+r[2],0);
     $("#lout").innerHTML = seg + (tnow.length ? ttable(tnow) : `<div class="panel empty">No upcoming games with a betting total.</div>`) +
       `<p class="note">Betting total = median over/under across sportsbooks. Our total comes from each team's points scored and allowed, adjusted for opponents, minus points for players listed Out. Sorted by totals confidence, highest first.</p>` +
       (tlater.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${tlater.length} early totals)</span></summary><div style="margin-top:12px">${ttable(tlater)}</div></details>` : "") +
-      `<div class="bar"><h2>Live track record: totals</h2></div>
+      recent("total") + `<div class="bar"><h2>Live track record: totals</h2></div>
       <div class="panel scroll"><table><thead><tr><th>Strategy (fixed in advance)</th><th class="num">Record</th></tr></thead><tbody>
         <tr><td>Our side of the total at kickoff</td><td class="num">${rec("ou_model")}</td></tr>
         <tr><td><b>Top confidence</b> <span class="sub">top 10% of each week by totals score</span></td><td class="num">${rec("ou_top")}</td></tr>
@@ -1179,7 +1343,7 @@ function renderLines(){
   $("#lout").innerHTML = seg + (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines.</div>`) +
     `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by confidence, highest first (games without a confidence score last, by difference). The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
     (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : "") +
-    tracker + record + past;
+    recent("spread") + tracker + record + past;
   bindLineSeg();
 }
 
@@ -1205,7 +1369,7 @@ const oursVsLine = (home, away, ours, line) => { const same = Math.abs(line) >= 
 const byStr = (home, away, m) => Math.abs(m) < .25 ? "an even game" : `${esc(m > 0 ? home : away)} by ${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 const signed = x => Math.abs(x) < .25 ? "PK" : (x > 0 ? "+" : "−") + (Math.round(Math.abs(x)*2)/2).toFixed(1);
 // The matchup line with team logos; `pick` (a team name) is highlighted.
-const gameLine = (away, home, neutral, pick) => { const t = n => `<span class="pteam${n === pick ? " pickside" : ""}">${mono(n, "xs")}${esc(n)}</span>`;
+const gameLine = (away, home, neutral, pick) => { const t = n => `<span class="pteam${n === pick ? " pickside" : ""}" data-team="${esc(n)}">${mono(n, "xs")}${esc(n)}</span>`;
   return `${t(away)} <span class="pat">${neutral ? "vs" : "at"}</span> ${t(home)}`; };
 // FLIP: remember where each card was, re-render, then animate every card from its old spot to its new one;
 // new cards fade up, so filtering looks like the list rearranging itself.
@@ -1263,7 +1427,7 @@ function renderTeam(name){
   const bar = v => { const w=Math.abs(v)*50; return `<span class="vbar"><i style="${v>=0?`left:50%;width:${w}%;background:var(--win)`:`right:50%;width:${w}%;background:var(--loss)`}"></i></span>`; };
   const recOf = t => RESULT.recs[t] ? `${RESULT.recs[t][0]}-${RESULT.recs[t][1]}` : "";
   $("#teamOut").innerHTML = `
-    <div class="teamhead">${mono(r.team, "lg")}<h2>${esc(r.team)}</h2><span class="rec" style="font-size:16px">${r.w}-${r.l}</span></div>
+    <div class="teamhead" style="--tc:${teamColor(r.team)}">${mono(r.team, "lg")}<h2>${esc(r.team)}</h2><span class="rec" style="font-size:16px">${r.w}-${r.l}</span></div>
     <div class="tiles">
       <div class="tile"><b>#${r.rank}</b><span>Overall rank</span></div>
       <div class="tile"><b>#${r.power}</b><span>Power rank</span></div>
