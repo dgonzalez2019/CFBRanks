@@ -280,29 +280,28 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
   -webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);box-shadow:var(--shadow);animation:viewIn .5s var(--ease) both;animation-delay:calc(var(--i,0) * 40ms);transition:transform .3s var(--ease)}
 .pick:hover{transform:translateY(-2px)}
 .pick.hot{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));box-shadow:var(--shadow),0 0 40px -24px var(--gold)}
-.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.phead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 12px}
 .pgame{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0;font:700 17px/1.25 var(--body);color:var(--ink)}
 .pteam{display:inline-flex;align-items:center;color:var(--ink)}
 .pteam .mono{width:28px;height:28px;margin-right:10px}
 .pteam .mono.logo img{width:28px;height:28px}
 .pteam.pickside{color:var(--accent)}
+.pick.hot .pteam.pickside{color:var(--gold)}
 .pat{font:600 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.pconf{display:grid;justify-items:end;flex:none;text-align:right}
-.pconf b{font:800 24px/1 var(--display);color:var(--ink)}
-.pconf b.none{color:var(--muted)}
-.pconf span{font:600 10px/1.3 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.pick.hot .pconf b,.pick.hot .pconf span{color:var(--gold)}
-.pbet{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;padding:12px 16px;border-radius:14px;background:var(--accent-soft);border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent)}
+.pick time{font:500 13px/1.2 var(--body);color:var(--muted);white-space:nowrap}
+.pbet{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--accent-soft);border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent)}
 .pick.hot .pbet{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 65%,transparent)}
+.pbet>div:first-child{display:grid;gap:6px;min-width:0}
 .pkind{font:600 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.ptext{font:800 30px/1 var(--display);text-transform:uppercase;letter-spacing:.02em;color:var(--accent);overflow-wrap:anywhere}
+.ptext{font:800 32px/1 var(--display);text-transform:uppercase;letter-spacing:.02em;color:var(--accent);overflow-wrap:anywhere}
 .pick.hot .ptext{color:var(--gold)}
-.pfoot{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px 14px}
-.pstats{display:flex;flex-wrap:wrap;gap:6px}
-.pstats span{font:500 11.5px/1 var(--body);color:var(--muted);padding:6px 8px;border-radius:8px;border:1px solid var(--line)}
-.pstats b{font:600 12px/1 var(--mono);color:var(--ink);margin-left:4px}
-.pick time{margin-left:auto;font:600 12.5px/1.2 var(--mono);color:var(--accent);white-space:nowrap;text-align:right}
-@media (max-width:640px){.pgame{font-size:16px}.ptext{font-size:26px}.pconf b{font-size:21px}.pbet{padding:10px 14px}}
+.pconf{display:grid;justify-items:end;flex:none;text-align:right;gap:3px}
+.pconf b{font:800 30px/1 var(--display);color:var(--ink)}
+.pconf b.none{color:var(--muted)}
+.pconf span{font:500 11.5px/1.2 var(--body);color:var(--muted)}
+.pconf em{font:700 11px/1 var(--body);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:var(--paper);background:var(--gold);padding:4px 7px;border-radius:999px;margin-top:2px}
+.pwhy{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+@media (max-width:640px){.pgame{font-size:16px}.ptext{font-size:27px}.pconf b{font-size:25px}.pbet{padding:12px 14px}}
 /* ---------- game cards (Lines tab) ---------- */
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;width:100%;max-width:560px;border-radius:14px;background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
 .seg button{border:0;background:transparent;border-radius:10px;padding:12px 8px;font:600 15px/1.1 var(--body);color:var(--muted);white-space:nowrap;transition:background .2s,color .2s}
@@ -1104,11 +1103,11 @@ function renderLines(){
   const table = rows => `<div class="picks">${rows.map((l,i) => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome, c = trackedGame(l.home, l.away);
       return pickCard({kind:"spread", conf:c?.pct ?? null, top:c?.top, top5:c?.top5, start:l.start, text:`${esc(lean)} ${signed(lean===l.home ? -l.mkt : l.mkt)}`,
         game:gameLine(l.away, l.home, l.neutral, lean), note:injNote(l),
-        stats:[["Betting line", lineStr(l.home, l.away, l.mkt)], ["Our line", lineStr(l.home, l.away, l.ours)], ["Win chance", `${esc(fav)} ${Math.round(fp*100)}%`], ["Off the line", `${Math.abs(l.diff).toFixed(1)} pts`]]}, i); }).join("")}</div>`;
+        why:`We have ${byStr(l.home, l.away, l.ours)}; the line has ${byStr(l.home, l.away, l.mkt)}. ${esc(fav)} wins ${Math.round(fp*100)}% of the time.`}, i); }).join("")}</div>`;
   const ttable = rows => `<div class="picks">${rows.map((l,i) => { const c = l.tc, over = c ? c.over : l.ourTotal > l.total, d = l.ourTotal - l.total;
       return pickCard({kind:"total", conf:c?.pct ?? null, top:c?.top, top5:c?.top5, start:l.start, text:`${over ? "Over" : "Under"} ${l.total.toFixed(1)}`,
         game:gameLine(l.away, l.home, l.neutral, null), note:injNote(l),
-        stats:[["Betting total", l.total.toFixed(1)], ["Our total", l.ourTotal], ["Off the total", `${d>0?"+":""}${d.toFixed(1)} pts`]]}, i); }).join("")}</div>`;
+        why:`We expect ${l.ourTotal} total points; the line is ${l.total.toFixed(1)}.`}, i); }).join("")}</div>`;
   const totalsOf = rows => rows.filter(l => l.total != null).map(l => ({...l, tc: trackedTotal(l.home, l.away)}))
     .sort((x,y) => (y.tc?.pct ?? -1)-(x.tc?.pct ?? -1) || Math.abs(y.ourTotal-y.total)-Math.abs(x.ourTotal-x.total));
   // Track record: our week-by-week predictions (made only from earlier games) vs. the line and the result.
@@ -1189,15 +1188,16 @@ let PMODE = "all";
 const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
     <div class="phead">
       <div class="pgame">${p.game}</div>
-      <div class="pconf">${p.conf != null ? `<b>${(p.conf*100).toFixed(1)}%</b><span>${p.top5 ? "★ Top 5%" : p.top ? "★ Top 10%" : "confidence"}</span>` : `<b class="none">—</b><span>no score yet</span>`}</div>
-    </div>
-    <div class="pbet ${p.kind}"><span class="pkind">${p.kind === "spread" ? "Spread bet" : "Over/under bet"}</span><b class="ptext">${p.text}</b></div>
-    <div class="pfoot">
-      <div class="pstats">${p.stats.map(([k,v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>
       <time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${gameWhen(p.start)}</time>
     </div>
-    ${p.note ? `<div class="sub">${p.note}</div>` : ""}
+    <div class="pbet">
+      <div><span class="pkind">${p.kind === "spread" ? "Bet the spread" : "Bet the total"}</span><b class="ptext">${p.text}</b></div>
+      <div class="pconf">${p.conf != null ? `<b>${(p.conf*100).toFixed(1)}%</b><span>chance to hit</span>${p.top5 ? `<em>★ Top 5%</em>` : p.top ? `<em>★ Top 10%</em>` : ""}` : `<b class="none">—</b><span>no score yet</span>`}</div>
+    </div>
+    <p class="pwhy">${p.why}${p.note ? ` ${p.note}.` : ""}</p>
   </article>`;
+// "Ohio State by 6.5" from a home margin.
+const byStr = (home, away, m) => Math.abs(m) < .25 ? "an even game" : `${esc(m > 0 ? home : away)} by ${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 const signed = x => Math.abs(x) < .25 ? "PK" : (x > 0 ? "+" : "−") + (Math.round(Math.abs(x)*2)/2).toFixed(1);
 // The matchup line with team logos; `pick` (a team name) is highlighted.
 const gameLine = (away, home, neutral, pick) => { const t = n => `<span class="pteam${n === pick ? " pickside" : ""}">${mono(n, "xs")}${esc(n)}</span>`;
@@ -1211,13 +1211,13 @@ function renderPicks(){
       const home = g.ours > g.line, team = home ? g.home : g.away;
       picks.push({g, start:g.start, kind:"spread", conf:g.conf, top:g.top_conf, top5:g.top5, text:`${esc(team)} ${sgn(home ? -g.line : g.line)}`,
         game:gameLine(g.away, g.home, g.neutral, team),
-        stats:[["Betting line", lineStr(g.home, g.away, g.line)], ["Our line", lineStr(g.home, g.away, g.ours)], ["Off the line", `${Math.abs(g.ours - g.line).toFixed(1)} pts`]]});
+        why:`We have ${byStr(g.home, g.away, g.ours)}; the line has ${byStr(g.home, g.away, g.line)}.`});
     }
     if(g.tconf != null && g.total != null){
       const over = g.ours_total > g.total;
       picks.push({g, start:g.start, kind:"total", conf:g.tconf, top:g.ttop_conf, top5:g.ttop5, text:`${over ? "Over" : "Under"} ${g.total.toFixed(1)}`,
         game:gameLine(g.away, g.home, g.neutral, null),
-        stats:[["Betting total", g.total.toFixed(1)], ["Our total", g.ours_total], ["Off the total", `${(g.ours_total - g.total > 0 ? "+" : "")}${(g.ours_total - g.total).toFixed(1)} pts`]]});
+        why:`We expect ${g.ours_total} total points; the line is ${g.total.toFixed(1)}.`});
     }
   });
   // Top 5% / 10% here are of ALL this week's scored picks, spreads and totals ranked together (the Spreads and
