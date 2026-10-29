@@ -7,7 +7,8 @@ def load(path):
     for r in json.load(open(path))["games"]:
         if not (r[6] or r[7]) or r[3] == r[4] and False: continue
         G.append(dict(week=r[0], home=r[1] if r[6] else FCS, away=r[2] if r[7] else FCS, hp=r[3], ap=r[4],
-                      neutral=bool(r[5]), fbs=bool(r[6] and r[7]), box=r[8] if len(r) > 8 else None))
+                      neutral=bool(r[5]), fbs=bool(r[6] and r[7]), box=r[8] if len(r) > 8 else None,
+                      box2=r[9] if len(r) > 9 else None))
     return G
 def teams_of(games): ts = sorted({g["home"] for g in games} | {g["away"] for g in games}); return ts, {t: i for i, t in enumerate(ts)}
 

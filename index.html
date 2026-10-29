@@ -88,6 +88,8 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .score .side.win b{color:var(--accent)}
 .score .dash{font:700 28px/1 var(--display);color:var(--muted)}
 .eff th,.eff td:first-child{white-space:normal}
+.eff td:first-child .sub{font-size:12px}
+.eff .num .sub{display:block}
 .show-sm{display:none}
 .injgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:12px}
 .inj{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
@@ -354,19 +356,35 @@ function adjOD(games, val, ridge){  // val(g, side) -> [y, weight] or null; side
   return {off, def, mu:x[2*n], hp:x[2*n+1]};
 }
 const expOD = (M, o, d, home) => M.mu + (M.off[o]||0) + (M.def[d]||0) + (home?M.hp:0);
+// Positional matchups: offense s against defense d = 1-s in one game, as [rate, weight]. Sack and pressure
+// rates are per dropback (pass attempts + sacks), tackles for loss and turnovers per play, third downs per try.
+let MATCHUP_NOTE = "";  // set below once the backtest decides whether these feed the prediction
+const UNITS_ALL = ["ypa","ypc","sack","hurry","tfl","to","third"];
+function unitRates(g, s){
+  const out = {}, b = g.box, d = 1-s; if(!b) return out;
+  const pa = b[4*s+1], ra = b[4*s+3];
+  if(pa) out.ypa = [b[4*s]/pa, pa];
+  if(ra) out.ypc = [b[4*s+2]/ra, ra];
+  const c = g.box2; if(!c) return out;
+  const sacks = c[6*d], drop = pa + sacks, plays = pa + ra;
+  if(drop){ out.sack = [sacks/drop, drop]; out.hurry = [c[6*d+2]/drop, drop]; }
+  if(plays){ out.tfl = [c[6*d+1]/plays, plays]; out.to = [c[6*s+3]/plays, plays]; }
+  if(c[6*s+5]) out.third = [c[6*s+4]/c[6*s+5], c[6*s+5]];
+  return out;
+}
 function efficiency(games){
   const bx = games.filter(g => g.box);
   if(bx.length < EFF_MIN_GAMES) return null;
-  const rate = (y,att) => att ? [y/att, att] : null;
-  const ypa = adjOD(bx, (g,s) => rate(g.box[4*s], g.box[4*s+1]), EFF_RIDGE);
-  const ypc = adjOD(bx, (g,s) => rate(g.box[4*s+2], g.box[4*s+3]), EFF_RIDGE);
+  const fits = {};
+  UNITS_ALL.forEach(u => { const gs = u==="ypa"||u==="ypc" ? bx : bx.filter(g => g.box2);
+    if(gs.length >= EFF_MIN_GAMES) fits[u] = adjOD(gs, (g,s) => unitRates(g,s)[u] || null, EFF_RIDGE); });
   const X = [[0,0,0],[0,0,0],[0,0,0]], v = [0,0,0];  // points ~ c0 + c1*YPA + c2*YPC
   bx.forEach(g => [0,1].forEach(s => {
     const pa = g.box[4*s+1], ra = g.box[4*s+3]; if(!pa || !ra) return;
     const r = [1, g.box[4*s]/pa, g.box[4*s+2]/ra], y = s ? g.ap : g.hp;
     r.forEach((ri,i) => { v[i] += ri*y; r.forEach((rj,j) => X[i][j] += ri*rj); });
   }));
-  return {ypa, ypc, coef: solve(X, v)};
+  return {ypa:fits.ypa, ypc:fits.ypc, fits, coef: solve(X, v)};
 }
 // Last season as a starting point: each team's end-of-last-season margin rating, kept at PRIOR_KEEP, and this
 // season's ratings are pulled toward it (ridge PRIOR_LAM) instead of toward average. Tuned on 2022-25 with each
@@ -558,13 +576,15 @@ function renderResults(){
 }
 
 // Opponent-adjusted unit ratings for FBS teams, with national ranks (offense: higher is better; defense: lower).
+// Opponent-adjusted unit ratings for FBS teams, with national ranks. HIGH_GOOD lists rates where more is better
+// for the offense; for the rest (sacks, pressure, tackles for loss, turnovers) less is better for the offense.
+const HIGH_GOOD = new Set(["ypa","ypc","third"]);
 function unitRatings(E, teams){
   if(!E) return null;
-  const out = {}, units = {passO:[E.ypa,"off",-1], passD:[E.ypa,"def",1], rushO:[E.ypc,"off",-1], rushD:[E.ypc,"def",1]};
-  teams.forEach(t => out[t] = {});
-  Object.entries(units).forEach(([k,[M,part,dir]]) => {
-    teams.slice().sort((x,y) => dir*((M[part][x]||0)-(M[part][y]||0))).forEach((t,i) => out[t][k] = {v: M.mu + (M[part][t]||0), rank: i+1});
-  });
+  const out = {}; teams.forEach(t => out[t] = {});
+  Object.entries(E.fits).forEach(([u,M]) => [["off",HIGH_GOOD.has(u)?-1:1],["def",HIGH_GOOD.has(u)?1:-1]].forEach(([part,dir]) => {
+    teams.slice().sort((x,y) => dir*((M[part][x]||0)-(M[part][y]||0))).forEach((t,i) => out[t][u+part] = {v: M.mu + (M[part][t]||0), rank: i+1});
+  }));
   return out;
 }
 
@@ -585,17 +605,23 @@ function renderMatchup(force){
   const v = $("#mv").value, p = predict(PRED, a, b, v, outVal(a), outVal(b)), winA = p.pa >= .5, w = winA ? a : b, wp = winA ? p.pa : 1-p.pa;
   const ra = RESULT.byTeam[a], rb = RESULT.byTeam[b];
   const U = UNITS, cell = u => `${u.v.toFixed(1)} <span class="sub">#${u.rank}</span>`;
+  // Each matchup: [unit, label for the offense, label for the defense, unit text, formatter]
+  const pctf = v => (v*100).toFixed(1)+"%", num1 = v => v.toFixed(1);
+  const MU = [["ypa","Passing","yds per attempt",num1], ["ypc","Rushing","yds per carry",num1],
+              ["sack","Sacks","per dropback: line vs. pass rush",pctf], ["hurry","QB pressure","hurries per dropback",pctf],
+              ["tfl","Tackles for loss","per play: blocking vs. front",pctf], ["to","Turnovers","per play: ball security vs. takeaways",pctf],
+              ["third","Third downs","converted",pctf]];
+  const has = u => U && U[a][u+"off"] && U[b][u+"off"];
+  const cellU = (o,f) => `${f(o.v)} <span class="sub">#${o.rank}</span>`;
+  const expU = (u,o,d,home) => expOD(PRED.eff.fits[u], o, d, home);
+  const muRows = (off, def, offHome) => MU.filter(([u]) => has(u)).map(([u,label,unit,f]) => `
+        <tr><td>${label} <span class="sub">${unit}</span></td><td class="num">${cellU(U[off][u+"off"],f)}</td>
+          <td class="num">${cellU(U[def][u+"def"],f)}</td><td class="num"><b>${f(expU(u,off,def,offHome))}</b></td></tr>`).join("");
+  const mhead = (off, def) => `<tr><th>${esc(off)} offense vs. ${esc(def)} defense</th><th class="num">Off.</th><th class="num">Def.</th><th class="num">Game</th></tr>`;
   const eff = p.eff && U ? `<div class="panel scroll"><table class="eff">
-      <thead><tr><th>Passing &amp; rushing</th><th class="num">${esc(a)}</th><th class="num">${esc(b)}</th></tr></thead>
-      <tbody>
-        <tr><td>Pass offense <span class="sub">yds/att</span></td><td class="num">${cell(U[a].passO)}</td><td class="num">${cell(U[b].passO)}</td></tr>
-        <tr><td>Pass defense <span class="sub">yds/att allowed</span></td><td class="num">${cell(U[a].passD)}</td><td class="num">${cell(U[b].passD)}</td></tr>
-        <tr><td>Rush offense <span class="sub">yds/carry</span></td><td class="num">${cell(U[a].rushO)}</td><td class="num">${cell(U[b].rushO)}</td></tr>
-        <tr><td>Rush defense <span class="sub">yds/carry allowed</span></td><td class="num">${cell(U[a].rushD)}</td><td class="num">${cell(U[b].rushD)}</td></tr>
-        <tr><td><b>This game: expected yds/att</b></td><td class="num"><b>${p.eff.a.ypa.toFixed(1)}</b></td><td class="num"><b>${p.eff.b.ypa.toFixed(1)}</b></td></tr>
-        <tr><td><b>This game: expected yds/carry</b></td><td class="num"><b>${p.eff.a.ypc.toFixed(1)}</b></td><td class="num"><b>${p.eff.b.ypc.toFixed(1)}</b></td></tr>
-      </tbody></table></div>
-      <p class="note" style="margin:0">All four units are adjusted for opponents: a defense is rated on what its opponents gained against everyone else, and an offense on what its opponents allowed. Ranks are among FBS teams.</p>` : "";
+      <thead>${mhead(a,b)}</thead><tbody>${muRows(a, b, v==="A")}</tbody>
+      <thead>${mhead(b,a)}</thead><tbody>${muRows(b, a, v==="B")}</tbody></table></div>
+      <p class="note" style="margin:0">Positional matchups, each adjusted for opponents: a unit is rated against what its opponents did against everyone else. # is the national rank among FBS teams (1 = best). "This game" is the expected rate when these two units meet.${MATCHUP_NOTE}</p>` : "";
   const injList = t => { const l = (PVAL[t]||[]).filter(x => x.value >= .1).slice(0,10);
     return `<div><b>${esc(t)}</b>${outVal(t) ? ` <span class="neg" style="font-family:var(--mono);font-size:13px">−${outVal(t).toFixed(1)} pts</span>` : ""}
       ${l.length ? l.map(x => `<label class="inj"><input type="checkbox" data-team="${esc(t)}" data-name="${esc(x.name)}"${OUT[t]?.has(x.name)?" checked":""}> <span>${esc(x.name)} <span class="sub">${esc(x.pos)}</span></span><span class="sub" style="font-family:var(--mono)">${x.value.toFixed(1)}</span></label>`).join("")
@@ -787,7 +813,7 @@ function parseCSV(text){
   return out;
 }
 const pack = g => [g.home,g.away,g.hp,g.ap,g.neutral?1:0,g.hf?1:0,g.af?1:0];
-const unpack = (wk,a) => ({week:wk,home:a[0],away:a[1],hp:a[2],ap:a[3],neutral:!!a[4],hf:!!a[5],af:!!a[6],box:a[7]||null});
+const unpack = (wk,a) => ({week:wk,home:a[0],away:a[1],hp:a[2],ap:a[3],neutral:!!a[4],hf:!!a[5],af:!!a[6],box:a[7]||null,box2:a[8]||null});
 
 $("#csv").addEventListener("change", async e => {
   const f = e.target.files[0]; if(!f) return; const msg = $("#upmsg");
