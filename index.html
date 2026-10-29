@@ -38,7 +38,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;overflow-x:clip}
+html{scroll-behavior:smooth;overflow-x:hidden}  /* hidden, not clip: older iPhone Safari ignores clip and zooms the page out */
 body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 ::selection{background:var(--accent);color:var(--accent-ink)}
 .stage{display:none}
@@ -110,7 +110,10 @@ button.primary{background:var(--accent);border-color:var(--accent);color:var(--a
 @supports (animation-timeline: view()){
   .panel,.tiles,.quads,.pick,.stat,.pcard{animation-name:tiltIn;animation-fill-mode:both;animation-timing-function:linear;animation-timeline:view();animation-range:entry 0% entry 55%}
 }
-@keyframes tiltIn{from{opacity:0;transform:perspective(1100px) translateY(46px) rotateX(16deg) scale(.97)}}
+/* Blocks lean back from their top edge and stand up as they enter; leaning back (not forward) keeps them narrower
+   than the screen, so nothing widens the page on phones. */
+@keyframes tiltIn{from{opacity:0;transform:perspective(1100px) translateY(40px) rotateX(-14deg) scale(.97)}}
+.panel,.tiles,.quads,.pick,.stat{transform-origin:50% 0}
 
 /* ---------- tables ---------- */
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
@@ -150,8 +153,8 @@ tr:nth-child(1)>.rk.medal{color:var(--gold)} tr:nth-child(2)>.rk.medal{color:var
 .vbar::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
 
 /* ---------- hero ---------- */
-.hero{position:relative;display:grid;gap:22px;padding:10px 0 4px}
-.hero-art{position:absolute;right:-40px;top:-30px;width:min(620px,70vw);height:auto;color:var(--accent);opacity:.22;pointer-events:none;z-index:-1;transform:perspective(900px) rotateX(48deg) rotateZ(-8deg);transform-origin:60% 40%}
+.hero{position:relative;display:grid;gap:22px;padding:10px 0 4px;overflow-x:hidden;overflow-x:clip}
+.hero-art{position:absolute;right:0;top:-30px;width:min(620px,70vw);height:auto;color:var(--accent);opacity:.22;pointer-events:none;z-index:-1;transform:perspective(900px) rotateX(48deg) rotateZ(-8deg);transform-origin:60% 40%}
 .hero-art path,.hero-art line,.hero-art rect{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-dasharray:var(--len,600);stroke-dashoffset:var(--len,600);animation:draw 1.8s var(--ease) both;animation-delay:calc(var(--d,0) * 70ms + .2s)}
 .hero-art text{fill:currentColor;font:600 15px var(--display);opacity:0;animation:fadeIn 1s ease both;animation-delay:calc(var(--d,0) * 70ms + .9s)}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -327,7 +330,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;backgrou
   .pcard .tn{font-size:23px} .pcard.p1 .tn{font-size:32px}
   .pcard .sc{font-size:32px}
   .pcard:not(.p1) .bars{display:none}
-  .hero-art{right:-90px;top:-10px;width:120vw;opacity:.16}
+  .hero-art{right:0;top:-10px;width:100%;opacity:.16}
 }
 @media (max-width:640px){.hide-sm{display:none}.show-sm{display:block}.theme{padding:0;width:36px;justify-content:center}h1{font-size:21px}h1 small{display:none}.logo{width:30px;height:30px}
   .status{font-size:11.5px}
@@ -421,6 +424,7 @@ tr.moved-up{animation:moveFlash 1.6s ease .9s both} tr.moved-down{animation:move
 /* ---------- game sheet (tap a pick card) ---------- */
 .pick{cursor:pointer}
 .pmeta{display:flex;gap:4px;align-items:baseline}
+.pmeta-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pmeta .pmore{margin-left:auto;padding-left:10px;flex:none;color:var(--accent);font-weight:600;font-size:13px}
 #sheet{border:0;padding:0;margin:auto;width:min(760px,100vw);max-height:min(92vh,980px);background:transparent;color:var(--ink);overflow:visible}
 #sheet::backdrop{background:rgba(20,16,8,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
@@ -1509,7 +1513,7 @@ const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" data-k="
       <div><span class="pkind">${p.kind === "spread" ? "Spread" : "Over/under"}</span><b class="ptext">${p.text}</b></div>
       <div class="pconf">${p.conf != null ? `<div class="ringwrap"><div class="ring" style="--v:${(p.conf*100).toFixed(1)}"></div><b>${(p.conf*100).toFixed(1)}%</b></div>${p.top5 ? `<em>★ Top 5%</em>` : p.top ? `<em>★ Top 10%</em>` : `<span>chance to hit</span>`}` : `<div class="ringwrap"><b class="none">—</b></div><span>no score yet</span>`}</div>
     </div>
-    <p class="pmeta" title="${esc(String(p.why).replace(/<[^>]+>/g, ""))}${p.note ? " · " + esc(p.note.replace(/<[^>]+>/g, "")) : ""}"><time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${shortWhen(p.start)}</time> · ${p.why}${p.note ? " · injuries counted" : ""}<span class="pmore" aria-hidden="true">Details ›</span></p>
+    <p class="pmeta" title="${esc(String(p.why).replace(/<[^>]+>/g, ""))}${p.note ? " · " + esc(p.note.replace(/<[^>]+>/g, "")) : ""}"><span class="pmeta-t"><time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${shortWhen(p.start)}</time> · ${p.why}${p.note ? " · injuries counted" : ""}</span><span class="pmore" aria-hidden="true">Details ›</span></p>
   </article>`;
 // "Ours UNLV −23.0 · Line −24.5": the line's team is left out when it's the same favorite as ours.
 const oursVsLine = (home, away, ours, line) => { const same = Math.abs(line) >= .25 && Math.abs(ours) >= .25 && (ours > 0) === (line > 0);
