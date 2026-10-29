@@ -157,7 +157,7 @@ body{margin:0}
       <div class="panel scroll">
         <table class="top">
           <thead><tr>
-            <th>Rank</th><th>Team</th><th class="num" title="Power rating plus 0.5 × résumé points">Score</th>
+            <th>Rank</th><th>Team</th><th class="num" title="Power rating plus résumé points">Score</th>
             <th class="num" title="Power rating rank: expected margin vs. an average FBS team on a neutral field">Power</th>
             <th class="num" title="Résumé points from wins and losses by quadrant">Résumé</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
           </tr></thead>
@@ -239,9 +239,9 @@ body{margin:0}
   <section id="v-method" class="view" hidden>
     <div class="panel method">
       <h3>How the rankings are built</h3>
-      <p>The rankings answer one question: who are the best teams? Each team's score is its power rating plus 0.5 × its résumé points, so how well a team plays sets the base and who it has beaten moves it up or down.</p>
+      <p>The rankings answer one question: who are the best teams? Each team's score is its power rating plus its résumé points, so how well a team plays sets the base and who it has beaten moves it up or down.</p>
       <ol>
-        <li><b>Power ratings from every game at once.</b> Each team gets a rating in points versus an average FBS team on a neutral field. All ratings are solved together, so a team's rating reflects how its opponents did against their own opponents. Margins are compressed past about three scores, and all FCS teams share one pooled rating.</li>
+        <li><b>Power ratings from the Matchup model.</b> Each team's rating is the Matchup tab's predicted margin against an average FBS team on a neutral field. It solves every game at once, so a team's rating reflects how its opponents did against their own opponents. It starts from last season's ratings and blends in passing and rushing efficiency adjusted for opponents, the same model that predicts games and feeds the confidence ratings. Margins are capped at 45, and all FCS teams share one pooled rating.</li>
         <li><b>Home field is measured, not assumed.</b> The model estimates the home edge from this season's results. Neutral-site games get none.</li>
         <li><b>Each game gets a difficulty.</b> The page asks how often the benchmark team would win that exact game at that venue. A road game at a top-15 team might be 25%. A home game against a bottom-20 team might be 95%.</li>
         <li><b>Strength of record.</b> Shown alongside the rankings as a résumé check. Wins above benchmark (WAB) is actual wins minus the benchmark's expected wins, and SOR ranks teams by it.</li>
@@ -301,14 +301,15 @@ function sampleSeason(){
 }
 
 /* ---------------- algorithm ---------------- */
-const CAP = 21, RIDGE = 2;
-// Ranking score = power rating + RESUME_WEIGHT * résumé. Résumé points per game by quadrant:
+// Power rating = the Matchup model's rating (predictor(): last season as a starting point, passing/rushing
+// efficiency): its neutral-field margin against an average FBS team. Ranking score = power rating + RESUME_WEIGHT *
+// résumé (1.0: these ratings are about twice as spread out as the old compressed ones, so this keeps the same balance).
+// Résumé points per game by quadrant: Résumé points per game by quadrant:
 // Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
 // Quadrants by the opponent's power rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = the rest and FCS.
 // Power rank (not overall rank) keeps résumés from feeding back into opponents' ranks.
 const QUAD_CUTS = [25, 50, 80];
-const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85, RESUME_WEIGHT = 0.5;
-const compress = m => CAP*Math.tanh(m/CAP);
+const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85, RESUME_WEIGHT = 1.0;
 function erf(x){const t=1/(1+.3275911*Math.abs(x)),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);return x>=0?y:-y}
 
 // Results-only ranking (Colley Matrix): each team's rating is solved from wins, losses and its opponents'
@@ -338,7 +339,7 @@ function colley(games){
   });
 }
 
-// Matchup predictor. Separate from the ranking models, which compress margins: predictions need real points.
+// Matchup predictor. Also the power rating behind the rankings (compute()).
 // Margin: ridge fit on point margins capped at 35 with a home-field term. Score total: ridge fit on each
 // side's points from offense and defense terms. Win chance: normal CDF with SD = in-sample RMSE × 1.4,
 // widened because in-sample error understates how far real results miss.
@@ -532,21 +533,15 @@ function solve(A,b){ // Gaussian elimination w/ partial pivoting
   return x;
 }
 
-function compute(games, benchRank){
+function compute(games, benchRank, prior=null){
   games = games.filter(g => g.hf || g.af);  // pooled-vs-pooled games carry no signal
   const nm = (t,f) => f ? t : FCS;
   const teams = [...new Set(games.flatMap(g => [nm(g.home,g.hf), nm(g.away,g.af)]))].sort();
-  const idx = Object.fromEntries(teams.map((t,i)=>[t,i])), n = teams.length, H = n;
-  const A = Array.from({length:n+1},()=>new Float64Array(n+1)), b = new Float64Array(n+1);
-  const rows = games.map(g => { const h=idx[nm(g.home,g.hf)], a=idx[nm(g.away,g.af)], x=g.neutral?0:1, y=compress(g.hp-g.ap);
-    A[h][h]+=1; A[a][a]+=1; A[h][a]-=1; A[a][h]-=1; A[h][H]+=x; A[H][h]+=x; A[a][H]-=x; A[H][a]-=x; A[H][H]+=x*x;
-    b[h]+=y; b[a]-=y; b[H]+=x*y; return [h,a,x,y]; });
-  for(let i=0;i<n;i++) A[i][i]+=RIDGE;
-  const beta = solve(A.map(r=>Array.from(r)), Array.from(b));
-  const hfa = beta[H];
-  let ss=0; rows.forEach(([h,a,x,y]) => { const r=y-(beta[h]-beta[a]+hfa*x); ss+=r*r; });
-  const SD = Math.sqrt(ss/rows.length)*1.05;
+  // Neutral-field margins are linear in the ratings, so each team's margin against one reference team, recentered
+  // on the FBS mean, is its margin against an average FBS team.
+  const M = predictor(games, prior), ref = teams.find(t => t!==FCS), hfa = M.hfa, SD = M.sd;
   const wp = m => .5*(1+erf(m/(SD*Math.SQRT2)));
+  const beta = teams.map(t => predict(M, t, ref, "N").margin), idx = Object.fromEntries(teams.map((t,i)=>[t,i]));
   const fbs = teams.filter(t=>t!==FCS), mean = fbs.reduce((s,t)=>s+beta[idx[t]],0)/fbs.length;
   const R = {}; teams.forEach(t => R[t] = beta[idx[t]]-mean);
   const order = fbs.slice().sort((x,y)=>R[y]-R[x]), prank = {}; order.forEach((t,i)=>prank[t]=i+1);
@@ -578,7 +573,7 @@ function compute(games, benchRank){
   out.slice().sort((x,y)=>y.sos-x.sos).forEach((r,i)=>r.sosRank=i+1);
   out.sort((x,y)=>y.score-x.score).forEach((r,i)=>r.rank=i+1);  // rows are listed best team first
   const byTeam = Object.fromEntries(out.map(r=>[r.team,r]));
-  return {rows:out, byTeam, hfa, SD, benchTeam, nGames:games.length, recs};
+  return {rows:out, byTeam, hfa, SD, benchTeam, nGames:games.length, recs, M};
 }
 
 /* ---------------- rendering ---------------- */
@@ -598,7 +593,7 @@ function renderTop(){
     ${["Q1","Q2","Q3","Q4"].map(k=>`<td><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
     <td class="hide-sm">${gameStr(r.W[0])}</td>
     <td class="hide-sm">${gameStr(r.L[0])}</td></tr>`).join("");
-  $("#hfaNote").innerHTML = `Score = power rating + 0.5 × résumé. Power is how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
+  $("#hfaNote").innerHTML = `Score = power rating + résumé. Power is the Matchup model's rating: how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
 function renderResults(){
@@ -836,9 +831,9 @@ function renderStatus(){
 }
 
 function recompute(){
-  RESULT = compute(GAMES, BENCH);
+  RESULT = compute(GAMES, BENCH, PRIOR);
   RONLY = colley(GAMES.filter(g => g.hf || g.af));
-  PRED = predictor(GAMES.filter(g => g.hf || g.af), PRIOR);
+  PRED = RESULT.M;
   PVAL = playerValues(PLAYERS, GAMES);
   BT = backtest(GAMES.filter(g => g.hf || g.af));
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));

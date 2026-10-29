@@ -51,24 +51,20 @@ from collections import defaultdict
 import numpy as np
 
 # ---------------------------------------------------------------- tuning knobs
-MARGIN_CAP_SCALE = 21.0   # margin compression: m' = S*tanh(m/S) ~ caps near 3 scores
-RIDGE = 2.0               # regularization (pulls thin-sample teams toward average)
-WIN_PROB_SD = 15.0        # overwritten at fit time from model residuals
+WIN_PROB_SD = 15.0        # overwritten at fit time (the Matchup model's outcome SD)
 FCS_POOL = "FCS (pooled)" # all non-FBS opponents share one rating
-RECENCY = 0.0             # 0 = all weeks equal; e.g. 0.03 = later weeks weigh more
+# Power rating = the Matchup model's rating (fit_predictor(): last season as a starting point, passing/rushing
+# efficiency): its neutral-field margin against an average FBS team. RESUME_WEIGHT 1.0 because these ratings are
+# about twice as spread out as the old compressed ones, so the rating/resume balance stays the same.
 # Ranking score = power rating + RESUME_WEIGHT * resume. Resume points per game by quadrant:
 # Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
 WIN_PTS = {"Q1": 4.0, "Q2": 2.0, "Q3": 1.0, "Q4": 0.5}
 LOSS_PTS = {"Q1": 0.5, "Q2": 1.0, "Q3": 2.0, "Q4": 4.0}
 LOSS_WEIGHT = 0.85
-RESUME_WEIGHT = 0.5
+RESUME_WEIGHT = 1.0
 # Quadrants by the opponent's power rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = rest + FCS.
 # Power rank (not overall rank) keeps resumes from feeding back into opponents' ranks.
 QUAD_CUTS = (25, 50, 80)
-
-
-def compress(m):
-    return MARGIN_CAP_SCALE * math.tanh(m / MARGIN_CAP_SCALE)
 
 
 def win_prob(margin):
@@ -134,36 +130,16 @@ def load_cfbd(year, key, upcoming=None):
 
 
 # ---------------------------------------------------------------- core model
-def fit_ratings(games):
-    """Ridge least squares: compressed_margin = HFA*home + R_home - R_away."""
-    norm = lambda t, fbs: t if fbs else FCS_POOL
-    teams = sorted({norm(g["home"], g["home_fbs"]) for g in games} |
-                   {norm(g["away"], g["away_fbs"]) for g in games})
-    idx = {t: i for i, t in enumerate(teams)}
-    n = len(teams)
-    max_wk = max(g["week"] for g in games) or 1
-
-    X = np.zeros((len(games), n + 1)); y = np.zeros(len(games)); w = np.ones(len(games))
-    for k, g in enumerate(games):
-        h, a = norm(g["home"], g["home_fbs"]), norm(g["away"], g["away_fbs"])
-        X[k, idx[h]] = 1; X[k, idx[a]] = -1
-        X[k, n] = 0 if g["neutral"] else 1          # HFA column
-        y[k] = compress(g["hp"] - g["ap"])
-        w[k] = math.exp(-RECENCY * (max_wk - g["week"]))
-
-    W = np.sqrt(w)[:, None]
-    P = np.eye(n + 1) * RIDGE; P[n, n] = 0          # don't shrink HFA
-    beta = np.linalg.solve((X * W).T @ (X * W) + P, (X * W).T @ (y * W.ravel()))
-    ratings = dict(zip(teams, beta[:n])); hfa = beta[n]
-    # calibrate outcome spread from residuals (same compressed units as ratings)
+def fit_ratings(games, prior=None):
+    """Power ratings from the Matchup model: each team's neutral-field margin against an average FBS team. Margins
+    are linear in the ratings, so the margin against one reference team, recentered on the FBS mean, gives it."""
     global WIN_PROB_SD
-    resid = y - X @ beta
-    WIN_PROB_SD = float(np.sqrt(np.average(resid ** 2, weights=w)) * 1.05)
-
-    fbs_vals = [r for t, r in ratings.items() if t != FCS_POOL]
-    mean = float(np.mean(fbs_vals))                   # center: avg FBS team = 0
-    ratings = {t: r - mean for t, r in ratings.items()}
-    return ratings, hfa, norm
+    M = fit_predictor(games, prior)
+    ref = next(t for t in sorted(M["T"]) if t != FCS_POOL)
+    raw = {t: predict(M, t, ref)["margin"] for t in M["T"]}
+    mean = float(np.mean([r for t, r in raw.items() if t != FCS_POOL]))
+    WIN_PROB_SD = M["sd"]
+    return {t: r - mean for t, r in raw.items()}, M["hfa"], lambda t, fbs: t if fbs else FCS_POOL
 
 
 def poisson_binomial_at_least(probs, k):
@@ -181,9 +157,9 @@ def quadrant(opp_rank):
     return "Q4"
 
 
-def compute(games, benchmark_rank=25):
+def compute(games, benchmark_rank=25, prior=None):
     games = [g for g in games if g["home_fbs"] or g["away_fbs"]]  # pooled-vs-pooled games carry no signal
-    ratings, hfa, norm = fit_ratings(games)
+    ratings, hfa, norm = fit_ratings(games, prior)
     fbs_sorted = sorted((t for t in ratings if t != FCS_POOL), key=lambda t: -ratings[t])
     rank = {t: i + 1 for i, t in enumerate(fbs_sorted)}
     bench = ratings[fbs_sorted[min(benchmark_rank, len(fbs_sorted)) - 1]]
@@ -550,7 +526,7 @@ def main():
     ap.add_argument("--venue", choices=("neutral", "team1", "team2"), default="neutral", help="who is at home for --predict")
     ap.add_argument("--out-players", default="", help="comma-separated players who are out, for --predict (needs --players)")
     ap.add_argument("--players", help="the site's data/players.json, for --out-players")
-    ap.add_argument("--prev", help="last season's games (data/history/<year>.json) to seed --predict ratings")
+    ap.add_argument("--prev", help="last season's games (data/history/<year>.json) to seed the ratings (rankings and --predict)")
     a = ap.parse_args()
 
     if a.json:
@@ -587,7 +563,7 @@ def main():
         return
     if a.rank == "colley":
         print_colley(colley(games), a.top); return
-    rows, hfa, bench = compute(games, a.benchmark)
+    rows, hfa, bench = compute(games, a.benchmark, season_prior(load_json(a.prev)) if a.prev else None)
     print_table(rows, hfa, bench, a.top, a.rank)
     if a.team:
         m = [r for r in rows if r["team"].lower() == a.team.lower()]
