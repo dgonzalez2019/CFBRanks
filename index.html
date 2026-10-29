@@ -400,6 +400,7 @@ tbody tr.click.tc .tm{color:color-mix(in srgb,var(--tc) 75%,var(--ink))}
 .pcard.tc{background-image:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--tc) 22%,transparent),transparent 70%)}
 .pick{background-image:linear-gradient(120deg,color-mix(in srgb,var(--tc,transparent) 0%,transparent),transparent)}
 .pick.tc{background-image:linear-gradient(120deg,color-mix(in srgb,var(--tc) 16%,transparent),transparent 55%);border-color:color-mix(in srgb,var(--tc) 45%,var(--line))}
+.sh-teams .pteam{cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 30%,transparent);text-underline-offset:4px}
 .pteam{cursor:default;border-radius:8px;transition:color .3s}
 .pteam.tcs{color:color-mix(in srgb,var(--tc) 80%,var(--ink))}
 .teamhead{position:relative;padding:18px 20px;border-radius:16px;background:linear-gradient(110deg,color-mix(in srgb,var(--tc,var(--accent)) 20%,transparent),transparent 70%);overflow:hidden}
@@ -562,7 +563,7 @@ h1 small b{font-weight:inherit}
           <thead><tr>
             <th>Rank</th><th>Team</th><th class="num" title="Power rating plus résumé points">Score</th>
             <th class="num" title="Power rating rank: expected margin vs. an average team on a neutral field">Power</th>
-            <th class="num" title="Résumé points from wins and losses by quadrant">Résumé</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
+            <th class="num" title="Average résumé points per game played, from wins and losses by quadrant">Résumé/gm</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
           </tr></thead>
           <tbody id="t25"></tbody>
         </table>
@@ -650,7 +651,7 @@ h1 small b{font-weight:inherit}
         <li><b>Each game gets a difficulty.</b> The page asks how often the benchmark team would win that exact game at that venue. A road game at a top-15 team might be 25%. A home game against a bottom-20 team might be 95%.</li>
         <li><b>Strength of record.</b> Shown alongside the rankings as a résumé check. Wins above benchmark (WAB) is actual wins minus the benchmark's expected wins, and SOR ranks teams by it.</li>
         <li><b>Win and loss quality.</b> A win is worth 1 minus the benchmark's win chance, so hard wins score high. A loss costs the benchmark's win chance, so losing a game a good team should win costs the most.</li>
-        <li><b>Résumé points.</b> Wins earn 4 (Q1), 2 (Q2), 1 (Q3) or 0.5 (Q4). Losses cost 85% of the mirror-image win: 0.43 (Q1), 0.85 (Q2), 1.7 (Q3) or 3.4 (Q4). Beating good teams matters most, and wins count slightly more than losses. Points are counted per game and scaled to a typical schedule (the FBS average number of games), so playing one more game than a rival, or having a bye, doesn't move a team by itself.</li>
+        <li><b>Résumé points.</b> Wins earn 4 (Q1), 2 (Q2), 1 (Q3) or 0.5 (Q4). Losses cost 85% of the mirror-image win: 0.43 (Q1), 0.85 (Q2), 1.7 (Q3) or 3.4 (Q4). Beating good teams matters most, and wins count slightly more than losses. The résumé is each team's average per game it has played (its points divided by its own number of games), so playing one more game than a rival, or having a bye, doesn't move a team by itself.</li>
         <li><b>Quadrants.</b> Opponents are tiered by power rank, at any venue: Q1 is the top 25, Q2 is 26–50, Q3 is 51–80, and everything else, including FCS, is Q4. Power rank is used so one team's résumé never inflates its opponents' ranks, which would let a conference's teams prop each other up.</li>
       </ol>
       <h3>The Results only tab</h3>
@@ -677,7 +678,7 @@ h1 small b{font-weight:inherit}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
+let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -711,7 +712,7 @@ function sampleSeason(){
    scripts/cfb_sor.py and the coefficients in scripts/track_picks.py). NFL settings: research/nfl_tune.py (model) and
    research/nfl_conf.py (confidence), both tested on seasons they weren't fit on. */
 const LEAGUES = {
-  cfb:{name:"CFB", dir:"data/", topN:25, word:"FBS", topLabel:"Top 25", quad:[25,50,80], resumeW:1.0, keep:.9, lam:2, cap:45, eff:.25,
+  cfb:{name:"CFB", dir:"data/", topN:25, word:"FBS", topLabel:"Top 25", quad:[25,50,80], resumeW:7.4, keep:.9, lam:2, cap:45, eff:.25,
     bench:25, benchOpts:[[12,"#12 team (playoff bar)"],[25,"#25 team (ranked bar)"],[40,"#40 team (bowl-plus bar)"]],
     conf:[0.08102, 0.018616, 0.047526, -0.059625, 0.063655], tconf:[-0.0018, 0.0605, 0.0039, 0.3163, 0.0626, 0.0974], pace:67.2, tmid:55,
     topRec:[["2022",38,33],["2023",33,39],["2024",44,27],["2025",40,33],["2026",23,16]], totRec:[["2022",31,35],["2023",32,36],["2024",50,19],["2025",41,29],["2026",15,19]],
@@ -721,7 +722,7 @@ const LEAGUES = {
     sheetSpread:"spread picks covered 54.6%", sheetTotal:"totals picks hit 55.0%, but unevenly (44–72% by season)",
     lineNote:"Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse.",
     qbNote:"QB values are calibrated on 2022–25, where teams whose starting QB missed a game fell short by about 1.25× this raw gap."},
-  nfl:{name:"NFL", dir:"data/nfl/", topN:32, word:"NFL", topLabel:"Rankings", quad:[8,16,24], resumeW:0.3, keep:.5, lam:8, cap:21, eff:0,
+  nfl:{name:"NFL", dir:"data/nfl/", topN:32, word:"NFL", topLabel:"Rankings", quad:[8,16,24], resumeW:2.0, keep:.5, lam:8, cap:21, eff:0,
     bench:12, benchOpts:[[7,"#7 team (division-winner bar)"],[12,"#12 team (playoff bar)"],[16,"#16 team (league average)"]],
     conf:[-0.0037, 0.0217, 0.2282, 0.1098, 0.0618], tconf:[-0.0085, -0.1109, -0.0118, 0.2351, -0.1735, -0.0458], pace:60.8, tmid:45,
     topRec:[["2016",12,13],["2017",12,12],["2018",11,13],["2019",15,9],["2020",14,11],["2021",17,9],["2022",14,12],["2023",9,17],["2024",12,14],["2025",18,9],["2026",7,2]],
@@ -757,7 +758,7 @@ async function setLeague(l){
   LEAGUE = l; store.set("sor.league", l);
   const go = async () => {
     applyLeague();
-    TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
+    SCHED = []; TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
     MKEY = ""; Object.keys(FLIPPED).forEach(k => delete FLIPPED[k]);
     $("#ma").value = store.get(SK("sor.ma")) || ""; $("#mb").value = store.get(SK("sor.mb")) || ""; $("#q").value = "";
     await loadData();
@@ -770,14 +771,14 @@ document.addEventListener("click", e => { const b = e.target.closest?.("[data-le
 /* ---------------- algorithm ---------------- */
 // Power rating = the Matchup model's rating (predictor(): last season as a starting point, passing/rushing
 // efficiency): its neutral-field margin against an average FBS team. Ranking score = power rating + RESUME_WEIGHT *
-// résumé (1.0: these ratings are about twice as spread out as the old compressed ones, so this keeps the same balance).
-// Résumé points per game by quadrant: Résumé points per game by quadrant:
+// résumé, where the résumé is the team's average points per game it has played (weight 7.4 CFB / 2.0 NFL keeps the
+// balance with the rating the earlier season-total versions had). Résumé points per game by quadrant:
 // Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
 // Quadrants by the opponent's power rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = the rest and FCS.
 // Power rank (not overall rank) keeps résumés from feeding back into opponents' ranks.
 let QUAD_CUTS = [25, 50, 80];
 const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85;
-let RESUME_WEIGHT = 1.0;
+let RESUME_WEIGHT = 7.4;  // per point of résumé per game (LEAGUES[...].resumeW)
 function erf(x){const t=1/(1+.3275911*Math.abs(x)),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);return x>=0?y:-y}
 
 // Results-only ranking (Colley Matrix): each team's rating is solved from wins, losses and its opponents'
@@ -1029,15 +1030,14 @@ function compute(games, benchRank, prior=null){
     });
   });
   const pbAtLeast = (ps,k) => { let d=[1]; ps.forEach(p=>{const nd=new Array(d.length+1).fill(0); d.forEach((v,i)=>{nd[i]+=v*(1-p); nd[i+1]+=v*p}); d=nd;}); return d.slice(k).reduce((a,c)=>a+c,0); };
-  // Résumé per game, scaled to the average schedule length, so an extra game or a bye doesn't move a team by itself.
-  const avgGames = fbs.reduce((s,t)=>s+sched[t].length,0) / Math.max(1, fbs.filter(t=>sched[t].length).length);
+  // Résumé = each team's own average per game played, so an extra game or a bye doesn't move a team by itself.
   const out = fbs.map(t => {
     const gs = sched[t].sort((x,y)=>x.week-y.week), w=gs.filter(x=>x.won).length, l=gs.length-w;
     const ps = gs.map(x=>x.pb), exp = ps.reduce((a,c)=>a+c,0);
     const q = {Q1:[0,0],Q2:[0,0],Q3:[0,0],Q4:[0,0]}; gs.forEach(x=>q[x.quad][x.won?0:1]++);
     const W = gs.filter(x=>x.won).sort((x,y)=>y.value-x.value), L = gs.filter(x=>!x.won).sort((x,y)=>x.value-y.value);
-    const resumeRaw = gs.reduce((a,x)=>a+(x.won?WIN_PTS[x.quad]:-LOSS_WEIGHT*LOSS_PTS[x.quad]),0), resume = gs.length ? resumeRaw/gs.length*avgGames : 0;
-    return {team:t,w,l,rating:R[t],power:prank[t],resume,resumeRaw,avgGames,score:R[t]+RESUME_WEIGHT*resume,wab:w-exp,sorp:pbAtLeast(ps,w),sos:gs.length?(gs.length-exp)/gs.length:0,q,W,L,games:gs,
+    const resumeRaw = gs.reduce((a,x)=>a+(x.won?WIN_PTS[x.quad]:-LOSS_WEIGHT*LOSS_PTS[x.quad]),0), resume = gs.length ? resumeRaw/gs.length : 0;
+    return {team:t,w,l,rating:R[t],power:prank[t],resume,resumeRaw,score:R[t]+RESUME_WEIGHT*resume,wab:w-exp,sorp:pbAtLeast(ps,w),sos:gs.length?(gs.length-exp)/gs.length:0,q,W,L,games:gs,
             winVal:W.reduce((a,x)=>a+x.value,0),lossCost:-L.reduce((a,x)=>a+x.value,0)};
   });
   out.sort((x,y)=>y.wab-x.wab || x.sorp-y.sorp).forEach((r,i)=>r.sor=i+1);
@@ -1078,7 +1078,7 @@ function renderHero(){
       <div class="tn">${esc(r.team)}</div>
       <div class="meta"><span>${r.w}-${r.l}</span><span>Power #${r.power}</span><span>SOS #${r.sosRank}</span></div>
       <div class="sc"><span data-count="${r.score.toFixed(1)}">${r.score.toFixed(1)}</span><small>score</small></div>
-      <div class="bars">${bar("Power", r.rating, maxR, (r.rating>=0?"+":"")+r.rating.toFixed(1))}${bar("Résumé", Math.max(0, r.resume), maxRes, (r.resume>=0?"+":"")+r.resume.toFixed(1))}</div>
+      <div class="bars">${bar("Power", r.rating, maxR, (r.rating>=0?"+":"")+r.rating.toFixed(1))}${bar("Résumé", Math.max(0, r.resume), maxRes, (r.resume>=0?"+":"")+r.resume.toFixed(2)+"/gm")}</div>
     </div>`;
   $("#podium").innerHTML = card(top[1], 2) + card(top[0], 1) + card(top[2], 3);
   const unbeaten = rows.filter(r => r.l === 0 && r.w > 0).length;
@@ -1281,7 +1281,7 @@ function openSheet(kind, key){
   const injured = n => [...outSet(n)].map(x => esc(x)).join(", ");
   const base = ex ? `<div class="why-base"><span>An average pick starts at <b>${(ex.f.base*100).toFixed(1)}%</b></span><span>This pick: <b>${(conf*100).toFixed(1)}%</b></span></div>` : "";
   $("#sheetBody").innerHTML = `
-    <div class="sh-game"><div class="pgame">${gameLine(away, home, neutral, kind === "spread" && ex ? ex.pick : null)}</div><div class="sh-when">${l?.start ? gameWhen(l.start) : `Week ${esc(wk)}`}${neutral ? " · neutral site" : ""}</div></div>
+    <div class="sh-game"><div class="pgame sh-teams">${gameLine(away, home, neutral, kind === "spread" && ex ? ex.pick : null)}</div><div class="sh-when">${l?.start ? gameWhen(l.start) : `Week ${esc(wk)}`}${neutral ? " · neutral site" : ""}</div></div>
     ${conf != null && ex ? `<div class="pbet${(kind === "total" ? t.ttop_conf : t.top_conf) ? " hotbet" : ""}"><div><span class="pkind">${kind === "spread" ? "Spread" : "Over/under"}</span><b class="ptext">${ex.label}</b></div>
       <div class="pconf"><div class="ringwrap"><div class="ring" style="--v:${(conf*100).toFixed(1)}"></div><b>${(conf*100).toFixed(1)}%</b></div><span>chance to hit</span></div></div>` : ""}
     ${ex ? `<h3>Why ${(conf*100).toFixed(1)}%</h3>${base}<div class="why">${whyRows}</div>
@@ -1311,6 +1311,8 @@ document.addEventListener("click", e => {
   const c = e.target.closest?.(".pick[data-k]");
   if(c){ const [kind, ...k] = c.dataset.k.split("|"); openSheet(kind, k.join("|")); return; }
   if(e.target.closest?.(".sheet-x")) closeSheet();
+  const tn = e.target.closest?.(".sh-teams .pteam[data-team]");
+  if(tn && RESULT.byTeam[tn.dataset.team]){ closeSheet(); openTeam(tn.dataset.team); return; }
   if(e.target.id === "sheet") closeSheet();  // the backdrop
   const o = e.target.closest?.("[data-open]");
   if(o){ const [a, b, v] = o.dataset.open.split("|"); closeSheet(); $("#ma").value = a; $("#mb").value = b; $("#mv").value = v; location.hash = "matchup"; renderMatchup(true); window.scrollTo({top:0}); }
@@ -1329,7 +1331,7 @@ function renderTop(){
     <td>${mono(r.team)}<span class="tm">${esc(r.team)}</span><span class="rec">${r.w}-${r.l}</span></td>
     <td class="num meter" style="--w:${Math.max(4, 100*r.score/Math.max(1e-9, RESULT.rows[0].score)).toFixed(0)}px">${r.score.toFixed(1)}</td>
     <td class="num">${r.power}</td>
-    <td class="num ${r.resume>=0?"pos":"neg"}">${r.resume>=0?"+":""}${r.resume.toFixed(1)}</td><td class="num">${r.sosRank}</td>
+    <td class="num ${r.resume>=0?"pos":"neg"}">${r.resume>=0?"+":""}${r.resume.toFixed(2)}</td><td class="num">${r.sosRank}</td>
     ${["Q1","Q2","Q3","Q4"].map(k=>`<td><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
     <td class="hide-sm">${gameStr(r.W[0])}</td>
     <td class="hide-sm">${gameStr(r.L[0])}</td></tr>`).join("");
@@ -1337,7 +1339,7 @@ function renderTop(){
     [...$("#t25").rows].forEach((tr, i) => { const d = moves[tr.dataset.team]; if(!d) return;
       tr.animate([{transform:`translateY(${d*h}px)`, zIndex:2}, {transform:"none", zIndex:2}], {duration:1100, delay:500 + Math.min(i,25)*25, easing:"cubic-bezier(.3,1.2,.4,1)", fill:"backwards"}); }); }
   renderHero();
-  $("#hfaNote").innerHTML = `Score = power rating + résumé (résumé points per game, scaled to the average ${RESULT.rows[0]?.avgGames.toFixed(1) ?? ""}-game schedule). Power is the Matchup model's rating: how a team would fare against an average ${LG.word} team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
+  $("#hfaNote").innerHTML = `Score = power rating + ${RESUME_WEIGHT} × résumé, where résumé is the team's average points per game it has played. Power is the Matchup model's rating: how a team would fare against an average ${LG.word} team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
 function renderResults(){
@@ -1673,7 +1675,7 @@ function renderTeam(name){
     <div class="tiles">
       <div class="tile"><b>#${r.rank}</b><span>Overall rank</span></div>
       <div class="tile"><b>#${r.power}</b><span>Power rank</span></div>
-      <div class="tile"><b class="${r.resume>=0?"pos":"neg"}">${r.resume>=0?"+":""}${r.resume.toFixed(1)}</b><span>Résumé points</span></div>
+      <div class="tile"><b class="${r.resume>=0?"pos":"neg"}">${r.resume>=0?"+":""}${r.resume.toFixed(2)}</b><span>Résumé per game (${r.resumeRaw>=0?"+":""}${r.resumeRaw.toFixed(1)} in ${r.w+r.l})</span></div>
       <div class="tile"><b>#${r.sor}</b><span>Strength of record</span></div>
       <div class="tile"><b>#${r.sosRank}</b><span>Schedule strength</span></div>
       <div class="tile"><b class="${r.wab>=0?"pos":"neg"}">${r.wab>=0?"+":""}${r.wab.toFixed(2)}</b><span>Wins above bench</span></div>
@@ -1694,7 +1696,31 @@ function renderTeam(name){
         <td class="num">${Math.round(x.pb*100)}%</td>
         <td>${bar(x.value)} <span class="num ${x.value>=0?"pos":"neg"}" style="margin-left:6px">${x.value>=0?"+":""}${x.value.toFixed(2)}</span></td></tr>`).join("")}
       </tbody></table></div>
-    <p class="note">Bench win is how often the benchmark team (${esc(RESULT.benchTeam)}) would win that game at that venue. A win is worth 100% minus that number; a loss costs that number. Tap an opponent to open their page.</p>`;
+    <p class="note">Bench win is how often the benchmark team (${esc(RESULT.benchTeam)}) would win that game at that venue. A win is worth 100% minus that number; a loss costs that number. Tap an opponent to open their page.</p>
+    ${upcomingFor(r.team)}`;
+}
+// The rest of a team's schedule: games in the schedule file not yet in the results, with our prediction and the line.
+function upcomingFor(team){
+  const played = new Set(GAMES.map(g => `${g.week}|${g.home}|${g.away}`));
+  const rest = (SCHED.length ? SCHED : LINES).filter(g => (g.home === team || g.away === team) && !played.has(`${g.week}|${g.home}|${g.away}`))
+    .sort((a,b) => (a.start || "").localeCompare(b.start || "") || a.week - b.week);
+  if(!rest.length) return SCHED.length ? `<p class="note">No games left on the schedule.</p>` : "";
+  const nm = (t, f) => f === false || f === 0 ? FCS : t;
+  const rows = rest.map(g => {
+    const home = g.home === team, opp = home ? g.away : g.home, oppKey = nm(opp, home ? g.af : g.hf);
+    const ln = LINES.find(l => l.week === g.week && l.home === g.home && l.away === g.away);
+    let pred = "—", win = "";
+    if(PRED.T[team] && PRED.T[oppKey]){ const p = predict(PRED, team, oppKey, g.neutral ? "N" : home ? "A" : "B", autoModelOut(team), oppKey === FCS ? 0 : autoModelOut(oppKey));
+      pred = `${p.sa}–${p.sb}`; win = `<span class="${p.pa >= .5 ? "pos" : "neg"}">${Math.round(p.pa*100)}%</span>`; }
+    const orank = RESULT.byTeam[opp]?.rank;
+    return `<tr ${RESULT.byTeam[opp] ? `class="click" data-team="${esc(opp)}" tabindex="0"` : ""}>
+      <td class="num">${g.week}</td><td class="sub">${g.start ? gameDay(g.start) : "TBA"}</td>
+      <td><span class="sub">${g.neutral ? "vs (N)" : home ? "vs" : "@"}</span> ${orank ? `<span class="sub">#${orank}</span> ` : ""}<span class="tm">${esc(opp)}</span> <span class="sub hide-sm">${RESULT.byTeam[opp] ? `${RESULT.byTeam[opp].w}-${RESULT.byTeam[opp].l}` : ""}</span></td>
+      <td class="num">${pred}</td><td class="num">${win}</td>
+      <td class="num">${ln && ln.spread != null ? lineStr(g.home, g.away, -ln.spread) : "—"}</td></tr>`; }).join("");
+  return `<div class="bar"><h2>Still to play</h2><span class="sub">${rest.length} game${rest.length === 1 ? "" : "s"}</span></div>
+    <div class="panel scroll"><table><thead><tr><th>Wk</th><th>Date</th><th>Opponent</th><th class="num" title="Our predicted score, ${esc(team)} first">Our score</th><th class="num" title="Our chance ${esc(team)} wins">Win %</th><th class="num">Betting line</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="note">Predicted from today's ratings (with players listed Out), so they will move as the season goes on. Betting lines appear about a week before each game.</p>`;
 }
 
 function renderStatus(){
@@ -1802,6 +1828,10 @@ async function loadData(){
       const lr = await fetch(`${LG.dir}lines.json`, {cache:"no-store"});
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[], open:r[10] ?? null}));
     }catch(e){ LINES = []; }
+    try{  // the full schedule (played and upcoming): [week, home, away, neutral, start, home_fbs, away_fbs]
+      const sr = await fetch(`${LG.dir}schedule.json`, {cache:"no-store"});
+      SCHED = sr.ok ? ((await sr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], start:r[4], hf:r[5] ?? 1, af:r[6] ?? 1})) : [];
+    }catch(e){ SCHED = []; }
     try{
       const tm = await fetch(`${LG.dir}teams.json`, {cache:"no-store"});
       // v2 rows: [school, logo, dark-background logo, color, alt color]; the first version had no dark logo.

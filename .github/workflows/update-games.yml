@@ -35,5 +35,6 @@ jobs:
           if [ -f data/tracker.json ]; then git add data/tracker.json; fi
           if [ -f data/ppa.json ]; then git add data/ppa.json; fi
           if [ -f data/teams.json ]; then git add data/teams.json; fi
+          if [ -f data/schedule.json ]; then git add data/schedule.json; fi
           if [ -d data/nfl ]; then git add data/nfl; fi
           git diff --cached --quiet || (git commit -m "Update game results" && git push)

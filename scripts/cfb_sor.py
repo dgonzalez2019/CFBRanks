@@ -54,14 +54,14 @@ import numpy as np
 WIN_PROB_SD = 15.0        # overwritten at fit time (the Matchup model's outcome SD)
 FCS_POOL = "FCS (pooled)" # all non-FBS opponents share one rating
 # Power rating = the Matchup model's rating (fit_predictor(): last season as a starting point, passing/rushing
-# efficiency): its neutral-field margin against an average FBS team. RESUME_WEIGHT 1.0 because these ratings are
+# efficiency): its neutral-field margin against an average FBS team. RESUME_WEIGHT (per point of résumé per game) because these ratings are
 # about twice as spread out as the old compressed ones, so the rating/resume balance stays the same.
 # Ranking score = power rating + RESUME_WEIGHT * resume. Resume points per game by quadrant:
 # Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
 WIN_PTS = {"Q1": 4.0, "Q2": 2.0, "Q3": 1.0, "Q4": 0.5}
 LOSS_PTS = {"Q1": 0.5, "Q2": 1.0, "Q3": 2.0, "Q4": 4.0}
 LOSS_WEIGHT = 0.85
-RESUME_WEIGHT = 1.0
+RESUME_WEIGHT = 7.4  # per point of résumé per game (see LEAGUE_SETTINGS)
 # Quadrants by the opponent's power rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = rest + FCS.
 # Power rank (not overall rank) keeps resumes from feeding back into opponents' ranks.
 QUAD_CUTS = (25, 50, 80)
@@ -69,11 +69,12 @@ QUAD_CUTS = (25, 50, 80)
 
 # League settings (keep in sync with LEAGUES in index.html). NFL values come from research/nfl_tune.py (2016-25,
 # week-by-week with last season's prior: keep 0.5, lam 8, cap 21, no box-score efficiency; 63.7% winners / 10.22
-# avg miss vs the closing line's 66.5% / 9.77) and RESUME_WEIGHT 0.3 keeps the rating/résumé balance of CFB
-# (NFL ratings are far more bunched: SD 3-4 points vs 10).
+# avg miss vs the closing line's 66.5% / 9.77) and RESUME_WEIGHT is per point of résumé per game
+# (CFB 7.4, NFL 2.0: the balance with the rating that the earlier season-total versions had; NFL ratings are far
+# more bunched, SD 3-4 points vs 10).
 LEAGUE_SETTINGS = {
-    "cfb": dict(PRIOR_KEEP=0.9, PRIOR_LAM=2.0, PRIOR_CAP=45.0, EFF_WEIGHT=0.25, QUAD_CUTS=(25, 50, 80), RESUME_WEIGHT=1.0),
-    "nfl": dict(PRIOR_KEEP=0.5, PRIOR_LAM=8.0, PRIOR_CAP=21.0, EFF_WEIGHT=0.0, QUAD_CUTS=(8, 16, 24), RESUME_WEIGHT=0.3),
+    "cfb": dict(PRIOR_KEEP=0.9, PRIOR_LAM=2.0, PRIOR_CAP=45.0, EFF_WEIGHT=0.25, QUAD_CUTS=(25, 50, 80), RESUME_WEIGHT=7.4),
+    "nfl": dict(PRIOR_KEEP=0.5, PRIOR_LAM=8.0, PRIOR_CAP=21.0, EFF_WEIGHT=0.0, QUAD_CUTS=(8, 16, 24), RESUME_WEIGHT=2.0),
 }
 
 
@@ -212,9 +213,8 @@ def compute(games, benchmark_rank=25, prior=None):
                 value=(1 - p_bench) if won else -p_bench,   # + win quality / - loss cost
             ))
 
-    # Résumé is counted per game and scaled to the average schedule length, so an extra game (or a bye) doesn't move a
-    # team by itself: with a running total, a 7-1 team out-ranked a 6-1 team that beat it, only for having played more.
-    avg_games = float(np.mean([len(sched[t]) for t in fbs_sorted if sched[t]])) if fbs_sorted else 1.0
+    # Résumé = each team's own average per game played, so an extra game (or a bye) doesn't move a team by itself:
+    # with a running total, a 7-1 team out-ranked a 6-1 team that beat it, only for having played more.
     rows = []
     for t in fbs_sorted:
         gs = sched[t]
@@ -229,7 +229,7 @@ def compute(games, benchmark_rank=25, prior=None):
         W_ = sorted([x for x in gs if x["won"]], key=lambda x: -x["value"])
         L_ = sorted([x for x in gs if not x["won"]], key=lambda x: x["value"])
         resume_raw = sum(WIN_PTS[x["quad"]] if x["won"] else -LOSS_WEIGHT * LOSS_PTS[x["quad"]] for x in gs)
-        resume = resume_raw / len(gs) * avg_games if gs else 0.0
+        resume = resume_raw / len(gs) if gs else 0.0
         rows.append(dict(
             team=t, record=f"{wins}-{losses}", rating=ratings[t], power_rank=rank[t],
             resume=resume, resume_raw=resume_raw, score=ratings[t] + RESUME_WEIGHT * resume,

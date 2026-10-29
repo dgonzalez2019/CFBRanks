@@ -101,6 +101,12 @@ out = {"season": a.year, "updated": datetime.datetime.now(datetime.timezone.utc)
 path.write_text(json.dumps(out, separators=(",", ":")))
 print(f"Wrote {len(rows)} games ({sum(len(r) > 8 for r in rows)} with box scores, {sum(len(r) > 9 for r in rows)} with matchup stats) to {path}")
 
+# The full schedule (played and upcoming), for the team pages: [week, home, away, neutral, start, home_fbs, away_fbs].
+sched = sorted(([g["week"], g["home"], g["away"], int(g["neutral"]), g.get("start"), int(g["home_fbs"]), int(g["away_fbs"])] for g in games + upcoming),
+               key=lambda r: (r[4] or "", r[0]))
+(path.parent / "schedule.json").write_text(json.dumps({"season": a.year, "updated": out["updated"], "games": sched}, separators=(",", ":")))
+print(f"Wrote the schedule: {len(sched)} games ({len(upcoming)} still to play)")
+
 
 # Betting lines: one /lines call per season type covers every game. Spreads use the API's convention
 # (home team's spread, negative = home favored); we store the median across sportsbooks.

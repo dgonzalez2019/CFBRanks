@@ -128,6 +128,10 @@ def season_files(season, write_dir, current):
     gpath = write_dir / ("games.json" if current else f"{season}.json")
     gpath.write_text(json.dumps({"season": season, "updated": stamp, "games": games}, separators=(",", ":")))
     (write_dir / ("lines.json" if current else f"{season}_lines.json")).write_text(json.dumps({"season": season, "updated": stamp, "games": lines}, separators=(",", ":")))
+    if current:  # the full schedule for the team pages: [week, home, away, neutral, start, 1, 1]
+        sched = [[int(g["week"]), name(g["home_team"]), name(g["away_team"]), int((g.get("location") or "").lower() == "neutral"),
+                  start_utc(g.get("gameday"), g.get("gametime")), 1, 1] for g in G if name(g["home_team"]) and name(g["away_team"])]
+        (write_dir / "schedule.json").write_text(json.dumps({"season": season, "updated": stamp, "games": sched}, separators=(",", ":")))
     (write_dir / ("ppa.json" if current else f"{season}_ppa.json")).write_text(json.dumps({"season": season, "updated": stamp, "games": ppa}, separators=(",", ":")))
     print(f"  wrote {len(games)} games ({sum(len(r) > 8 for r in games)} with box scores), {len(lines)} lines "
           f"({sum(r[6] is None for r in lines)} upcoming), {len(ppa)} EPA rows")
