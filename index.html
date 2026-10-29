@@ -1714,12 +1714,12 @@ function upcomingFor(team){
       pred = `${p.sa}–${p.sb}`; win = `<span class="${p.pa >= .5 ? "pos" : "neg"}">${Math.round(p.pa*100)}%</span>`; }
     const orank = RESULT.byTeam[opp]?.rank;
     return `<tr ${RESULT.byTeam[opp] ? `class="click" data-team="${esc(opp)}" tabindex="0"` : ""}>
-      <td class="num">${g.week}</td><td class="sub">${g.start ? gameDay(g.start) : "TBA"}</td>
-      <td><span class="sub">${g.neutral ? "vs (N)" : home ? "vs" : "@"}</span> ${orank ? `<span class="sub">#${orank}</span> ` : ""}<span class="tm">${esc(opp)}</span> <span class="sub hide-sm">${RESULT.byTeam[opp] ? `${RESULT.byTeam[opp].w}-${RESULT.byTeam[opp].l}` : ""}</span></td>
+      <td class="num">${g.week}</td><td class="sub hide-sm">${g.start ? gameDay(g.start) : "TBA"}</td>
+      <td><span class="sub">${g.neutral ? "vs (N)" : home ? "vs" : "@"}</span> ${orank ? `<span class="sub">#${orank}</span> ` : ""}<span class="tm">${esc(opp)}</span> <span class="sub hide-sm">${RESULT.byTeam[opp] ? `${RESULT.byTeam[opp].w}-${RESULT.byTeam[opp].l}` : ""}</span><span class="sub show-sm">${g.start ? gameDay(g.start) : "TBA"}</span></td>
       <td class="num">${pred}</td><td class="num">${win}</td>
-      <td class="num">${ln && ln.spread != null ? lineStr(g.home, g.away, -ln.spread) : "—"}</td></tr>`; }).join("");
+      <td class="num hide-sm">${ln && ln.spread != null ? lineStr(g.home, g.away, -ln.spread) : "—"}</td></tr>`; }).join("");
   return `<div class="bar"><h2>Still to play</h2><span class="sub">${rest.length} game${rest.length === 1 ? "" : "s"}</span></div>
-    <div class="panel scroll"><table><thead><tr><th>Wk</th><th>Date</th><th>Opponent</th><th class="num" title="Our predicted score, ${esc(team)} first">Our score</th><th class="num" title="Our chance ${esc(team)} wins">Win %</th><th class="num">Betting line</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="panel scroll"><table><thead><tr><th>Wk</th><th class="hide-sm">Date</th><th>Opponent</th><th class="num" title="Our predicted score, ${esc(team)} first">Score</th><th class="num" title="Our chance ${esc(team)} wins">Win %</th><th class="num hide-sm">Betting line</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="note">Predicted from today's ratings (with players listed Out), so they will move as the season goes on. Betting lines appear about a week before each game.</p>`;
 }
 
