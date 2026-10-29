@@ -25,6 +25,11 @@ jobs:
       - name: NFL data (optional)
         run: python scripts/fetch_nfl.py || echo "NFL fetch failed; keeping the previous files."
       - run: python scripts/track_picks.py --league nfl || echo "NFL tracker failed; keeping the previous file."
+      - name: NFL player props (optional, needs ODDS_API_KEY)
+        run: python scripts/fetch_props.py || echo "Props fetch failed; keeping the previous file."
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      - run: python scripts/track_props.py || echo "Props tracker failed; keeping the previous file."
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"

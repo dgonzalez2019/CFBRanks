@@ -308,10 +308,10 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;backgrou
 .pmeta{margin:0;font-size:13.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmeta b{color:var(--ink);font-weight:600}
 .pmeta time{color:var(--ink);font-weight:500}
-@media (max-width:640px){.pgame{font-size:15.5px}.ptext{font-size:26px}.pbet{padding:11px 12px 11px 14px}.ring,.ringwrap{width:56px;height:56px}.pick{padding:14px 14px 12px}}
+@media (max-width:640px){.seg button{padding:10px 4px;font-size:13.5px;white-space:normal;line-height:1.15}.pgame{font-size:15.5px}.ptext{font-size:26px}.pbet{padding:11px 12px 11px 14px}.ring,.ringwrap{width:56px;height:56px}.pick{padding:14px 14px 12px}}
 
 /* ---------- switches ---------- */
-.seg{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;width:100%;max-width:540px;border-radius:12px;background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.seg{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;padding:4px;width:100%;max-width:540px;border-radius:12px;background:color-mix(in srgb,var(--ink) 6%,transparent)}
 .seg button{position:relative;z-index:1;border:0;background:transparent;border-radius:9px;padding:11px 8px;font:500 15px/1.1 var(--body);color:var(--muted);white-space:nowrap;transition:color .25s}
 .seg button:hover{color:var(--ink)}
 .seg button[aria-selected="true"]{color:var(--ink);font-weight:600;background:var(--card);box-shadow:0 1px 2px rgba(40,30,10,.12),0 4px 12px -6px rgba(40,30,10,.3)}
@@ -702,11 +702,11 @@ h1 small b{font-weight:inherit}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], ROLES = [], TSTATS = null, TSP = null, PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
+let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], ROLES = [], TSTATS = null, TSP = null, PROPS = null, PRMODE = "all", PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-LMODE = ["spread","total"].includes(store.get("sor.lmode")) ? store.get("sor.lmode") : "picks";
+LMODE = ["spread","total","props"].includes(store.get("sor.lmode")) ? store.get("sor.lmode") : "picks";
 
 /* ---------------- sample season (invented schools) ---------------- */
 function sampleSeason(){
@@ -782,7 +782,7 @@ async function setLeague(l){
   LEAGUE = l; store.set("sor.league", l);
   const go = async () => {
     applyLeague();
-    SCHED = []; TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; ROLES = []; TSTATS = null; TSP = null; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
+    SCHED = []; TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; ROLES = []; TSTATS = null; TSP = null; PROPS = null; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
     MKEY = ""; Object.keys(FLIPPED).forEach(k => delete FLIPPED[k]);
     $("#ma").value = store.get(SK("sor.ma")) || ""; $("#mb").value = store.get(SK("sor.mb")) || ""; $("#q").value = "";
     await loadData();
@@ -1317,6 +1317,7 @@ function explainTotal(t){
 const MU_UNITS = [["ypa","Passing","yds per attempt",v => v.toFixed(1)], ["ypc","Rushing","yds per carry",v => v.toFixed(1)],
   ["sack","Sacks","per dropback",v => (v*100).toFixed(1)+"%"], ["to","Turnovers","per play",v => (v*100).toFixed(1)+"%"], ["third","Third downs","converted",v => (v*100).toFixed(1)+"%"]];
 function openSheet(kind, key){
+  if(kind === "prop") return openPropSheet(key);
   const t = (TRACKER?.games||[]).find(g => g.key === key), [wk, home, away] = key.split("|"), l = LINES.find(x => `${x.week}|${x.home}|${x.away}` === key);
   if(!home || !away || !PRED.T[home] || !PRED.T[away]) return;
   const neutral = l ? l.neutral : !!t?.neutral, ih = autoModelOut(home), ia = autoModelOut(away);
@@ -1594,12 +1595,14 @@ const gameWhen = s => { if(!s) return "Date TBA"; const d = new Date(s), et = {t
   return `${gameDay(s)} · ${/^(00|24):00$/.test(mid) ? "Time TBA" : t + " ET"}`; };
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 // Lines tab switch: Top picks (the summary, default) | Spreads | Totals.
-const lineSeg = () => `<div class="seg" role="tablist" aria-label="Top picks, spreads or totals">${[["picks","Top picks"],["spread","Spreads"],["total","Totals (O/U)"]].map(([k,n]) =>
+const lineSeg = () => `<div class="seg" role="tablist" aria-label="Top picks, spreads or totals">${[["picks","Top picks"],["spread","Spreads"],["total","Totals (O/U)"], ...(LEAGUE === "nfl" ? [["props","Player props"]] : [])].map(([k,n]) =>
   `<button type="button" role="tab" data-lm="${k}" aria-selected="${LMODE===k}">${n}</button>`).join("")}</div>`;
 const bindLineSeg = () => $("#lout").querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { LMODE = b.dataset.lm; store.set("sor.lmode", LMODE);
   document.startViewTransition && !REDUCED ? document.startViewTransition(renderLines) : renderLines(); }));
 function renderLines(){
+  if(LMODE === "props" && LEAGUE !== "nfl") LMODE = "picks";
   if(LMODE === "picks"){ renderPicks(); return; }
+  if(LMODE === "props"){ renderProps(); return; }
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
   const up = LINES.filter(l => l.hp==null && PRED.T[l.home] && PRED.T[l.away]).map(l => {
     const ih = autoModelOut(l.home), ia = autoModelOut(l.away);
@@ -1712,7 +1715,7 @@ const shortWhen = s => { if(!s) return "Date TBA"; const d = new Date(s), et = {
 const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" data-k="${p.kind}|${esc(p.key || "")}" role="button" tabindex="0" aria-label="Details for this pick" style="--i:${Math.min(i,20)}">
     <div class="pgame">${p.game}</div>
     <div class="pbet">
-      <div><span class="pkind">${p.kind === "spread" ? "Spread" : "Over/under"}</span><b class="ptext">${p.text}</b></div>
+      <div><span class="pkind">${p.kindLabel || (p.kind === "spread" ? "Spread" : "Over/under")}</span><b class="ptext">${p.text}</b></div>
       <div class="pconf">${p.conf != null ? `<div class="ringwrap"><div class="ring" style="--v:${(p.conf*100).toFixed(1)}"></div><b>${(p.conf*100).toFixed(1)}%</b></div>${p.top5 ? `<em>★ Top 5%</em>` : p.top ? `<em>★ Top 10%</em>` : `<span>chance to hit</span>`}` : `<div class="ringwrap"><b class="none">—</b></div><span>no score yet</span>`}</div>
     </div>
     <p class="pmeta" title="${esc(String(p.why).replace(/<[^>]+>/g, ""))}${p.note ? " · " + esc(p.note.replace(/<[^>]+>/g, "")) : ""}"><span class="pmeta-t"><time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${shortWhen(p.start)}</time> · ${p.why}${p.note ? " · injuries counted" : ""}</span><span class="pmore" aria-hidden="true">Details ›</span></p>
@@ -1773,6 +1776,66 @@ function renderPicks(){
     `<p class="note">Confidence is the model's chance the pick beats the betting line (spreads) or total (over/unders). Even the best-rated picks are expected to win only about 55% of the time, and totals scores are much less proven than spread scores. Results are tracked under Spreads and Totals. Not betting advice.</p>`;
   $("#lout").querySelectorAll("[data-pm]").forEach(b => b.addEventListener("click", () => { PMODE = b.dataset.pm; flipRender("#lout .picks", renderPicks); }));
   bindLineSeg();
+}
+
+// NFL player props (data/nfl/props.json from scripts/track_props.py): each prop's projection from the player's
+// earlier games, the opponent and the team's implied points (scripts/props_model.py), and our chance the side we
+// take wins. Tested only against lines near our own projection (research/nfl_props.py): sportsbook prop lines
+// aren't free historically, so the live record below is the real test.
+const PROP_MK = {pass_yds:["Passing","passing yds"], rush_yds:["Rushing","rushing yds"], rec_yds:["Receiving","receiving yds"], receptions:["Receptions","receptions"]};
+const amer = o => o == null ? "—" : o > 0 ? `+${o}` : `−${-o}`;
+const propLine = p => `${p.side === "over" ? "Over" : "Under"} ${(+p.line).toFixed(1)} ${PROP_MK[p.mk][1]}`;
+const propWho = p => `<span class="pteam pickside" data-team="${esc(p.team)}">${mono(p.team, "xs")}${esc(p.player)}</span> <span class="pat">${p.team === p.home ? "vs" : "at"}</span> <span class="pteam" data-team="${esc(p.opp)}">${esc(p.opp)}</span>`;
+function renderProps(){
+  const nowMs = Date.now(), all = PROPS?.props || [];
+  const up = all.filter(p => new Date(p.start).getTime() > nowMs).sort((a,b) => b.conf - a.conf);
+  const shown = up.filter(p => PRMODE === "all" || p.mk === PRMODE);
+  const seg = `<div class="seg sm" role="tablist" aria-label="Which props"><span class="seglabel">Show</span>${[["all","All"], ...Object.entries(PROP_MK).map(([k,v]) => [k, v[0]])].map(([k,n]) =>
+    `<button type="button" role="tab" data-prm="${k}" aria-selected="${PRMODE===k}">${n}<i>${k === "all" ? up.length : up.filter(p => p.mk === k).length}</i></button>`).join("")}</div>`;
+  const graded = all.filter(p => p.won === true || p.won === false);
+  const recRow = (label, l) => { const w = l.filter(p => p.won).length; return l.length ? `<tr><td>${label}</td><td class="num">${w}–${l.length - w}</td><td class="num">${Math.round(100*w/l.length)}%</td></tr>` : ""; };
+  const record = graded.length ? `<div class="bar"><h2>Live record</h2><span class="sub">${graded.length} graded props</span></div>
+    <div class="panel scroll"><table><thead><tr><th>Props</th><th class="num">Record</th><th class="num">Hit</th></tr></thead><tbody>
+    ${recRow("★ Top 5%", graded.filter(p => p.top5))}${recRow("★ Top 10%", graded.filter(p => p.top10))}${recRow("Rated 60%+", graded.filter(p => p.conf >= .6))}${recRow("All", graded)}
+    ${Object.entries(PROP_MK).map(([k,v]) => recRow(v[0], graded.filter(p => p.mk === k))).join("")}</tbody></table></div>
+    <p class="note">At standard −110 prices a side has to win 52.4% of the time to break even.</p>` : "";
+  const T = PROPS?.test || {};
+  const tested = Object.entries(PROP_MK).filter(([k]) => T[k]).map(([k,v]) => `${v[0].toLowerCase()} ${T[k].mae.toFixed(k === "receptions" ? 2 : 1)} vs ${T[k].mae_avg.toFixed(k === "receptions" ? 2 : 1)}`).join(", ");
+  $("#ltitle").textContent = "This week's player props";
+  $("#lout").innerHTML = lineSeg() + seg +
+    `<p class="note" style="margin:0">Every passing, rushing and receiving prop the sportsbooks have posted for games in the next day and a half, with our projection and our chance the side we take wins, most confident first. ★ marks this week's top 5% and 10%.</p>` +
+    (shown.length ? `<div class="picks">${shown.map((p,i) => pickCard({kind:"prop", kindLabel:`${PROP_MK[p.mk][0]} prop`, conf:p.conf, top:p.top10, top5:p.top5, start:p.start,
+        text:propLine(p), game:propWho(p), key:p.key, why:`Proj <b>${p.proj}</b> · Line ${(+p.line).toFixed(1)} · ${amer(p.side === "over" ? p.over : p.under)}`}, i)).join("")}</div>`
+      : `<div class="panel empty">No player props posted yet. They appear about a day and a half before each game${PROPS?.updated ? ` (last checked ${new Date(PROPS.updated).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})})` : ""}.</div>`) +
+    record +
+    `<p class="note">How the projection works: the player's games this season, the latest counting most, plus last season as a starting point; what this opponent allows to his position; and his team's expected points from the betting line. Tested on 2023–25 games it wasn't fit on, it missed by less than a plain season average (${tested || "see research/nfl_props.py"}), and its chances were well calibrated (a "60%" side hit about 60% at lines near our projection). Sportsbook prop lines aren't available historically for free, so it has <b>not</b> been tested against real prop lines: books are sharper than our projection, so expect real results well below those numbers. The live record above is the honest test. Not betting advice.</p>`;
+  $("#lout").querySelectorAll("[data-prm]").forEach(b => b.addEventListener("click", () => { PRMODE = b.dataset.prm; flipRender("#lout .picks", renderProps); }));
+  bindLineSeg();
+}
+function openPropSheet(key){
+  const p = (PROPS?.props || []).find(x => x.key === key); if(!p) return;
+  const L = PROP_MK[p.mk][1], pct = v => (v*100).toFixed(1) + "%", up = p.side === "over";
+  const oppTxt = Math.abs(p.opp_f - 1) < .03 ? "about average" : `${Math.round(Math.abs(p.opp_f - 1)*100)}% ${p.opp_f > 1 ? "more" : "less"} than average`;
+  const edge = p.conf - p.book_p;
+  $("#sheetBody").innerHTML = `
+    <div class="sh-game"><div class="pgame sh-teams">${propWho(p)}</div><div class="sh-when">${gameWhen(p.start)} · ${esc(p.pos)}</div></div>
+    <div class="pbet${p.top10 ? " hotbet" : ""}"><div><span class="pkind">${PROP_MK[p.mk][0]} prop</span><b class="ptext">${propLine(p)}</b></div>
+      <div class="pconf"><div class="ringwrap"><div class="ring" style="--v:${(p.conf*100).toFixed(1)}"></div><b>${pct(p.conf)}</b></div><span>chance to hit</span></div></div>
+    <h3>Why ${pct(p.conf)}</h3>
+    <div class="sh-grid">
+      <div><span>Our projection</span><b>${p.proj} ${esc(L)}</b></div><div><span>Betting line</span><b>${(+p.line).toFixed(1)}</b><span>median of ${p.books} book${p.books === 1 ? "" : "s"}</span></div>
+      <div><span>Season average</span><b>${p.avg}</b><span>${p.games} games</span></div><div><span>Last 3 games</span><b>${p.last3}</b></div>
+      <div><span>Recent-weighted</span><b>${p.base}</b><span>${p.prior != null ? `incl. last season's ${p.prior}/game` : "no stats last season"}</span></div>
+      <div><span>${esc(p.opp)} defense</span><b>${p.opp_f.toFixed(2)}×</b><span>allows ${oppTxt} to ${esc(p.pos)}s</span></div>
+      <div><span>${esc(p.team)} expected points</span><b>${p.imp}</b><span>from the spread and total</span></div>
+      <div><span>Books' chance (no vig)</span><b>${pct(p.book_p)}</b><span>${amer(up ? p.over : p.under)} for ${up ? "over" : "under"}</span></div>
+    </div>
+    <p class="sh-sum" style="margin:0">We project <b>${p.proj}</b> ${esc(L)} against a line of <b>${(+p.line).toFixed(1)}</b>. In past seasons players projected like this went ${up ? "over" : "under"} that line about <b>${pct(p.conf)}</b> of the time (over ${pct(p.p_over)}, under ${pct(1 - p.p_over)}). The books' prices imply ${pct(p.book_p)}, so we're ${Math.abs(edge) < .01 ? "in line with them" : `${(Math.abs(edge)*100).toFixed(1)} points ${edge > 0 ? "more" : "less"} confident than they are`}.</p>
+    ${p.won != null ? `<p class="sh-sum" style="margin:0"><b>Result:</b> ${p.actual} ${esc(L)} — ${p.won ? "hit" : "missed"}.</p>` : ""}
+    <p class="note" style="margin:0">Projected from his earlier games, the opponent and the game's betting line. Teammates' injuries and weather aren't included. Untested against real sportsbook prop lines; see the live record.</p>`;
+  const d = $("#sheet"); d.classList.remove("closing");
+  if(!d.open){ if(typeof d.showModal === "function"){ try{ d.showModal(); }catch(e){ d.setAttribute("open", ""); d.classList.add("nomodal"); } } else { d.setAttribute("open", ""); d.classList.add("nomodal"); } }
+  document.documentElement.classList.add("sheet-open"); d.querySelector(".sheet-in").scrollTop = 0;
 }
 
 function renderTeam(name){
@@ -1972,6 +2035,10 @@ async function loadData(){
       const pr = await fetch(`${LG.dir}players.json`, {cache:"no-store"});
       if(pr.ok) PLAYERS = ((await pr.json()).players || []).map(r => ({team:r[0], name:r[1], pos:r[2], plays:r[3], ppa:r[4]}));
     }catch(e){ PLAYERS = []; }
+    try{
+      const pp = LEAGUE === "nfl" ? await fetch(`${LG.dir}props.json`, {cache:"no-store"}) : null;
+      PROPS = pp?.ok ? await pp.json() : null;
+    }catch(e){ PROPS = null; }
     try{
       const tr2 = await fetch(`${LG.dir}teamstats.json`, {cache:"no-store"});
       TSTATS = tr2.ok ? await tr2.json() : null;
