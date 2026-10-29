@@ -28,8 +28,11 @@ def median(xs):
 
 
 # Lines: [week, home, away, median home spread (negative = home favored), median total, median opening spread, [books]]
+import datetime
+in_progress = a.year >= datetime.date.today().year  # current season: lines and players live in data/, not history
+
 lp = out_dir / f"{a.year}_lines.json"
-if not lp.exists():
+if not lp.exists() and not in_progress:
     rows = []
     for seas in ("regular", "postseason"):
         for it in get(f"https://api.collegefootballdata.com/lines?year={a.year}&seasonType={seas}"):
@@ -73,7 +76,7 @@ if not qp.exists():
 
 # Player values for that season, same format as data/players.json: [team, name, position, plays, avg PPA per play]
 pp = out_dir / f"{a.year}_players.json"
-if not pp.exists():
+if not pp.exists() and not in_progress:
     rows = []
     for x in get(f"https://api.collegefootballdata.com/ppa/players/season?year={a.year}&excludeGarbageTime=true"):
         avg = (x.get("averagePPA") or {}).get("all"); tot = (x.get("totalPPA") or {}).get("all")
