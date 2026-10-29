@@ -276,34 +276,33 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 
 /* ---------- picks tab ---------- */
 .picks{display:grid;gap:10px}
-.pick{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:6px 16px;align-items:center;padding:14px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);
+.pick{position:relative;display:grid;gap:12px;padding:16px 18px;border-radius:18px;background:var(--card);border:1px solid var(--line);
   -webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);box-shadow:var(--shadow);animation:viewIn .5s var(--ease) both;animation-delay:calc(var(--i,0) * 40ms);transition:transform .3s var(--ease)}
-.pick:hover{transform:translateX(4px)}
-.pick.hot{border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
-.pick.won{border-color:color-mix(in srgb,var(--win) 60%,var(--line));background:linear-gradient(90deg,var(--win-soft),var(--card) 60%);box-shadow:var(--shadow),inset 4px 0 0 var(--win)}
-.pick.lost{border-color:color-mix(in srgb,var(--loss) 45%,var(--line));background:linear-gradient(90deg,var(--loss-soft),var(--card) 60%);box-shadow:var(--shadow),inset 4px 0 0 var(--loss);opacity:.85}
-.pconf{display:grid;justify-items:center;min-width:76px}
-.pconf b{font:800 28px/1 var(--display);color:var(--ink)}
-.pick.hot .pconf b{color:var(--gold);text-shadow:0 0 16px var(--gold-soft)}
-.pconf span{font:600 9.5px/1.3 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
-.pick.hot .pconf span{color:var(--gold)}
-.pmain{display:grid;gap:3px;min-width:0}
-.pkind{justify-self:start;font:600 9.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:4px 6px;border-radius:5px;background:var(--accent-soft);color:var(--accent)}
-.pkind.total{background:var(--gold-soft);color:var(--gold)}
-.ptext{font:800 22px/1.1 var(--display);text-transform:uppercase;letter-spacing:.02em;overflow-wrap:anywhere}
-.pres{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font:700 13px/1.3 var(--body);margin-top:2px}
-.pick.won .pres{color:var(--win)} .pick.lost .pres{color:var(--loss)}
-.pres span{font:500 12px/1.3 var(--mono);color:var(--muted)}
-.pgame{font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
-.pteam{display:inline-flex;align-items:center;color:var(--ink);font-weight:500}
-.pteam.pickside{color:var(--accent);font-weight:700}
-.pat{font:600 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pick:hover{transform:translateY(-2px)}
+.pick.hot{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));box-shadow:var(--shadow),0 0 40px -24px var(--gold)}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.pgame{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0;font:700 17px/1.25 var(--body);color:var(--ink)}
+.pteam{display:inline-flex;align-items:center;color:var(--ink)}
+.pteam .mono{width:28px;height:28px;margin-right:10px}
+.pteam .mono.logo img{width:28px;height:28px}
+.pteam.pickside{color:var(--accent)}
+.pat{font:600 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pconf{display:grid;justify-items:end;flex:none;text-align:right}
+.pconf b{font:800 24px/1 var(--display);color:var(--ink)}
 .pconf b.none{color:var(--muted)}
-.pstats{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.pstats span{font:500 11.5px/1 var(--body);color:var(--muted);padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.pconf span{font:600 10px/1.3 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pick.hot .pconf b,.pick.hot .pconf span{color:var(--gold)}
+.pbet{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;padding:12px 16px;border-radius:14px;background:var(--accent-soft);border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent)}
+.pick.hot .pbet{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 65%,transparent)}
+.pkind{font:600 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ptext{font:800 30px/1 var(--display);text-transform:uppercase;letter-spacing:.02em;color:var(--accent);overflow-wrap:anywhere}
+.pick.hot .ptext{color:var(--gold)}
+.pfoot{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px 14px}
+.pstats{display:flex;flex-wrap:wrap;gap:6px}
+.pstats span{font:500 11.5px/1 var(--body);color:var(--muted);padding:6px 8px;border-radius:8px;border:1px solid var(--line)}
 .pstats b{font:600 12px/1 var(--mono);color:var(--ink);margin-left:4px}
-.pick time{align-self:end;font:600 12px/1.2 var(--mono);color:var(--accent);white-space:nowrap;text-align:right}
-@media (max-width:640px){.pick{grid-template-columns:auto 1fr}.pick time{grid-column:1/-1;justify-self:end}.pconf{min-width:64px}.pconf b{font-size:24px}.ptext{font-size:19px}}
+.pick time{margin-left:auto;font:600 12.5px/1.2 var(--mono);color:var(--accent);white-space:nowrap;text-align:right}
+@media (max-width:640px){.pgame{font-size:16px}.ptext{font-size:26px}.pconf b{font-size:21px}.pbet{padding:10px 14px}}
 /* ---------- game cards (Lines tab) ---------- */
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;width:100%;max-width:560px;border-radius:14px;background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
 .seg button{border:0;background:transparent;border-radius:10px;padding:12px 8px;font:600 15px/1.1 var(--body);color:var(--muted);white-space:nowrap;transition:background .2s,color .2s}
@@ -1188,15 +1187,16 @@ function renderLines(){
 let PMODE = "all";
 // One row card per pick: confidence on the left, the side to take as the headline, the game, the numbers, kickoff.
 const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
-    <div class="pconf">${p.conf != null ? `<b>${(p.conf*100).toFixed(1)}%</b><span>${p.top5 ? "★ Top 5%" : p.top ? "★ Top 10%" : "confidence"}</span>` : `<b class="none">—</b><span>no score yet</span>`}</div>
-    <div class="pmain">
-      <div class="pkind ${p.kind}">${p.kind === "spread" ? "Spread" : "Over/under"}</div>
-      <div class="ptext">${p.text}</div>
+    <div class="phead">
       <div class="pgame">${p.game}</div>
-      <div class="pstats">${p.stats.map(([k,v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>
-      ${p.note ? `<div class="sub">${p.note}</div>` : ""}
+      <div class="pconf">${p.conf != null ? `<b>${(p.conf*100).toFixed(1)}%</b><span>${p.top5 ? "★ Top 5%" : p.top ? "★ Top 10%" : "confidence"}</span>` : `<b class="none">—</b><span>no score yet</span>`}</div>
     </div>
-    <time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${gameWhen(p.start)}</time>
+    <div class="pbet ${p.kind}"><span class="pkind">${p.kind === "spread" ? "Spread bet" : "Over/under bet"}</span><b class="ptext">${p.text}</b></div>
+    <div class="pfoot">
+      <div class="pstats">${p.stats.map(([k,v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>
+      <time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${gameWhen(p.start)}</time>
+    </div>
+    ${p.note ? `<div class="sub">${p.note}</div>` : ""}
   </article>`;
 const signed = x => Math.abs(x) < .25 ? "PK" : (x > 0 ? "+" : "−") + (Math.round(Math.abs(x)*2)/2).toFixed(1);
 // The matchup line with team logos; `pick` (a team name) is highlighted.
