@@ -92,6 +92,8 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .eff .num .sub{display:block}
 .show-sm{display:none}
 .injgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:12px}
+.tag{display:inline-block;font:600 10.5px/1 var(--mono);padding:3px 5px;border-radius:4px;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line);vertical-align:1px}
+.tag.out{color:var(--loss);background:var(--loss-soft);box-shadow:none}
 .inj{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
 .lines td:nth-child(2){white-space:normal}
 .eff td:first-child .sub{display:block}
@@ -264,7 +266,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -470,6 +472,26 @@ function playerValues(players, games){
   return byTeam;
 }
 
+// Injury reports (SportsDataIO, data/injuries.json). Players listed Out are marked automatically. For our model
+// a player's value is scaled by the share of his team's games this season played before his injury started:
+// the ratings already reflect games he missed. Lines from sportsbooks already price public reports, so the
+// line-based prediction only moves for changes the viewer makes to the report (extra players out, or listed
+// players unticked).
+const nameKey = n => n.toLowerCase().replace(/[^a-z ]/g,"").replace(/\b(jr|sr|ii|iii|iv)\b/g,"").replace(/\s+/g," ").trim();
+const injuryOf = (team, name) => (INJURIES[team]||[]).find(r => nameKey(r.name) === nameKey(name)) || null;
+const publicOut = (team, name) => injuryOf(team, name)?.status === "Out";
+function weekDates(){ const d = {}; LINES.forEach(l => { if(l.start && (!d[l.week] || l.start < d[l.week])) d[l.week] = l.start.slice(0,10); }); return d; }
+function shareBefore(team, start){  // share of the team's games played before the injury started
+  if(!start) return 1;
+  const wd = weekDates(), gs = GAMES.filter(g => g.home===team || g.away===team);
+  if(!gs.length) return 1;
+  return gs.filter(g => wd[g.week] && wd[g.week] < start).length / gs.length;
+}
+function outSet(team){ if(!OUT[team]) OUT[team] = new Set((PVAL[team]||[]).filter(x => publicOut(team, x.name)).map(x => x.name)); return OUT[team]; }
+const modelOut = team => (PVAL[team]||[]).filter(x => outSet(team).has(x.name)).reduce((s,x) => s + x.value * (publicOut(team, x.name) ? shareBefore(team, injuryOf(team, x.name).start) : 1), 0);
+const lineOut = team => (PVAL[team]||[]).reduce((s,x) => { const m = outSet(team).has(x.name), p = publicOut(team, x.name); return s + (m && !p ? x.value : !m && p ? -x.value : 0); }, 0);
+const autoModelOut = team => (PVAL[team]||[]).filter(x => publicOut(team, x.name)).reduce((s,x) => s + x.value * shareBefore(team, injuryOf(team, x.name).start), 0);
+
 // Honest accuracy: predict each week using only earlier games (from week 2 when last season seeds the
 // ratings, otherwise from week 5, when this season alone is enough).
 function backtest(games){
@@ -596,7 +618,7 @@ let MKEY = "";
 function renderMatchup(force){
   const a = $("#ma").value, b = $("#mb").value, ok = t => RESULT.byTeam[t];
   // Leaving a text box fires "change" too; redrawing then would swallow the click that caused it.
-  const key = [a, b, $("#mv").value, [...(OUT[a]||[])], [...(OUT[b]||[])]].join("|");
+  const key = ok(a) && ok(b) ? [a, b, $("#mv").value, [...outSet(a)], [...outSet(b)]].join("|") : [a, b].join("|");
   if(!force && key === MKEY) return;
   MKEY = key;
   $("#mv").options[1].text = ok(a) ? `${a} at home` : "Team 1 at home";
@@ -605,7 +627,7 @@ function renderMatchup(force){
     (BT ? ` Tested on ${BT.n} past games using only the games before each one, it picked the winner ${Math.round(BT.hit*100)}% of the time and missed the margin by ${BT.mae.toFixed(1)} points on average (${Math.round(BT.close*100)}% of those games were decided by one score).` : "");
   if(!ok(a) || !ok(b) || a===b){ $("#mout").innerHTML = `<div class="panel empty">${a&&b&&a===b?"Pick two different teams.":"Pick two FBS teams to see who would win and the predicted score."}</div>`; return; }
   store.set("sor.ma", a); store.set("sor.mb", b);
-  const outVal = t => (PVAL[t]||[]).filter(x => OUT[t]?.has(x.name)).reduce((s,x)=>s+x.value,0);
+  const outVal = modelOut;
   const v = $("#mv").value, p = predict(PRED, a, b, v, outVal(a), outVal(b)), winA = p.pa >= .5, w = winA ? a : b, wp = winA ? p.pa : 1-p.pa;
   const ra = RESULT.byTeam[a], rb = RESULT.byTeam[b];
   const U = UNITS, cell = u => `${u.v.toFixed(1)} <span class="sub">#${u.rank}</span>`;
@@ -626,24 +648,28 @@ function renderMatchup(force){
       <thead>${mhead(a,b)}</thead><tbody>${muRows(a, b, v==="A")}</tbody>
       <thead>${mhead(b,a)}</thead><tbody>${muRows(b, a, v==="B")}</tbody></table></div>
       <p class="note" style="margin:0">Positional matchups, each adjusted for opponents: a unit is rated against what its opponents did against everyone else. # is the national rank among FBS teams (1 = best). "Game" is the expected rate when these two units meet.${MATCHUP_NOTE}</p>` : "";
-  const injList = t => { const l = (PVAL[t]||[]).filter(x => x.value >= .1).slice(0,10);
+  const injList = t => { const all = PVAL[t]||[], l = all.filter((x,i) => i < 10 && x.value >= .1 || injuryOf(t, x.name));
+    const badge = r => !r ? "" : `<span class="tag ${r.status==="Out"?"out":""}" title="${esc(r.note||"")}">${esc(r.status)}${r.body && r.body!=="Undisclosed" ? " · "+esc(r.body) : ""}</span>`;
+    const others = (INJURIES[t]||[]).filter(r => !all.some(x => nameKey(x.name)===nameKey(r.name)) && (r.status==="Out"||r.status==="Doubtful")).length;
     return `<div><b>${esc(t)}</b>${outVal(t) ? ` <span class="neg" style="font-family:var(--mono);font-size:13px">−${outVal(t).toFixed(1)} pts</span>` : ""}
-      ${l.length ? l.map(x => `<label class="inj"><input type="checkbox" data-team="${esc(t)}" data-name="${esc(x.name)}"${OUT[t]?.has(x.name)?" checked":""}> <span>${esc(x.name)} <span class="sub">${esc(x.pos)}</span></span><span class="sub" style="font-family:var(--mono)">${x.value.toFixed(1)}</span></label>`).join("")
-        : `<p class="sub" style="margin:6px 0 0">No player data.</p>`}</div>`; };
+      ${l.length ? l.map(x => { const r = injuryOf(t, x.name), sh = r && publicOut(t, x.name) ? shareBefore(t, r.start) : 1;
+        return `<label class="inj"><input type="checkbox" data-team="${esc(t)}" data-name="${esc(x.name)}"${outSet(t).has(x.name)?" checked":""}> <span>${esc(x.name)} <span class="sub">${esc(x.pos)}</span> ${badge(r)}</span><span class="sub" style="font-family:var(--mono)" title="${sh<1?`Full value ${x.value.toFixed(1)}; ratings already include the ${Math.round((1-sh)*100)}% of games he missed`:""}">${(x.value*sh).toFixed(1)}</span></label>`; }).join("")
+        : `<p class="sub" style="margin:6px 0 0">No player data.</p>`}
+      ${others ? `<p class="sub" style="margin:6px 0 0">${others} more listed Out or Doubtful (defense, line or depth players we can't value).</p>` : ""}</div>`; };
   const inj = PLAYERS.length ? `<details id="injbox" class="panel" style="padding:12px 16px"${INJOPEN?" open":""}>
-      <summary><b>Injuries: mark players who are out</b> <span class="sub">${(OUT[a]?.size||0)+(OUT[b]?.size||0)} marked</span></summary>
+      <summary><b>Injuries</b> <span class="sub">${outSet(a).size+outSet(b).size} marked out${INJ_UPDATED ? ` · report updated ${new Date(INJ_UPDATED).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})}` : ""}</span></summary>
       <div class="injgrid">${injList(a)}${injList(b)}</div>
       <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him: his points added per play this season versus his backup's, times his plays per game. QB values are calibrated on 2022–25, where teams whose starting QB missed a game fell short by about 1.25× this raw gap. Other positions are halved because passing credit is shared between passer and receiver, and are untested. Offensive players only: there is no free per-player data for defenders or linemen.</p>
     </details>` : "";
   const ln = LINES.find(l => l.hp==null && ((l.home===a && l.away===b) || (l.home===b && l.away===a)));
   let mkt = "";
   if(ln){
-    const mA = (ln.home===a ? -ln.spread : ln.spread) + outVal(b) - outVal(a), pA = .5*(1+erf(mA/(MKT_SD*Math.SQRT2)));
+    const mA = (ln.home===a ? -ln.spread : ln.spread) + lineOut(b) - lineOut(a), pA = .5*(1+erf(mA/(MKT_SD*Math.SQRT2)));
     const fav = mA>=0 ? a : b, fp = mA>=0 ? pA : 1-pA, where = ln.neutral ? "neutral site" : `at ${ln.home}`;
     mkt = `<div class="panel" style="padding:14px 16px;border-color:var(--accent)">
       <b>Best prediction: the betting line.</b> ${esc(fav)} by ${(Math.round(Math.abs(mA)*2)/2).toFixed(1)}, wins about ${Math.round(fp*100)}%
-      <span class="sub">(week ${ln.week}, ${esc(where)}; line ${lineStr(ln.home, ln.away, -ln.spread)}${outVal(a)||outVal(b) ? ", adjusted for the players you marked out" : ""})</span>
-      <p class="sub" style="margin:6px 0 0">Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse. The score above is our model's, for comparison and for games without a line. If an injury was already announced, the line likely includes it: don't mark it again.</p></div>`;
+      <span class="sub">(week ${ln.week}, ${esc(where)}; line ${lineStr(ln.home, ln.away, -ln.spread)}${lineOut(a)||lineOut(b) ? ", adjusted for your changes to the injury report" : ""})</span>
+      <p class="sub" style="margin:6px 0 0">Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse. The score above is our model's, for comparison and for games without a line. Injuries on the public report are assumed to be in the line already; only your changes to the report move it.</p></div>`;
   }
   const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
   const side = (t, s, r, win) => `<div class="side${win?" win":""}"><b>${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
@@ -659,7 +685,7 @@ function renderMatchup(force){
     </div>${mkt}${inj}${eff}`;
   $("#injbox")?.addEventListener("toggle", e => INJOPEN = e.target.open);
   $("#mout").querySelectorAll(".inj input").forEach(cb => cb.addEventListener("change", () => {
-    const t = cb.dataset.team, s = (OUT[t] ||= new Set());
+    const t = cb.dataset.team, s = outSet(t);
     cb.checked ? s.add(cb.dataset.name) : s.delete(cb.dataset.name);
     renderMatchup();
   }));
@@ -674,8 +700,9 @@ const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?ho
 function renderLines(){
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
   const up = LINES.filter(l => l.hp==null && PRED.T[l.home] && PRED.T[l.away]).map(l => {
-    const p = predict(PRED, l.home, l.away, l.neutral?"N":"A"), mkt = -l.spread;
-    return {...l, ours:p.margin, mkt, diff:p.margin-mkt, ourTotal:p.sa+p.sb, pHome:p.pa};
+    const ih = autoModelOut(l.home), ia = autoModelOut(l.away);
+    const p = predict(PRED, l.home, l.away, l.neutral?"N":"A", ih, ia), mkt = -l.spread;
+    return {...l, ours:p.margin, mkt, diff:p.margin-mkt, ourTotal:p.sa+p.sb, pHome:p.pa, ih, ia};
   }).sort((x,y) => Math.abs(y.diff)-Math.abs(x.diff));
   const thisWeek = up.length ? Math.min(...up.map(l=>l.week)) : null;
   const day = s => s ? new Date(s).toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"}) : "";
@@ -684,7 +711,7 @@ function renderLines(){
       <tbody>${rows.map(l => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
         return `<tr>
         <td class="rk" style="font-size:17px">${Math.abs(l.diff).toFixed(1)}</td>
-        <td><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${day(l.start)} · we lean ${esc(lean)}</span>
+        <td><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
           <span class="show-sm" style="font-size:13px;margin-top:4px">Line ${lineStr(l.home, l.away, l.mkt)} · Ours <b>${lineStr(l.home, l.away, l.ours)}</b><br>${esc(fav)} wins ${Math.round(fp*100)}%${l.total!=null?` · Total ${l.total.toFixed(1)} vs ${l.ourTotal}`:""}</span></td>
         <td class="hide-sm">${lineStr(l.home, l.away, l.mkt)}</td><td class="hide-sm"><b>${lineStr(l.home, l.away, l.ours)}</b></td>
         <td class="num hide-sm">${esc(fav)} ${Math.round(fp*100)}%</td>
@@ -851,6 +878,11 @@ async function loadData(){
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[]}));
     }catch(e){ LINES = []; }
     try{
+      const ir = await fetch("data/injuries.json", {cache:"no-store"});
+      if(ir.ok){ const j = await ir.json(); INJ_UPDATED = j.updated; INJURIES = {};
+        (j.injuries||[]).forEach(r => (INJURIES[r[0]] ||= []).push({name:r[1], pos:r[2], status:r[3], body:r[4], start:r[5], updated:r[6], note:r[7]})); }
+    }catch(e){ INJURIES = {}; }
+    try{
       const rr = await fetch("data/research.json", {cache:"no-store"});
       if(rr.ok) RESEARCH = await rr.json();
     }catch(e){ RESEARCH = null; }
@@ -862,6 +894,7 @@ async function loadData(){
       const pr = await fetch("data/players.json", {cache:"no-store"});
       if(pr.ok) PLAYERS = ((await pr.json()).players || []).map(r => ({team:r[0], name:r[1], pos:r[2], plays:r[3], ppa:r[4]}));
     }catch(e){ PLAYERS = []; }
+    OUT = {};  // marks made against the sample season or before the injury report loaded don't carry over
     recompute();
   }catch(e){ /* keep sample season */ }
 }

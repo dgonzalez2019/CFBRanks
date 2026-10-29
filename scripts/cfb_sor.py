@@ -129,7 +129,7 @@ def load_cfbd(year, key, upcoming=None):
             games.append(dict(week=g.get("week", 0) + (20 if seas == "postseason" else 0),
                               home=h, away=a, hp=hp, ap=ap,
                               neutral=bool(g.get("neutralSite", g.get("neutral_site"))),
-                              home_fbs=h in fbs, away_fbs=a in fbs))
+                              home_fbs=h in fbs, away_fbs=a in fbs, start=g.get("startDate", g.get("start_date"))))
     return games
 
 
