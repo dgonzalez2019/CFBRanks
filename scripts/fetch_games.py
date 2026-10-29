@@ -226,10 +226,12 @@ if a.roles:
                 if cat == "defensive":
                     r["inv"] += v * {"TOT": 1, "TFL": 2, "SACKS": 2, "PD": 2, "QB HUR": 1}.get(st, 0)
                 elif v > 0 and st in ("FGA", "XPA", "NO", "PUNTS"): r["kick"] = True; r["pos"] = r["pos"] or ("K" if cat == "kicking" else "P")
+        OFFENSE = {"QB", "RB", "FB", "WR", "TE", "OL", "OT", "G", "C", "LS", "ATH"}
         bench = {"DL": 3.0, "DT": 3.0, "NT": 3.0, "DE": 3.5, "EDGE": 3.5, "LB": 6.0, "OLB": 4.5, "ILB": 6.0, "CB": 4.5, "S": 5.0, "DB": 4.5}
         rows = []
         for (team, name), r in agg.items():
             if r["kick"]: share = 1.0
+            elif r["pos"] in OFFENSE: continue   # special-teams tackles say nothing about an offensive player's role
             elif gp[team]: share = min(1.0, r["inv"] / gp[team] / bench.get(r["pos"], 4.5))
             else: continue
             rows.append([team, name, r["pos"], round(share, 3)])

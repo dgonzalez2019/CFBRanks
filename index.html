@@ -133,6 +133,7 @@ tr:nth-child(1)>.rk.medal{color:var(--gold)} tr:nth-child(2)>.rk.medal{color:var
 .sub{color:var(--muted);font-size:13px}
 .pos{color:var(--win)} .neg{color:var(--loss)}
 .meter{position:relative}
+table.top td.qline{display:none}
 .meter::after{content:"";position:absolute;right:10px;bottom:4px;height:2px;width:calc(var(--w) * 0.6);max-width:60px;border-radius:2px;background:var(--accent);opacity:.5;transform-origin:100% 50%;animation:grow 1s var(--ease) both;animation-delay:calc(min(var(--i,0),30) * 18ms + .25s)}
 @keyframes grow{from{transform:scaleX(0)}}
 .mono{--h:210;display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;margin-right:9px;vertical-align:middle;
@@ -335,11 +336,34 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;backgrou
 @media (max-width:640px){.hide-sm{display:none}.show-sm{display:block}.theme{padding:0;width:36px;justify-content:center}h1{font-size:21px}h1 small{display:none}.logo{width:30px;height:30px}
   .status{font-size:11.5px}
   nav a{padding:11px 10px 13px;font-size:14px}
-  .top th,.top td{padding-left:6px;padding-right:6px}
-  .top tr>:first-child,.top tr>:nth-child(2){position:sticky;z-index:1;background:var(--card)}
-  .top tr>:first-child{left:0;width:40px;min-width:40px}
-  .top tr>:nth-child(2){left:40px;box-shadow:inset -1px 0 0 var(--line)}
-  .top .mono{width:22px;height:22px;margin-right:7px;font-size:8.5px}
+  /* Only the section tabs stay pinned on phones: the title row scrolls away (--hh = its height, set in JS). */
+  header{top:calc(env(safe-area-inset-top,0px) - var(--hh,0px))}
+  .head{animation:none!important}
+  nav{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent);padding-right:24px}
+  /* Rankings table as stacked rows: rank, team and score, then every stat with a label, then best win / worst loss. */
+  .panel.scroll:has(> table.top){overflow:visible}
+  table.top thead{display:none}
+  table.top,table.top tbody{display:block}
+  table.top tr{display:flex;flex-wrap:wrap;align-items:center;row-gap:8px;padding:12px 12px 12px 0;border-bottom:1px solid var(--line)}
+  table.top tr:last-child{border-bottom:0}
+  table.top td{border:0!important;padding:0!important;background:none!important}
+  table.top td.rk{flex:0 0 40px;text-align:center}
+  table.top tr>:nth-child(2){flex:1 0 calc(100% - 104px);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  table.top td.meter{flex:0 0 64px;text-align:right;font:700 20px/1 var(--body)}
+  table.top td.meter::before{content:"score";display:block;font:500 10px/1.3 var(--body);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  table.top td[data-l]{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-right:14px;font-size:14px}
+  table.top td[data-l]::before{content:attr(data-l);font:500 10px/1.2 var(--body);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  table.top td[data-l="Power"]{margin-left:40px}
+  table.top td.qcol{display:none}
+  table.top td.qline{display:flex!important;flex:0 0 calc(100% - 40px);margin:0 0 0 40px;flex-direction:row;align-items:center;gap:6px;flex-wrap:wrap}
+  table.top td.qline{gap:4px!important;flex-wrap:nowrap!important}
+  table.top td.qline .chip{padding:2px 6px!important;font-size:12px!important;min-width:0!important;margin-right:4px}
+  table.top td.qline b{font:500 11px/1 var(--body);color:var(--muted);margin-left:4px}
+  table.top td.qline b:first-of-type{margin-left:0}
+  table.top td.hide-sm{display:block!important;flex:0 0 calc(100% - 40px);margin-left:40px;font-size:13px;color:var(--muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  table.top td.hide-sm::before{content:attr(data-w) " ";color:var(--muted);font-weight:600}
+  table.top td.hide-sm+td.hide-sm{margin-top:-4px}
+  table.top .mono{width:26px;height:26px;margin-right:8px;font-size:9px}
   .meter::after{display:none}
   .score .side span{font-size:16px}
   .score .side .mono{width:32px;height:32px}
@@ -1161,7 +1185,8 @@ function moveInd(){
   ind.style.left = a.offsetLeft+"px"; ind.style.width = a.offsetWidth+"px";
   const nav = a.parentElement; if(nav.scrollWidth > nav.clientWidth) nav.scrollTo({left: a.offsetLeft - (nav.clientWidth - a.offsetWidth)/2, behavior: REDUCED ? "auto" : "smooth"});
 }
-addEventListener("resize", moveInd); document.fonts?.ready.then(moveInd);
+const setHH = () => { const h = $(".head"); if(h) document.documentElement.style.setProperty("--hh", h.offsetHeight + "px"); };
+addEventListener("resize", () => { moveInd(); setHH(); }); document.fonts?.ready.then(() => { moveInd(); setHH(); }); setHH();
 function setThemeIcon(){ const dark = document.documentElement.dataset.theme === "dark";
   $("#theme").innerHTML = dark ? `<b aria-hidden="true">☀</b><span class="hide-sm">Light mode</span>` : `<b aria-hidden="true">☾</b><span class="hide-sm">Dark mode</span>`;
   $("#theme").setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
@@ -1353,11 +1378,12 @@ function renderTop(){
     <td class="rk medal">${r.rank}${mv(r.team)}</td>
     <td>${mono(r.team)}<span class="tm">${esc(r.team)}</span><span class="rec">${r.w}-${r.l}</span></td>
     <td class="num meter" style="--w:${Math.max(4, 100*r.score/Math.max(1e-9, RESULT.rows[0].score)).toFixed(0)}px">${r.score.toFixed(1)}</td>
-    <td class="num">${r.power}</td>
-    <td class="num ${r.resume>=0?"pos":"neg"}">${r.resume>=0?"+":""}${r.resume.toFixed(2)}</td><td class="num">${r.sosRank}</td>
-    ${["Q1","Q2","Q3","Q4"].map(k=>`<td><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
-    <td class="hide-sm">${gameStr(r.W[0])}</td>
-    <td class="hide-sm">${gameStr(r.L[0])}</td></tr>`).join("");
+    <td class="num" data-l="Power">${r.power}</td>
+    <td class="num ${r.resume>=0?"pos":"neg"}" data-l="Résumé">${r.resume>=0?"+":""}${r.resume.toFixed(2)}</td><td class="num" data-l="SOS">${r.sosRank}</td>
+    ${["Q1","Q2","Q3","Q4"].map(k=>`<td class="qcol"><span class="chip ${k}">${fmtQ(r.q[k])}</span></td>`).join("")}
+    <td class="qline" title="Record by opponent tier (Q1 = best opponents)">${["Q1","Q2","Q3","Q4"].map(k=>`<b>${k}</b><span class="chip ${k}">${fmtQ(r.q[k])}</span>`).join("")}</td>
+    <td class="hide-sm" data-w="Best win">${gameStr(r.W[0])}</td>
+    <td class="hide-sm" data-w="Worst loss">${gameStr(r.L[0])}</td></tr>`).join("");
   if(fresh && !REDUCED){ const h = $("#t25").rows[0]?.getBoundingClientRect().height || 50;
     [...$("#t25").rows].forEach((tr, i) => { const d = moves[tr.dataset.team]; if(!d) return;
       tr.animate([{transform:`translateY(${d*h}px)`, zIndex:2}, {transform:"none", zIndex:2}], {duration:1100, delay:500 + Math.min(i,25)*25, easing:"cubic-bezier(.3,1.2,.4,1)", fill:"backwards"}); }); }
