@@ -129,8 +129,11 @@ if a.players:
         rows = []
         for x in P:
             avg = x.get("averagePPA", x.get("average_ppa")) or {}
-            plays = x.get("countablePlays", x.get("countable_plays"))
+            tot = x.get("totalPPA", x.get("total_ppa")) or {}
             val = avg.get("all") if isinstance(avg, dict) else None
+            plays = x.get("countablePlays", x.get("countable_plays"))
+            if not plays and val and isinstance(tot, dict) and tot.get("all") is not None:
+                plays = round(tot["all"] / val)  # the API may omit play counts; total / per-play recovers them
             if x.get("team") and x.get("name") and plays and val is not None and plays >= 10:
                 rows.append([x["team"], x["name"], x.get("position") or "", int(plays), round(float(val), 4)])
         print(f"Players: {len(P)} returned, {len(rows)} kept")
