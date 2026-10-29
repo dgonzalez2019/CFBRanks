@@ -14,8 +14,8 @@ def fetch(url, headers=None):
     except Exception as e: return None, str(e)
 
 def text(h):
-    h = re.sub(r"(?s)<(script|style)[^>]*>.*?</\\1>", " ", h); h = re.sub(r"<[^>]+>", " ", h)
-    return re.sub(r"\\s+", " ", html.unescape(h)).strip()
+    h = re.sub(r"(?s)<(script|style)[^>]*>.*?</\1>", " ", h); h = re.sub(r"<[^>]+>", " ", h)
+    return re.sub(r"\s+", " ", html.unescape(h)).strip()
 
 for page in ["https://bigballsdata.com/llms.txt", "https://bigballsdata.com/docs", "https://bigballsdata.com/injuries-api",
              "https://bigballsdata.com/ncaaf-api", "https://bigballsdata.com/pricing"]:
