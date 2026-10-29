@@ -22,6 +22,8 @@ jobs:
         env:
           SPORTSDATAIO_API_KEY: ${{ secrets.SPORTSDATAIO_API_KEY }}
       - run: python scripts/track_picks.py || echo "Tracker failed; keeping the previous file."
+      - name: NFL data (optional)
+        run: python scripts/fetch_nfl.py || echo "NFL fetch failed; keeping the previous files."
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
@@ -32,4 +34,5 @@ jobs:
           if [ -f data/tracker.json ]; then git add data/tracker.json; fi
           if [ -f data/ppa.json ]; then git add data/ppa.json; fi
           if [ -f data/teams.json ]; then git add data/teams.json; fi
+          if [ -d data/nfl ]; then git add data/nfl; fi
           git diff --cached --quiet || (git commit -m "Update game results" && git push)
