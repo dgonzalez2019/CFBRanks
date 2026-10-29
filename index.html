@@ -88,6 +88,8 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .score .side.win b{color:var(--accent)}
 .score .dash{font:700 28px/1 var(--display);color:var(--muted)}
 .eff th,.eff td:first-child{white-space:normal}
+.show-sm{display:none}
+.lines td:nth-child(2){white-space:normal}
 .eff td:first-child .sub{display:block}
 .pbar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
 .pbar i{display:block;height:100%}
@@ -100,7 +102,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 .upload{padding:16px 18px;display:grid;gap:10px}
 .msg{font-size:13px}
 .empty{padding:28px;text-align:center;color:var(--muted)}
-@media (max-width:640px){.hide-sm{display:none}h1{font-size:25px}.teamhead h2{font-size:28px}
+@media (max-width:640px){.hide-sm{display:none}.show-sm{display:block}h1{font-size:25px}.teamhead h2{font-size:28px}
   .top th,.top td{padding-left:6px;padding-right:6px}
   .top tr>:first-child,.top tr>:nth-child(2){position:sticky;z-index:1;background:var(--card)}
   .top tr>:first-child{left:0;box-sizing:border-box;width:40px;min-width:40px}
@@ -122,6 +124,7 @@ body{margin:0}
       <a href="#top25" data-view="top25">Top 25</a>
       <a href="#results" data-view="results">Results only</a>
       <a href="#matchup" data-view="matchup">Matchup</a>
+      <a href="#lines" data-view="lines">Lines</a>
       <a href="#teams" data-view="teams">Team lookup</a>
       <a href="#method" data-view="method">How it works</a>
     </nav>
@@ -191,6 +194,14 @@ body{margin:0}
     </div>
   </section>
 
+  <!-- LINES -->
+  <section id="v-lines" class="view" hidden>
+    <div style="display:grid;gap:14px">
+      <div class="bar"><h2 id="ltitle">Our lines vs. betting lines</h2></div>
+      <div id="lout" style="display:grid;gap:14px"></div>
+    </div>
+  </section>
+
   <!-- TEAM LOOKUP -->
   <section id="v-teams" class="view" hidden>
     <div style="display:grid;gap:16px">
@@ -230,6 +241,8 @@ body{margin:0}
       <p>A second, independent ranking that uses nothing but who won. It follows the Colley Matrix method: every team starts even, a win raises a team and a loss lowers it, and each result is weighed by how good the opponent is, where the opponent is judged the same way from its own results. All teams are solved together, so beating a team that beat good teams counts for more. Scores, margins and home field are ignored.</p>
       <h3>The Matchup tab</h3>
       <p>Pick two teams and where they play. The predicted margin comes from a rating fit to every game's point margin (capped at 35 so blowouts don't dominate), plus a measured home-field edge. A quarter of the margin comes from passing and rushing efficiency instead: each team's yards per pass attempt and per carry, on offense and defense, are adjusted for opponents (a pass defense is judged against what its opponents threw for against everyone else), then turned into points using how yards per play related to scoring this season. The predicted total comes from each team's points scored and allowed, adjusted for the opponents it faced, and the margin splits that total into a score. The win chance reflects how far real results have missed predictions this season, so even a 7-point favorite loses fairly often.</p>
+      <h3>The Lines tab</h3>
+      <p>Compares our predicted line with the betting market's (the median spread across sportsbooks from collegefootballdata.com) for this week's games, biggest difference first. The track record replays the season: each of our predictions is made only from games played before that week, then compared with the betting line and the final score. Betting markets are hard to beat, so the record is the honest test of whether our differences mean anything.</p>
       <h3>Updating the data</h3>
       <p>Upload a CSV with the columns <code>week,home_team,away_team,home_points,away_points,neutral_site,home_fbs,away_fbs</code>. Rows without scores are skipped. An uploaded file only changes your own view. The published rankings come from <code>data/games.json</code>, which the scheduled GitHub Action refreshes from collegefootballdata.com.</p>
       <div class="upload panel" style="border-style:dashed">
@@ -245,7 +258,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -392,7 +405,7 @@ function predict(M, a, b, venue){
 
 // Honest accuracy: predict each week from week 5 on using only earlier games.
 function backtest(games){
-  let n=0, hit=0, err=0, close=0;
+  let n=0, hit=0, err=0, close=0; const preds = {};
   const last = Math.max(0, ...games.map(g=>g.week));
   for(let w=5; w<=last; w++){
     const train = games.filter(g=>g.week<w); if(!train.length) continue;
@@ -400,9 +413,10 @@ function backtest(games){
     games.filter(g=>g.week===w && g.hf && g.af && g.hp!==g.ap && M.T[g.home] && M.T[g.away]).forEach(g => {
       const p = predict(M, g.home, g.away, g.neutral?"N":"A"), act = g.hp-g.ap;
       n++; hit += (p.margin>0)===(act>0); err += Math.abs(p.margin-act); close += Math.abs(act)<=8;
+      preds[`${g.week}|${g.home}|${g.away}`] = p.margin;
     });
   }
-  return n ? {n, hit:hit/n, mae:err/n, close:close/n} : null;
+  return n ? {n, hit:hit/n, mae:err/n, close:close/n, preds} : null;
 }
 
 function solve(A,b){ // Gaussian elimination w/ partial pivoting
@@ -544,6 +558,52 @@ function renderMatchup(){
     </div>${eff}`;
 }
 
+// Betting lines use the home team's spread (negative = home favored), so the market's home margin is -spread.
+const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
+function renderLines(){
+  if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
+  const up = LINES.filter(l => l.hp==null && PRED.T[l.home] && PRED.T[l.away]).map(l => {
+    const p = predict(PRED, l.home, l.away, l.neutral?"N":"A"), mkt = -l.spread;
+    return {...l, ours:p.margin, mkt, diff:p.margin-mkt, ourTotal:p.sa+p.sb, pHome:p.pa};
+  }).sort((x,y) => Math.abs(y.diff)-Math.abs(x.diff));
+  const thisWeek = up.length ? Math.min(...up.map(l=>l.week)) : null;
+  const day = s => s ? new Date(s).toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"}) : "";
+  const table = rows => `<div class="panel scroll"><table class="top lines">
+      <thead><tr><th>Diff</th><th>Game</th><th class="hide-sm">Betting line</th><th class="hide-sm">Our line</th><th class="num hide-sm">Our win %</th><th class="num hide-sm">Total</th><th class="num hide-sm">Ours</th></tr></thead>
+      <tbody>${rows.map(l => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
+        return `<tr>
+        <td class="rk" style="font-size:17px">${Math.abs(l.diff).toFixed(1)}</td>
+        <td><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${day(l.start)} · we lean ${esc(lean)}</span>
+          <span class="show-sm" style="font-size:13px;margin-top:4px">Line ${lineStr(l.home, l.away, l.mkt)} · Ours <b>${lineStr(l.home, l.away, l.ours)}</b><br>${esc(fav)} wins ${Math.round(fp*100)}%${l.total!=null?` · Total ${l.total.toFixed(1)} vs ${l.ourTotal}`:""}</span></td>
+        <td class="hide-sm">${lineStr(l.home, l.away, l.mkt)}</td><td class="hide-sm"><b>${lineStr(l.home, l.away, l.ours)}</b></td>
+        <td class="num hide-sm">${esc(fav)} ${Math.round(fp*100)}%</td>
+        <td class="num hide-sm">${l.total!=null ? l.total.toFixed(1) : "—"}</td><td class="num hide-sm">${l.ourTotal}</td></tr>`; }).join("")}</tbody></table></div>`;
+  // Track record: our week-by-week predictions (made only from earlier games) vs. the line and the result.
+  const done = LINES.filter(l => l.hp!=null && BT && BT.preds[`${l.week}|${l.home}|${l.away}`]!=null).map(l => ({...l, ours:BT.preds[`${l.week}|${l.home}|${l.away}`], mkt:-l.spread, act:l.hp-l.ap}));
+  let record = "";
+  if(done.length >= 20){
+    const mae = k => done.reduce((s,l)=>s+Math.abs(l[k]-l.act),0)/done.length;
+    const wins = k => { const d = done.filter(l=>l.act!==0 && l[k]!==0); return d.filter(l=>(l[k]>0)===(l.act>0)).length/d.length; };
+    const tiers = [0,3,5,7].map(t => { const d = done.filter(l => Math.abs(l.ours-l.mkt)>=t && l.act!==l.mkt);
+      return d.length ? `<tr><td>${t ? `${t}+ points` : "Any"}</td><td class="num">${d.length}</td><td class="num">${Math.round(100*d.filter(l=>(l.act>l.mkt)===(l.ours>l.mkt)).length/d.length)}%</td></tr>` : ""; }).join("");
+    record = `<div class="bar"><h2>Track record this season</h2></div>
+      <div class="tiles">
+        <div class="tile"><b>${mae("ours").toFixed(1)}</b><span>Our avg miss (pts)</span></div>
+        <div class="tile"><b>${mae("mkt").toFixed(1)}</b><span>Betting line avg miss</span></div>
+        <div class="tile"><b>${Math.round(wins("ours")*100)}%</b><span>Our winners right</span></div>
+        <div class="tile"><b>${Math.round(wins("mkt")*100)}%</b><span>Line's winners right</span></div>
+      </div>
+      <div class="panel scroll"><table><thead><tr><th>When we disagreed by</th><th class="num">Games</th><th class="num">Result on our side</th></tr></thead><tbody>${tiers}</tbody></table></div>
+      <p class="note">${done.length} games from week 5 on. Each of our predictions used only games played before that week. Betting at standard odds needs about 52.4% on your side just to break even, so small samples above that can easily be luck.</p>`;
+  }
+  const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
+  $("#ltitle").textContent = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: our lines vs. betting lines` : "Our lines vs. betting lines";
+  $("#lout").innerHTML = (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines.</div>`) +
+    `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by biggest difference. The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
+    (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : "") +
+    record;
+}
+
 function renderTeam(name){
   const r = RESULT.byTeam[name];
   if(!r){ $("#teamOut").innerHTML = `<div class="panel empty">${name?`No FBS team named “${esc(name)}” in this data.`:"Search for a team to see its opponents, their rankings, and the strength of each win and loss."}</div>`; return; }
@@ -592,6 +652,7 @@ function recompute(){
   BT = backtest(GAMES.filter(g => g.hf || g.af));
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));
   renderResults();
+  renderLines();
   if(!$("#ma").value){ $("#ma").value = store.get("sor.ma") || RESULT.rows[0]?.team || ""; $("#mb").value = store.get("sor.mb") || RESULT.rows[1]?.team || ""; }
   renderMatchup();
   $("#teamlist").innerHTML = RESULT.rows.map(r=>`<option value="${esc(r.team)}">`).join("");
@@ -603,7 +664,7 @@ function recompute(){
 
 /* ---------------- routing ---------------- */
 function route(){
-  const v = (location.hash||"#top25").slice(1), view = ["top25","results","matchup","teams","method"].includes(v)?v:"top25";
+  const v = (location.hash||"#top25").slice(1), view = ["top25","results","matchup","lines","teams","method"].includes(v)?v:"top25";
   document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-"+view);
   document.querySelectorAll("nav a").forEach(a => a.dataset.view===view ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
 }
@@ -663,6 +724,10 @@ async function loadData(){
     if(!d.games || !d.games.length) return;
     GAMES = d.games.map(a => unpack(a[0], a.slice(1)));
     SOURCE = {kind:"live", label:`${d.season} season`, updated:d.updated};
+    try{
+      const lr = await fetch("data/lines.json", {cache:"no-store"});
+      if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[]}));
+    }catch(e){ LINES = []; }
     recompute();
   }catch(e){ /* keep sample season */ }
 }
