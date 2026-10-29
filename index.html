@@ -146,6 +146,11 @@ tr:nth-child(2)>.rk.medal{color:var(--silver)} tr:nth-child(3)>.rk.medal{color:v
 .mono{--h:210;display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:9px;margin-right:9px;vertical-align:middle;
   font:800 12px/1 var(--display);letter-spacing:.02em;color:#fff;
   background:linear-gradient(145deg,hsl(var(--h) 70% 52%),hsl(calc(var(--h) + 40) 70% 30%));box-shadow:0 4px 14px -4px hsl(var(--h) 80% 50% / .6), inset 0 1px 0 rgba(255,255,255,.25)}
+.mono.xs{width:20px;height:20px;border-radius:6px;font-size:9px;margin-right:6px;box-shadow:none}
+.mono.logo{background:color-mix(in srgb,var(--tc,#7f8a99) 14%,color-mix(in srgb,var(--ink) 5%,transparent));box-shadow:inset 0 0 0 1px var(--line)}
+.mono.logo img{width:80%;height:80%;object-fit:contain;display:block}
+.mono.logo.xs,.mono.logo.xs img{background:none;box-shadow:none;width:20px;height:20px}
+:root:not([data-theme="light"]) .mono .lg-l,:root[data-theme="light"] .mono .lg-d{display:none}
 .mono.lg{width:64px;height:64px;border-radius:18px;font-size:26px;margin:0}
 .chip{display:inline-block;font:600 11px/1 var(--mono);padding:5px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
 .chip.Q1{background:var(--gold-soft);color:var(--gold);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
@@ -288,8 +293,11 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 .pres{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font:700 13px/1.3 var(--body);margin-top:2px}
 .pick.won .pres{color:var(--win)} .pick.lost .pres{color:var(--loss)}
 .pres span{font:500 12px/1.3 var(--mono);color:var(--muted)}
-.pgame{font-size:13.5px;color:var(--muted)}
-.pgame .pickside{color:var(--accent);font-weight:700}
+.pgame{font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+.pteam{display:inline-flex;align-items:center;color:var(--ink);font-weight:500}
+.pteam.pickside{color:var(--accent);font-weight:700}
+.pat{font:600 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pconf b.none{color:var(--muted)}
 .pstats{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .pstats span{font:500 11.5px/1 var(--body);color:var(--muted);padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 4%,transparent)}
 .pstats b{font:600 12px/1 var(--mono);color:var(--ink);margin-left:4px}
@@ -344,7 +352,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
   .top tr>:first-child,.top tr>:nth-child(2){position:sticky;z-index:1;background:var(--solid)}
   .top tr>:first-child{left:0;width:40px;min-width:40px}
   .top tr>:nth-child(2){left:40px;box-shadow:inset -1px 0 0 var(--line)}
-  .top .mono{display:none}
+  .top .mono{width:22px;height:22px;border-radius:7px;margin-right:6px;font-size:9px}
   .meter::after{display:none}
   .score .side span{font-size:16px}
   .method ol li{padding-left:44px}
@@ -522,7 +530,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
+let TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -838,7 +846,11 @@ function mono(t, cls=""){
   const w = String(t).replace(/\(.*?\)/g, "").replace(/[^A-Za-z&' ]/g, " ").split(/\s+/).filter(Boolean);
   const ini = (w.length > 1 ? w[0][0] + w[1][0] : (w[0]||"?").slice(0,2)).toUpperCase();
   let h = 0; for(const c of String(t)) h = (h*31 + c.charCodeAt(0)) % 360;
-  return `<span class="mono ${cls}" style="--h:${h}" aria-hidden="true">${esc(ini)}</span>`;
+  const T = TEAMS[t];
+  if(!T?.logo) return `<span class="mono ${cls}" style="--h:${h}" aria-hidden="true">${esc(ini)}</span>`;
+  // Team logo (light and dark-background versions, picked by theme); falls back to the initials if it fails to load.
+  const fail = `const m=this.closest('.mono');if(m){m.classList.remove('logo');m.textContent='${esc(ini)}'}`;
+  return `<span class="mono logo ${cls}" style="--h:${h}${T.color ? `;--tc:${esc(T.color)}` : ""}" aria-hidden="true"><img class="lg-l" src="${esc(T.logo)}" alt="" loading="lazy" onerror="${fail}"><img class="lg-d" src="${esc(T.dark || T.logo)}" alt="" loading="lazy" onerror="${fail}"></span>`;
 }
 // Top of the rankings: a podium for the top three, a stat strip and a ticker of this week's tracked games.
 function renderHero(){
@@ -1083,50 +1095,17 @@ function renderLines(){
   }).map(l => ({...l, conf: trackedGame(l.home, l.away)?.pct ?? null}))
     .sort((x,y) => (y.conf ?? -1)-(x.conf ?? -1) || Math.abs(y.diff)-Math.abs(x.diff));  // most confident first; games without a score after, by difference
   const thisWeek = up.length ? Math.min(...up.map(l=>l.week)) : null;
-  // One card per game: teams and confidence on top, the four numbers in tiles, lean and kickoff along the bottom.
-  const table = rows => `<div class="gcards">${rows.map((l,i) => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
-      const c = trackedGame(l.home, l.away), inj = [[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5);
-      return `<article class="gcard${c?.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
-        <div class="gtop">
-          <div class="gteams">
-            <div class="gteam">${mono(l.away)}<span class="tm">${esc(l.away)}</span></div>
-            <div class="gat">${l.neutral ? "vs" : "at"}</div>
-            <div class="gteam">${mono(l.home)}<span class="tm">${esc(l.home)}</span></div>
-          </div>
-          ${confBadge(c)}
-        </div>
-        <div class="gstats">
-          <div><span>Betting line</span><b>${lineStr(l.home, l.away, l.mkt)}</b></div>
-          <div class="ours"><span>Our line</span><b>${lineStr(l.home, l.away, l.ours)}</b></div>
-          <div><span>Win chance</span><b>${esc(fav)} ${Math.round(fp*100)}%</b></div>
-          <div><span>Our pick</span><b>${esc(lean)} ${(lean===l.home) === (l.mkt < 0) ? "+" : "−"}${(Math.round(Math.abs(l.mkt)*2)/2).toFixed(1)}</b></div>
-        </div>
-        <div class="gfoot">
-          <span class="sub">We lean <b>${esc(lean)}</b> · ${Math.abs(l.diff).toFixed(1)} pts off the line${inj.length ? ` · injuries: ${inj.map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
-          <time${l.start ? ` datetime="${esc(l.start)}"` : ""}>${gameWhen(l.start)}</time>
-        </div>
-      </article>`; }).join("")}</div>`;
-  const ttable = rows => `<div class="gcards">${rows.map((l,i) => { const c = l.tc, over = c ? c.over : l.ourTotal > l.total, d = l.ourTotal - l.total;
-      return `<article class="gcard${c?.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
-        <div class="gtop">
-          <div class="gteams">
-            <div class="gteam">${mono(l.away)}<span class="tm">${esc(l.away)}</span></div>
-            <div class="gat">${l.neutral ? "vs" : "at"}</div>
-            <div class="gteam">${mono(l.home)}<span class="tm">${esc(l.home)}</span></div>
-          </div>
-          ${totBadge(c)}
-        </div>
-        <div class="gstats">
-          <div><span>Betting total</span><b>${l.total.toFixed(1)}</b></div>
-          <div class="ours"><span>Our total</span><b>${l.ourTotal}</b></div>
-          <div><span>Our pick</span><b>${over ? "Over" : "Under"}</b></div>
-          <div><span>Difference</span><b>${d>0?"+":""}${d.toFixed(1)} <small>pts vs the total</small></b></div>
-        </div>
-        <div class="gfoot">
-          <span class="sub">We lean the <b>${over ? "over" : "under"}</b> · predicted ${l.ourTotal} vs ${l.total.toFixed(1)}${l.ih>=.5||l.ia>=.5 ? " · injuries counted" : ""}</span>
-          <time${l.start ? ` datetime="${esc(l.start)}"` : ""}>${gameWhen(l.start)}</time>
-        </div>
-      </article>`; }).join("")}</div>`;
+  // Spreads and totals use the same row cards as Top picks, for every game with a line.
+  const injNote = l => { const inj = [[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5);
+    return inj.length ? `Injuries counted: ${inj.map(([t,v])=>`${esc(t)} −${v.toFixed(1)} pts`).join(", ")}` : ""; };
+  const table = rows => `<div class="picks">${rows.map((l,i) => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome, c = trackedGame(l.home, l.away);
+      return pickCard({kind:"spread", conf:c?.pct ?? null, top:c?.top, top5:c?.top5, start:l.start, text:`${esc(lean)} ${signed(lean===l.home ? -l.mkt : l.mkt)}`,
+        game:gameLine(l.away, l.home, l.neutral, lean), note:injNote(l),
+        stats:[["Betting line", lineStr(l.home, l.away, l.mkt)], ["Our line", lineStr(l.home, l.away, l.ours)], ["Win chance", `${esc(fav)} ${Math.round(fp*100)}%`], ["Off the line", `${Math.abs(l.diff).toFixed(1)} pts`]]}, i); }).join("")}</div>`;
+  const ttable = rows => `<div class="picks">${rows.map((l,i) => { const c = l.tc, over = c ? c.over : l.ourTotal > l.total, d = l.ourTotal - l.total;
+      return pickCard({kind:"total", conf:c?.pct ?? null, top:c?.top, top5:c?.top5, start:l.start, text:`${over ? "Over" : "Under"} ${l.total.toFixed(1)}`,
+        game:gameLine(l.away, l.home, l.neutral, null), note:injNote(l),
+        stats:[["Betting total", l.total.toFixed(1)], ["Our total", l.ourTotal], ["Off the total", `${d>0?"+":""}${d.toFixed(1)} pts`]]}, i); }).join("")}</div>`;
   const totalsOf = rows => rows.filter(l => l.total != null).map(l => ({...l, tc: trackedTotal(l.home, l.away)}))
     .sort((x,y) => (y.tc?.pct ?? -1)-(x.tc?.pct ?? -1) || Math.abs(y.ourTotal-y.total)-Math.abs(x.ourTotal-x.total));
   // Track record: our week-by-week predictions (made only from earlier games) vs. the line and the result.
@@ -1203,36 +1182,43 @@ function renderLines(){
 // Picks tab: a pre-game summary of the Lines tab's Spreads and Totals views, keeping only this week's picks rated 50%
 // or more (games not yet kicked off), most confident first. The side to take is the headline of each card.
 let PMODE = "all";
+// One row card per pick: confidence on the left, the side to take as the headline, the game, the numbers, kickoff.
+const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
+    <div class="pconf">${p.conf != null ? `<b>${(p.conf*100).toFixed(1)}%</b><span>${p.top5 ? "★ Top 5%" : p.top ? "★ Top 10%" : "confidence"}</span>` : `<b class="none">—</b><span>no score yet</span>`}</div>
+    <div class="pmain">
+      <div class="pkind ${p.kind}">${p.kind === "spread" ? "Spread" : "Over/under"}</div>
+      <div class="ptext">${p.text}</div>
+      <div class="pgame">${p.game}</div>
+      <div class="pstats">${p.stats.map(([k,v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>
+      ${p.note ? `<div class="sub">${p.note}</div>` : ""}
+    </div>
+    <time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${gameWhen(p.start)}</time>
+  </article>`;
+const signed = x => Math.abs(x) < .25 ? "PK" : (x > 0 ? "+" : "−") + (Math.round(Math.abs(x)*2)/2).toFixed(1);
+// The matchup line with team logos; `pick` (a team name) is highlighted.
+const gameLine = (away, home, neutral, pick) => { const t = n => `<span class="pteam${n === pick ? " pickside" : ""}">${mono(n, "xs")}${esc(n)}</span>`;
+  return `${t(away)} <span class="pat">${neutral ? "vs" : "at"}</span> ${t(home)}`; };
 function renderPicks(){
   const sgn = x => Math.abs(x) < .25 ? "PK" : (x > 0 ? "+" : "−") + (Math.round(Math.abs(x)*2)/2).toFixed(1);
   const nowMs = Date.now(), picks = [];
   (TRACKER?.games||[]).filter(g => !g.results && (!g.start || new Date(g.start).getTime() > nowMs)).forEach(g => {
     const vs = g.neutral ? "vs" : "at";
     if(g.conf != null && g.line != null && g.conf >= .5){
-      const home = g.ours > g.line, team = home ? g.home : g.away, hl = t => t === team ? `<b class="pickside">${esc(t)}</b>` : esc(t);
-      picks.push({g, kind:"spread", conf:g.conf, top:g.top_conf, top5:g.top5, text:`${esc(team)} ${sgn(home ? -g.line : g.line)}`,
-        game:`${hl(g.away)} ${vs} ${hl(g.home)}`,
+      const home = g.ours > g.line, team = home ? g.home : g.away;
+      picks.push({g, start:g.start, kind:"spread", conf:g.conf, top:g.top_conf, top5:g.top5, text:`${esc(team)} ${sgn(home ? -g.line : g.line)}`,
+        game:gameLine(g.away, g.home, g.neutral, team),
         stats:[["Betting line", lineStr(g.home, g.away, g.line)], ["Our line", lineStr(g.home, g.away, g.ours)], ["Off the line", `${Math.abs(g.ours - g.line).toFixed(1)} pts`]]});
     }
     if(g.tconf != null && g.total != null && g.tconf >= .5){
       const over = g.ours_total > g.total;
-      picks.push({g, kind:"total", conf:g.tconf, top:g.ttop_conf, top5:g.ttop5, text:`${over ? "Over" : "Under"} ${g.total.toFixed(1)}`,
-        game:`${esc(g.away)} ${vs} ${esc(g.home)}`,
+      picks.push({g, start:g.start, kind:"total", conf:g.tconf, top:g.ttop_conf, top5:g.ttop5, text:`${over ? "Over" : "Under"} ${g.total.toFixed(1)}`,
+        game:gameLine(g.away, g.home, g.neutral, null),
         stats:[["Betting total", g.total.toFixed(1)], ["Our total", g.ours_total], ["Off the total", `${(g.ours_total - g.total > 0 ? "+" : "")}${(g.ours_total - g.total).toFixed(1)} pts`]]});
     }
   });
   const shown = picks.filter(p => PMODE === "all" || p.kind === PMODE).sort((a,b) => b.conf - a.conf);
   const nS = picks.filter(p => p.kind === "spread").length, nT = picks.length - nS, nTop = picks.filter(p => p.top).length;
-  const card = (p, i) => `<article class="pick${p.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
-      <div class="pconf"><b>${(p.conf*100).toFixed(1)}%</b><span>${p.top5 ? "★ Top 5%" : p.top ? "★ Top 10%" : "confidence"}</span></div>
-      <div class="pmain">
-        <div class="pkind ${p.kind}">${p.kind === "spread" ? "Spread" : "Over/under"}</div>
-        <div class="ptext">${p.text}</div>
-        <div class="pgame">${p.game}</div>
-        <div class="pstats">${p.stats.map(([k,v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>
-      </div>
-      <time${p.g.start ? ` datetime="${esc(p.g.start)}"` : ""}>${gameWhen(p.g.start)}</time>
-    </article>`;
+  const card = pickCard;
   const seg = `<div class="seg sm" role="tablist" aria-label="Which picks"><span class="seglabel">Show</span>${[["all",`All ${picks.length}`],["spread",`Spread picks ${nS}`],["total",`Total picks ${nT}`]].map(([k,n]) =>
     `<button type="button" role="tab" data-pm="${k}" aria-selected="${PMODE===k}">${n}</button>`).join("")}</div>`;
   $("#ltitle").textContent = "This week's top confidence picks";
@@ -1372,6 +1358,12 @@ async function loadData(){
       const lr = await fetch("data/lines.json", {cache:"no-store"});
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[], open:r[10] ?? null}));
     }catch(e){ LINES = []; }
+    try{
+      const tm = await fetch("data/teams.json", {cache:"no-store"});
+      // v2 rows: [school, logo, dark-background logo, color, alt color]; the first version had no dark logo.
+      if(tm.ok){ const j = await tm.json(), v2 = j.v === 2;
+        TEAMS = Object.fromEntries((j.teams || []).map(r => [r[0], {logo:r[1], dark:v2 ? r[2] : null, color:v2 ? r[3] : r[2]}])); }
+    }catch(e){ TEAMS = {}; }
     try{
       const tr = await fetch("data/tracker.json", {cache:"no-store"});
       if(tr.ok) TRACKER = await tr.json();

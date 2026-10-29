@@ -181,19 +181,21 @@ if a.ppa:
 
 
 # Team logos and colors for the page: one /teams call, only when the file is missing or more than a week old.
-# Stored per team: [school, logo URL, color, alternate color].
+# Stored per team: [school, logo URL, logo URL for dark backgrounds (or null), color, alternate color]; "v": 2.
 if a.teams:
     tp = pathlib.Path(a.teams)
-    try: age = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(json.loads(tp.read_text())["updated"])).days
+    try:
+        old = json.loads(tp.read_text())
+        age = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(old["updated"])).days if old.get("v") == 2 else None
     except (OSError, ValueError, KeyError): age = None
     if age is not None and age < 7:
         print(f"Teams: kept ({age} days old)")
     else:
         try:
             T = get("https://api.collegefootballdata.com/teams")
-            rows = [[t["school"], (t.get("logos") or [None])[0], t.get("color"), t.get("alternateColor", t.get("alt_color"))]
-                    for t in T if t.get("school") and t.get("logos")]
-            tp.write_text(json.dumps({"updated": out["updated"], "teams": rows}, separators=(",", ":")))
+            rows = [[t["school"], t["logos"][0], next((u for u in t["logos"][1:] if "dark" in u), None), t.get("color"),
+                     t.get("alternateColor", t.get("alt_color"))] for t in T if t.get("school") and t.get("logos")]
+            tp.write_text(json.dumps({"v": 2, "updated": out["updated"], "teams": rows}, separators=(",", ":")))
             print(f"Teams: wrote {len(rows)} with logos")
             if T and not rows: print("  First team item, for debugging:", json.dumps(T[0])[:600])
         except Exception as e:
