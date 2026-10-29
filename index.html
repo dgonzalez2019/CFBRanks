@@ -1203,27 +1203,33 @@ function renderPicks(){
   const nowMs = Date.now(), picks = [];
   (TRACKER?.games||[]).filter(g => !g.results && (!g.start || new Date(g.start).getTime() > nowMs)).forEach(g => {
     const vs = g.neutral ? "vs" : "at";
-    if(g.conf != null && g.line != null && g.conf >= .5){
+    if(g.conf != null && g.line != null){
       const home = g.ours > g.line, team = home ? g.home : g.away;
       picks.push({g, start:g.start, kind:"spread", conf:g.conf, top:g.top_conf, top5:g.top5, text:`${esc(team)} ${sgn(home ? -g.line : g.line)}`,
         game:gameLine(g.away, g.home, g.neutral, team),
         stats:[["Betting line", lineStr(g.home, g.away, g.line)], ["Our line", lineStr(g.home, g.away, g.ours)], ["Off the line", `${Math.abs(g.ours - g.line).toFixed(1)} pts`]]});
     }
-    if(g.tconf != null && g.total != null && g.tconf >= .5){
+    if(g.tconf != null && g.total != null){
       const over = g.ours_total > g.total;
       picks.push({g, start:g.start, kind:"total", conf:g.tconf, top:g.ttop_conf, top5:g.ttop5, text:`${over ? "Over" : "Under"} ${g.total.toFixed(1)}`,
         game:gameLine(g.away, g.home, g.neutral, null),
         stats:[["Betting total", g.total.toFixed(1)], ["Our total", g.ours_total], ["Off the total", `${(g.ours_total - g.total > 0 ? "+" : "")}${(g.ours_total - g.total).toFixed(1)} pts`]]});
     }
   });
-  const shown = picks.filter(p => PMODE === "all" || p.kind === PMODE).sort((a,b) => b.conf - a.conf);
-  const nS = picks.filter(p => p.kind === "spread").length, nT = picks.length - nS, nTop = picks.filter(p => p.top).length;
+  // Top 5% / 10% here are of ALL this week's scored picks, spreads and totals ranked together (the Spreads and
+  // Totals views flag the top of each market separately).
+  picks.sort((a,b) => b.conf - a.conf);
+  const n10 = Math.max(1, Math.round(picks.length * .10)), n5 = Math.max(1, Math.round(picks.length * .05)), nAll = picks.length;
+  picks.forEach((p,i) => { p.top = i < n10; p.top5 = i < n5; });
+  const keep = picks.filter(p => p.conf >= .5);
+  const shown = keep.filter(p => PMODE === "all" || p.kind === PMODE);
+  const nS = keep.filter(p => p.kind === "spread").length, nT = keep.length - nS;
   const card = pickCard;
-  const seg = `<div class="seg sm" role="tablist" aria-label="Which picks"><span class="seglabel">Show</span>${[["all",`All ${picks.length}`],["spread",`Spread picks ${nS}`],["total",`Total picks ${nT}`]].map(([k,n]) =>
+  const seg = `<div class="seg sm" role="tablist" aria-label="Which picks"><span class="seglabel">Show</span>${[["all",`All ${keep.length}`],["spread",`Spread picks ${nS}`],["total",`Total picks ${nT}`]].map(([k,n]) =>
     `<button type="button" role="tab" data-pm="${k}" aria-selected="${PMODE===k}">${n}</button>`).join("")}</div>`;
   $("#ltitle").textContent = "This week's top confidence picks";
   $("#lout").innerHTML = lineSeg() + seg +
-    `<p class="note" style="margin:0">This week's spread and total picks rated 50% or higher, before kickoff, most confident first. <b>${nTop}</b> are top confidence (★, the top 10% of the week in their market).</p>` +
+    `<p class="note" style="margin:0">This week's spread and total picks rated 50% or higher, before kickoff, most confident first. ★ marks the top of all ${nAll} spread and total picks this week ranked together: <b>${n5}</b> in the top 5% and <b>${n10}</b> in the top 10%.</p>` +
     (shown.length ? `<div class="picks">${shown.map(card).join("")}</div>` : `<div class="panel empty">No upcoming picks at 50% or more yet. Picks appear once a game is within 7 days of kickoff.</div>`) +
     `<p class="note">Confidence is the model's chance the pick beats the betting line (spreads) or total (over/unders). Even the best-rated picks are expected to win only about 55% of the time, and totals scores are much less proven than spread scores. Results are tracked under Spreads and Totals. Not betting advice.</p>`;
   $("#lout").querySelectorAll("[data-pm]").forEach(b => b.addEventListener("click", () => { PMODE = b.dataset.pm; renderPicks(); }));
