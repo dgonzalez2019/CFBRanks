@@ -67,6 +67,21 @@ RESUME_WEIGHT = 1.0
 QUAD_CUTS = (25, 50, 80)
 
 
+# League settings (keep in sync with LEAGUES in index.html). NFL values come from research/nfl_tune.py (2016-25,
+# week-by-week with last season's prior: keep 0.5, lam 8, cap 21, no box-score efficiency; 63.7% winners / 10.22
+# avg miss vs the closing line's 66.5% / 9.77) and RESUME_WEIGHT 0.3 keeps the rating/résumé balance of CFB
+# (NFL ratings are far more bunched: SD 3-4 points vs 10).
+LEAGUE_SETTINGS = {
+    "cfb": dict(PRIOR_KEEP=0.9, PRIOR_LAM=2.0, PRIOR_CAP=45.0, EFF_WEIGHT=0.25, QUAD_CUTS=(25, 50, 80), RESUME_WEIGHT=1.0),
+    "nfl": dict(PRIOR_KEEP=0.5, PRIOR_LAM=8.0, PRIOR_CAP=21.0, EFF_WEIGHT=0.0, QUAD_CUTS=(8, 16, 24), RESUME_WEIGHT=0.3),
+}
+
+
+def use_league(name):
+    """Switch the module's model settings to a league ("cfb" or "nfl")."""
+    globals().update(LEAGUE_SETTINGS[name])
+
+
 def win_prob(margin):
     """P(win) given expected margin, normal approximation."""
     return 0.5 * (1 + math.erf(margin / (WIN_PROB_SD * math.sqrt(2))))
