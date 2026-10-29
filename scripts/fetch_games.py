@@ -9,6 +9,7 @@ from cfb_sor import load_cfbd
 ap = argparse.ArgumentParser(); ap.add_argument("--year", type=int, default=datetime.date.today().year)
 ap.add_argument("--out", help="output file (default: data/games.json)")
 ap.add_argument("--lines", help="also write betting lines for the season's games (played and upcoming) here")
+ap.add_argument("--players", help="also write player value (season PPA per play, offensive players) here")
 a = ap.parse_args()
 key = os.environ.get("CFBD_API_KEY") or sys.exit("CFBD_API_KEY is not set")
 upcoming = []
@@ -117,3 +118,25 @@ if a.lines:
     lp = pathlib.Path(a.lines); lp.parent.mkdir(parents=True, exist_ok=True)
     lp.write_text(json.dumps({"season": a.year, "updated": out["updated"], "games": out_lines}, separators=(",", ":")))
     print(f"Wrote {len(out_lines)} lines ({sum(r[6] is None for r in out_lines)} upcoming) to {lp}")
+
+
+# Player value for the injury picker: one /ppa/players/season call. PPA = predicted points added per play,
+# so (player's PPA - a typical backup's) x his plays per game is roughly his worth in points per game.
+# Stored per player: [team, name, position, countable plays, average PPA per play (all plays)].
+if a.players:
+    try:
+        P = get(f"https://api.collegefootballdata.com/ppa/players/season?year={a.year}&excludeGarbageTime=true")
+        rows = []
+        for x in P:
+            avg = x.get("averagePPA", x.get("average_ppa")) or {}
+            plays = x.get("countablePlays", x.get("countable_plays"))
+            val = avg.get("all") if isinstance(avg, dict) else None
+            if x.get("team") and x.get("name") and plays and val is not None and plays >= 10:
+                rows.append([x["team"], x["name"], x.get("position") or "", int(plays), round(float(val), 4)])
+        print(f"Players: {len(P)} returned, {len(rows)} kept")
+        if P and not rows: print("  First player item, for debugging:", json.dumps(P[0])[:600])
+        if rows:
+            pp = pathlib.Path(a.players); pp.parent.mkdir(parents=True, exist_ok=True)
+            pp.write_text(json.dumps({"season": a.year, "updated": out["updated"], "players": rows}, separators=(",", ":")))
+    except Exception as e:
+        print(f"Player values unavailable: {e}")
