@@ -71,15 +71,18 @@ ANGLES = {
 def grade(rows, score, line="mkt", top=None):
     p = [(score(r), r) for r in rows if r.get(line) is not None and r["act"] != r[line]]
     p = [(s, r) for s, r in p if s]
-    if top: p = sorted(p, key=lambda x: -abs(x[0]))[:max(1, int(len(p) * top))]
+    # "Strongest third" only means something when strengths differ; for yes/no angles every flagged game counts.
+    # (Earlier, ties made this keep an arbitrary third of a yes/no angle's games, which inflated its record.)
+    if top and len({abs(x[0]) for x in p}) > 2: p = sorted(p, key=lambda x: -abs(x[0]))[:max(1, int(len(p) * top))]
     w = sum((r["act"] > r[line]) == (s > 0) for s, r in p); return w, len(p) - w
 pct = lambda wl: f"{wl[0]}-{wl[1]} {wl[0]/max(1,sum(wl)):.0%}"
-print("\n== single angles (direction from 2022-24; top third of each angle's strength) ==")
+print("\n== single angles (direction from 2022-24; top third of graded angles, all games for yes/no angles) ==")
 print(f"{'angle':<32} {'train 2022-24':>16} {'2025 close':>14} {'2025 open':>14} {'2026 close':>14}")
 for name, f in ANGLES.items():
     tr = grade([r for r in R if r["season"] in TRAIN], f); sgn = 1 if tr[0] >= tr[1] else -1
     g = lambda ss, line: grade([r for r in R if r["season"] in ss], lambda r: sgn * f(r), line, top=1/3)
-    print(f"{name:<32} {pct(g(TRAIN,'mkt')):>16} {pct(g((2025,),'mkt')):>14} {pct(g((2025,),'open')):>14} {pct(g((2026,),'mkt')):>14}")
+    label = (name if sgn > 0 else "OPPOSITE of: " + name)[:32]  # the direction learned on 2022-24
+    print(f"{label:<32} {pct(g(TRAIN,'mkt')):>16} {pct(g((2025,),'mkt')):>14} {pct(g((2025,),'open')):>14} {pct(g((2026,),'mkt')):>14}")
 
 # Combined logistic model on standardized angle scores
 names = list(ANGLES); tr = [r for r in R if r["season"] in TRAIN and r["act"] != r["mkt"]]

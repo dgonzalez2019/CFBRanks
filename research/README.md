@@ -29,6 +29,7 @@ steadiest single angle, conference-game underdogs, 53.2% over 2022-26 closing li
 the QB rule's 2026 test can be reproduced; it does not update.
 
 NIL era (trained on 2025 only, tested on 2026): score model vs opening lines 51.1% at 3+ points (2025 was 55.8%);
-situational model 52.0%; spread picks 51.9%; totals 49.7%; score + PPA blend 46.9%. Only one angle beat 55% in both
-2025 and 2026: underdogs getting exactly 3 or 7 (+/-0.5), 46-38 and 23-16 (69-54, 56%), but 51% in 2022-24 and the
-best of 10 angles tried, so likely chance until it holds up live.
+situational model 52.0%; spread picks 51.9%; totals 49.7%; score + PPA blend 46.9%. An earlier version of situational.py
+scored only an arbitrary third of yes/no angles' games (ties in "strongest third"), which made underdogs at 3 or 7
+look like 56% in 2025-26. Counting every game: underdogs at 3 or 7 went 171-200 (46.1%) in 2025-26 and 50% in
+2022-24; favorites at 3 or 7 went 200-171 (53.9%) in 2025-26, 50% before. Nothing reached 55%.
