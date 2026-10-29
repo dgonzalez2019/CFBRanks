@@ -802,7 +802,7 @@ function renderHero(){
   $("#statstrip").innerHTML = stats.map(([v,l],i) => `<div class="stat" style="--i:${i}"><b data-count="${v}">${v}</b><span>${l}</span></div>`).join("");
   const items = open.slice().sort((x,y) => (x.start||"").localeCompare(y.start||"")).map(g => {
     const pick = g.ours > g.line ? g.home : g.away;
-    return `<span class="it${g.top_conf ? " top" : ""}"><b>${esc(g.away)}</b>${g.neutral ? "vs" : "at"}<b>${esc(g.home)}</b>· line ${lineStr(g.home, g.away, g.line)} · we lean ${esc(pick)} <span class="${g.top_conf ? "hot" : ""}">${(g.conf*100).toFixed(1)}%${g.top_conf ? (g.top5 ? " ★ top 5%" : " ★ top 10%") : ""}</span></span>`; });
+    return `<span class="it${g.top_conf ? " top" : ""}">${g.start ? `${gameDay(g.start)} ·` : ""}<b>${esc(g.away)}</b>${g.neutral ? "vs" : "at"}<b>${esc(g.home)}</b>· line ${lineStr(g.home, g.away, g.line)} · we lean ${esc(pick)} <span class="${g.top_conf ? "hot" : ""}">${(g.conf*100).toFixed(1)}%${g.top_conf ? (g.top5 ? " ★ top 5%" : " ★ top 10%") : ""}</span></span>`; });
   $("#tickerWrap").hidden = !items.length;
   if(items.length){ $("#ticker").innerHTML = items.join("") + items.join(""); $("#ticker").style.setProperty("--dur", `${Math.max(30, items.length*5)}s`); }
 }
@@ -945,7 +945,7 @@ function renderMatchup(force){
     const fav = mA>=0 ? a : b, fp = mA>=0 ? pA : 1-pA, where = ln.neutral ? "neutral site" : `at ${ln.home}`;
     mkt = `<div class="panel" style="padding:14px 16px;border-color:var(--accent)">
       <b>Best prediction: the betting line.</b> ${esc(fav)} by ${(Math.round(Math.abs(mA)*2)/2).toFixed(1)}, wins about ${Math.round(fp*100)}%
-      <span class="sub">(week ${ln.week}, ${esc(where)}; line ${lineStr(ln.home, ln.away, -ln.spread)}${lineOut(a)||lineOut(b) ? ", adjusted for your changes to the injury report" : ""})</span>
+      <span class="sub">(week ${ln.week}${ln.start ? `, ${gameDay(ln.start)}` : ""}, ${esc(where)}; line ${lineStr(ln.home, ln.away, -ln.spread)}${lineOut(a)||lineOut(b) ? ", adjusted for your changes to the injury report" : ""})</span>
       <p class="sub" style="margin:6px 0 0">Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse. The score above is our model's, for comparison and for games without a line. Injuries on the public report are assumed to be in the line already; only your changes to the report move it.</p></div>`;
   }
   const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
@@ -988,6 +988,9 @@ function trackedGame(a, b){
   return {t, pick, pts: Math.abs(t.line), getsPts: (pick===t.home) === (t.line < 0), top: !!t.top_conf, top5: !!t.top5, pct: t.conf};
 }
 const confBadge = c => !c ? "" : `<span class="conf${c.top ? " top" : ""}" title="Chance our pick covers: ${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}. ${c.top ? (c.top5 ? "Top 5% of this week's games by confidence." : "Top 10% of this week's games by confidence.") : "Not in this week's top 10%."} Scores run about 48–56%; games scored 54–56% covered 55% on past seasons.">${`<small>${c.top5 ? "Top 5% confidence" : c.top ? "Top confidence" : "Confidence"}</small>`}${(c.pct*100).toFixed(1)}%<small>${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}</small></span>`;
+// Game date on the Eastern-time calendar: the schedule is set in ET, and games without a kickoff time yet are stored
+// at midnight ET, which would show as the day before in later time zones.
+const gameDay = s => s ? new Date(s).toLocaleDateString([], {weekday:"short", month:"short", day:"numeric", timeZone:"America/New_York"}) : "";
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 function renderLines(){
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
@@ -998,7 +1001,7 @@ function renderLines(){
   }).map(l => ({...l, conf: trackedGame(l.home, l.away)?.pct ?? null}))
     .sort((x,y) => (y.conf ?? -1)-(x.conf ?? -1) || Math.abs(y.diff)-Math.abs(x.diff));  // most confident first; games without a score after, by difference
   const thisWeek = up.length ? Math.min(...up.map(l=>l.week)) : null;
-  const day = s => s ? new Date(s).toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"}) : "";
+  const day = gameDay;
   const table = rows => `<div class="panel scroll"><table class="top lines">
       <thead><tr><th>Diff</th><th>Game</th><th class="hide-sm">Betting line</th><th class="hide-sm">Our line</th><th class="num hide-sm">Our win %</th><th class="num hide-sm">Total</th><th class="num hide-sm">Ours</th></tr></thead>
       <tbody>${rows.map(l => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
