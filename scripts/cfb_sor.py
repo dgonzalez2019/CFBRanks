@@ -251,6 +251,48 @@ def colley(games):
     return rows
 
 
+# Matchup predictor. Separate from the ranking models, which compress margins: predictions need real points.
+PRED_CAP, PRED_RIDGE, PTS_RIDGE, PRED_SD_INFLATE = 35.0, 1.0, 2.0, 1.4
+
+
+def fit_predictor(games):
+    """Margin: ridge fit on point margins capped at PRED_CAP with a home-field term. Score total: ridge fit
+    on each side's points from offense and defense terms. Win chance SD = in-sample RMSE x PRED_SD_INFLATE."""
+    games = [g for g in games if g["home_fbs"] or g["away_fbs"]]
+    norm = lambda t, fbs: t if fbs else FCS_POOL
+    teams = sorted({norm(g["home"], g["home_fbs"]) for g in games} | {norm(g["away"], g["away_fbs"]) for g in games})
+    idx = {t: i for i, t in enumerate(teams)}; n = len(teams)
+    X = np.zeros((len(games), n + 1)); y = np.zeros(len(games))
+    Xp = np.zeros((2 * len(games), 2 * n + 2)); yp = np.zeros(2 * len(games))
+    for k, g in enumerate(games):
+        h, a = idx[norm(g["home"], g["home_fbs"])], idx[norm(g["away"], g["away_fbs"])]
+        x = 0 if g["neutral"] else 1
+        X[k, h] = 1; X[k, a] = -1; X[k, n] = x; y[k] = max(-PRED_CAP, min(PRED_CAP, g["hp"] - g["ap"]))
+        Xp[2 * k, [h, n + a, 2 * n, 2 * n + 1]] = [1, 1, 1, x]; yp[2 * k] = g["hp"]
+        Xp[2 * k + 1, [a, n + h, 2 * n]] = 1; yp[2 * k + 1] = g["ap"]
+    P = np.eye(n + 1) * PRED_RIDGE; P[n, n] = 0
+    m = np.linalg.solve(X.T @ X + P, X.T @ y)
+    Pp = np.eye(2 * n + 2) * PTS_RIDGE; Pp[2 * n, 2 * n] = Pp[2 * n + 1, 2 * n + 1] = 0
+    q = np.linalg.solve(Xp.T @ Xp + Pp, Xp.T @ yp)
+    sd = float(np.sqrt(np.mean((y - X @ m) ** 2)) * PRED_SD_INFLATE)
+    T = {t: dict(r=m[i], off=q[i], defn=q[n + i]) for i, t in enumerate(teams)}
+    return dict(T=T, hfa=m[n], mu=q[2 * n], hp=q[2 * n + 1], sd=sd)
+
+
+def predict(M, a, b, venue="N"):
+    """venue: 'N' neutral, 'A' team a at home, 'B' team b at home."""
+    A, B = M["T"][a], M["T"][b]; ha, hb = int(venue == "A"), int(venue == "B")
+    margin = A["r"] - B["r"] + M["hfa"] * (ha - hb)
+    pa = 0.5 * (1 + math.erf(margin / (M["sd"] * math.sqrt(2))))
+    total = (M["mu"] + A["off"] + B["defn"] + M["hp"] * ha) + (M["mu"] + B["off"] + A["defn"] + M["hp"] * hb)
+    total = max(total, abs(margin) + 7)
+    sa, sb = round((total + margin) / 2), round((total - margin) / 2)
+    if sa == sb:  # no ties in college football
+        if margin >= 0: sa += 1
+        else: sb += 1
+    return dict(margin=margin, pa=pa, sa=sa, sb=sb)
+
+
 def print_colley(rows, top):
     hdr = f"{'Rk':>3} {'Team':<22}{'Rec':>6}{'Rating':>8}{'OppAvg':>8}  Best win / Worst loss"
     print("\nResults-only ranking (Colley Matrix)\n"); print(hdr); print("-" * len(hdr))
@@ -311,6 +353,8 @@ def main():
     ap.add_argument("--rank", choices=("score", "power", "sor", "colley"), default="score",
                     help="order of the table: score (power + resume, default), power, sor, or colley (results only)")
     ap.add_argument("--team"); ap.add_argument("--out")
+    ap.add_argument("--predict", nargs=2, metavar=("TEAM1", "TEAM2"), help="predict a matchup")
+    ap.add_argument("--venue", choices=("neutral", "team1", "team2"), default="neutral", help="who is at home for --predict")
     a = ap.parse_args()
 
     if a.csv:
@@ -321,6 +365,17 @@ def main():
         games = load_cfbd(a.year, key)
     if not games: sys.exit("No completed games found.")
 
+    if a.predict:
+        M = fit_predictor(games); t1, t2 = a.predict
+        for t in (t1, t2):
+            if t not in M["T"] or t == FCS_POOL: sys.exit(f"Team '{t}' not found.")
+        p = predict(M, t1, t2, {"neutral": "N", "team1": "A", "team2": "B"}[a.venue])
+        w, wp = (t1, p["pa"]) if p["pa"] >= 0.5 else (t2, 1 - p["pa"])
+        where = "neutral site" if a.venue == "neutral" else f"at {t1 if a.venue == 'team1' else t2}"
+        print(f"\n{t1} {p['sa']}, {t2} {p['sb']}  ({where})")
+        pts = max(1, round(abs(p["margin"])))
+        print(f"{w} wins {wp:.0%} of the time by about {pts} point{'' if pts == 1 else 's'}")
+        return
     if a.rank == "colley":
         print_colley(colley(games), a.top); return
     rows, hfa, bench = compute(games, a.benchmark)

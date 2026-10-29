@@ -79,6 +79,16 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .teamhead h2{font:700 34px/1 var(--display);text-transform:uppercase;margin:0}
 .quads{display:flex;gap:8px;flex-wrap:wrap}
 .quads div{display:flex;gap:6px;align-items:center;font-family:var(--mono);font-size:13px}
+.mform{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:16px}
+.mform label{display:grid;gap:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.mform input,.mform select{width:100%;box-sizing:border-box}
+.score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:20px 16px;text-align:center}
+.score .side b{display:block;font:700 56px/1 var(--display)}
+.score .side span{display:block;font-weight:600;margin-top:6px;overflow-wrap:anywhere}
+.score .side.win b{color:var(--accent)}
+.score .dash{font:700 28px/1 var(--display);color:var(--muted)}
+.pbar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
+.pbar i{display:block;height:100%}
 .note{font-size:13px;color:var(--muted);max-width:70ch}
 .method{padding:20px 22px;display:grid;gap:14px;max-width:none}
 .method h3{font:700 18px/1.1 var(--display);text-transform:uppercase;margin:0;letter-spacing:.03em}
@@ -109,6 +119,7 @@ body{margin:0}
     <nav aria-label="Sections">
       <a href="#top25" data-view="top25">Top 25</a>
       <a href="#results" data-view="results">Results only</a>
+      <a href="#matchup" data-view="matchup">Matchup</a>
       <a href="#teams" data-view="teams">Team lookup</a>
       <a href="#method" data-view="method">How it works</a>
     </nav>
@@ -164,6 +175,20 @@ body{margin:0}
     </div>
   </section>
 
+  <!-- MATCHUP -->
+  <section id="v-matchup" class="view" hidden>
+    <div style="display:grid;gap:14px">
+      <div class="bar"><h2>Matchup predictor</h2></div>
+      <div class="panel mform">
+        <label>Team 1<input id="ma" type="search" list="teamlist" placeholder="Search a team" autocomplete="off"></label>
+        <label>Team 2<input id="mb" type="search" list="teamlist" placeholder="Search a team" autocomplete="off"></label>
+        <label>Where<select id="mv"><option value="N">Neutral site</option><option value="A">Team 1 at home</option><option value="B">Team 2 at home</option></select></label>
+      </div>
+      <div id="mout"></div>
+      <p class="note" id="mnote"></p>
+    </div>
+  </section>
+
   <!-- TEAM LOOKUP -->
   <section id="v-teams" class="view" hidden>
     <div style="display:grid;gap:16px">
@@ -201,6 +226,8 @@ body{margin:0}
       </ol>
       <h3>The Results only tab</h3>
       <p>A second, independent ranking that uses nothing but who won. It follows the Colley Matrix method: every team starts even, a win raises a team and a loss lowers it, and each result is weighed by how good the opponent is, where the opponent is judged the same way from its own results. All teams are solved together, so beating a team that beat good teams counts for more. Scores, margins and home field are ignored.</p>
+      <h3>The Matchup tab</h3>
+      <p>Pick two teams and where they play. The predicted margin comes from a rating fit to every game's point margin (capped at 35 so blowouts don't dominate), plus a measured home-field edge. The predicted total comes from each team's points scored and allowed, adjusted for the opponents it faced, and the margin splits that total into a score. The win chance reflects how far real results have missed predictions this season, so even a 7-point favorite loses fairly often.</p>
       <h3>Updating the data</h3>
       <p>Upload a CSV with the columns <code>week,home_team,away_team,home_points,away_points,neutral_site,home_fbs,away_fbs</code>. Rows without scores are skipped. An uploaded file only changes your own view. The published rankings come from <code>data/games.json</code>, which the scheduled GitHub Action refreshes from collegefootballdata.com.</p>
       <div class="upload panel" style="border-style:dashed">
@@ -216,7 +243,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -280,6 +307,57 @@ function colley(games){
     return {team:t, rank:rank[t], rating:rating[t], w:W.length, l:L.length,
             oppAvg: gs.length ? gs.reduce((s,x)=>s+rating[x.opp],0)/gs.length : 0, W, L};
   });
+}
+
+// Matchup predictor. Separate from the ranking models, which compress margins: predictions need real points.
+// Margin: ridge fit on point margins capped at 35 with a home-field term. Score total: ridge fit on each
+// side's points from offense and defense terms. Win chance: normal CDF with SD = in-sample RMSE × 1.4,
+// widened because in-sample error understates how far real results miss.
+const PRED_CAP = 35, PRED_RIDGE = 1, PTS_RIDGE = 2, PRED_SD_INFLATE = 1.4;
+function predictor(games){
+  const nm = (t,f) => f ? t : FCS;
+  const teams = [...new Set(games.flatMap(g => [nm(g.home,g.hf), nm(g.away,g.af)]))].sort();
+  const idx = Object.fromEntries(teams.map((t,i)=>[t,i])), n = teams.length;
+  const A = Array.from({length:n+1},()=>new Array(n+1).fill(0)), b = new Array(n+1).fill(0);
+  const P = Array.from({length:2*n+2},()=>new Array(2*n+2).fill(0)), c = new Array(2*n+2).fill(0);
+  const addRow = (M, v, cols, y) => { cols.forEach(([i,x]) => { cols.forEach(([j,z]) => M[i][j]+=x*z); v[i]+=x*y; }); };
+  const rows = games.map(g => {
+    const h=idx[nm(g.home,g.hf)], a=idx[nm(g.away,g.af)], x=g.neutral?0:1, y=Math.max(-PRED_CAP,Math.min(PRED_CAP,g.hp-g.ap));
+    addRow(A, b, [[h,1],[a,-1],[n,x]], y);
+    addRow(P, c, [[h,1],[n+a,1],[2*n,1],[2*n+1,x]], g.hp);
+    addRow(P, c, [[a,1],[n+h,1],[2*n,1]], g.ap);
+    return [h,a,x,y];
+  });
+  for(let i=0;i<n;i++) A[i][i]+=PRED_RIDGE;
+  for(let i=0;i<2*n;i++) P[i][i]+=PTS_RIDGE;
+  const m = solve(A,b), q = solve(P,c);
+  const se = rows.reduce((s,[h,a,x,y])=>s+(y-(m[h]-m[a]+m[n]*x))**2,0);
+  const T = {}; teams.forEach((t,i)=>T[t]={r:m[i], off:q[i], def:q[n+i]});
+  return {T, hfa:m[n], mu:q[2*n], hp:q[2*n+1], sd:Math.sqrt(se/rows.length)*PRED_SD_INFLATE};
+}
+function predict(M, a, b, venue){
+  const A=M.T[a], B=M.T[b], ha=venue==="A"?1:0, hb=venue==="B"?1:0;
+  const margin = A.r - B.r + M.hfa*(ha-hb), pa = .5*(1+erf(margin/(M.sd*Math.SQRT2)));
+  let total = (M.mu+A.off+B.def+M.hp*ha) + (M.mu+B.off+A.def+M.hp*hb);
+  total = Math.max(total, Math.abs(margin)+7);
+  let sa = Math.round((total+margin)/2), sb = Math.round((total-margin)/2);
+  if(sa===sb){ if(margin>=0) sa++; else sb++; }  // no ties in college football
+  return {margin, pa, sa, sb};
+}
+
+// Honest accuracy: predict each week from week 5 on using only earlier games.
+function backtest(games){
+  let n=0, hit=0, err=0, close=0;
+  const last = Math.max(0, ...games.map(g=>g.week));
+  for(let w=5; w<=last; w++){
+    const train = games.filter(g=>g.week<w); if(!train.length) continue;
+    const M = predictor(train);
+    games.filter(g=>g.week===w && g.hf && g.af && g.hp!==g.ap && M.T[g.home] && M.T[g.away]).forEach(g => {
+      const p = predict(M, g.home, g.away, g.neutral?"N":"A"), act = g.hp-g.ap;
+      n++; hit += (p.margin>0)===(act>0); err += Math.abs(p.margin-act); close += Math.abs(act)<=8;
+    });
+  }
+  return n ? {n, hit:hit/n, mae:err/n, close:close/n} : null;
 }
 
 function solve(A,b){ // Gaussian elimination w/ partial pivoting
@@ -374,6 +452,30 @@ function renderResults(){
     <td>${gameStr(r.W[0])}</td><td>${gameStr(r.L[0])}</td></tr>`).join("");
 }
 
+function renderMatchup(){
+  const a = $("#ma").value, b = $("#mb").value, ok = t => RESULT.byTeam[t];
+  $("#mv").options[1].text = ok(a) ? `${a} at home` : "Team 1 at home";
+  $("#mv").options[2].text = ok(b) ? `${b} at home` : "Team 2 at home";
+  $("#mnote").innerHTML = `Margins come from a point-margin rating of every game this season; the score total comes from each team's points scored and allowed, adjusted for opponents.` +
+    (BT ? ` Tested on ${BT.n} past games using only the games before each one, it picked the winner ${Math.round(BT.hit*100)}% of the time and missed the margin by ${BT.mae.toFixed(1)} points on average (${Math.round(BT.close*100)}% of those games were decided by one score).` : "");
+  if(!ok(a) || !ok(b) || a===b){ $("#mout").innerHTML = `<div class="panel empty">${a&&b&&a===b?"Pick two different teams.":"Pick two FBS teams to see who would win and the predicted score."}</div>`; return; }
+  store.set("sor.ma", a); store.set("sor.mb", b);
+  const v = $("#mv").value, p = predict(PRED, a, b, v), winA = p.pa >= .5, w = winA ? a : b, wp = winA ? p.pa : 1-p.pa;
+  const ra = RESULT.byTeam[a], rb = RESULT.byTeam[b];
+  const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
+  const side = (t, s, r, win) => `<div class="side${win?" win":""}"><b>${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
+  $("#mout").innerHTML = `
+    <div class="panel">
+      <div class="score">${side(a, p.sa, ra, winA)}<div class="dash">–</div>${side(b, p.sb, rb, !winA)}</div>
+      <div style="padding:0 16px 18px;display:grid;gap:8px">
+        <div class="pbar" role="img" aria-label="${esc(a)} ${Math.round(p.pa*100)}%, ${esc(b)} ${Math.round((1-p.pa)*100)}%"><i style="width:${p.pa*100}%;background:var(${winA?"--accent":"--muted"})"></i><i style="width:${(1-p.pa)*100}%;background:var(${winA?"--muted":"--accent"})"></i></div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px"><span>${esc(a)} ${Math.round(p.pa*100)}%</span><span>${esc(b)} ${Math.round((1-p.pa)*100)}%</span></div>
+        <p style="margin:6px 0 0"><b>${esc(w)}</b> wins ${Math.round(wp*100)}% of the time by about <b>${Math.max(1,Math.round(Math.abs(p.margin)))}</b> point${Math.round(Math.abs(p.margin))===1?"":"s"}${v==="N"?" on a neutral field":` with ${esc(v==="A"?a:b)} at home`}.</p>
+        ${met.map(g=>`<p class="sub" style="margin:0">Already played, week ${g.week}: ${esc(g.away)} ${g.ap} ${g.neutral?"vs.":"at"} ${esc(g.home)} ${g.hp}${g.neutral?" (neutral site)":""}.</p>`).join("")}
+      </div>
+    </div>`;
+}
+
 function renderTeam(name){
   const r = RESULT.byTeam[name];
   if(!r){ $("#teamOut").innerHTML = `<div class="panel empty">${name?`No FBS team named “${esc(name)}” in this data.`:"Search for a team to see its opponents, their rankings, and the strength of each win and loss."}</div>`; return; }
@@ -418,7 +520,11 @@ function renderStatus(){
 function recompute(){
   RESULT = compute(GAMES, BENCH);
   RONLY = colley(GAMES.filter(g => g.hf || g.af));
+  PRED = predictor(GAMES.filter(g => g.hf || g.af));
+  BT = backtest(GAMES.filter(g => g.hf || g.af));
   renderResults();
+  if(!$("#ma").value){ $("#ma").value = store.get("sor.ma") || RESULT.rows[0]?.team || ""; $("#mb").value = store.get("sor.mb") || RESULT.rows[1]?.team || ""; }
+  renderMatchup();
   $("#teamlist").innerHTML = RESULT.rows.map(r=>`<option value="${esc(r.team)}">`).join("");
   renderStatus(); renderTop();
   const cur = $("#q").value || store.get("sor.team") || "";
@@ -428,7 +534,7 @@ function recompute(){
 
 /* ---------------- routing ---------------- */
 function route(){
-  const v = (location.hash||"#top25").slice(1), view = ["top25","results","teams","method"].includes(v)?v:"top25";
+  const v = (location.hash||"#top25").slice(1), view = ["top25","results","matchup","teams","method"].includes(v)?v:"top25";
   document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-"+view);
   document.querySelectorAll("nav a").forEach(a => a.dataset.view===view ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
 }
@@ -442,6 +548,8 @@ $("#q").addEventListener("change", e => renderTeam(e.target.value));
 $("#bench").addEventListener("change", e => { BENCH = +e.target.value; store.set("sor.bench", BENCH); recompute(); });
 $("#showall").addEventListener("change", e => { SHOWALL = e.target.value==="all"; renderTop(); });
 $("#rshowall").addEventListener("change", renderResults);
+["#ma","#mb"].forEach(id => { $(id).addEventListener("input", renderMatchup); $(id).addEventListener("change", renderMatchup); });
+$("#mv").addEventListener("change", renderMatchup);
 
 /* ---------------- CSV + shared data ---------------- */
 function parseCSV(text){
