@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Pull a past season's betting lines and per-game passers from collegefootballdata.com, for tuning.
-Writes <dir>/<year>_lines.json and <dir>/<year>_qb.json; skips a file that already exists.
+Writes <dir>/<year>_lines.json, <dir>/<year>_qb.json and <dir>/<year>_players.json; skips files that exist.
 Usage: CFBD_API_KEY=... python scripts/fetch_extras.py --year 2024 [--dir data/history]"""
 import argparse, json, os, sys, pathlib, urllib.request
 
@@ -69,3 +69,15 @@ if not qp.exists():
         if box and len(rows) == n0: print("  First item, for debugging:", json.dumps(box[0])[:800])
     qp.write_text(json.dumps({"season": a.year, "games": rows}, separators=(",", ":")))
     print(f"{a.year}: wrote passers for {len(rows)} games")
+
+# Player values for that season, same format as data/players.json: [team, name, position, plays, avg PPA per play]
+pp = out_dir / f"{a.year}_players.json"
+if not pp.exists():
+    rows = []
+    for x in get(f"https://api.collegefootballdata.com/ppa/players/season?year={a.year}&excludeGarbageTime=true"):
+        avg = (x.get("averagePPA") or {}).get("all"); tot = (x.get("totalPPA") or {}).get("all")
+        plays = x.get("countablePlays") or (round(tot / avg) if avg and tot is not None else None)
+        if x.get("team") and x.get("name") and plays and plays >= 10 and avg is not None:
+            rows.append([x["team"], x["name"], x.get("position") or "", int(plays), round(float(avg), 4)])
+    pp.write_text(json.dumps({"season": a.year, "players": rows}, separators=(",", ":")))
+    print(f"{a.year}: wrote {len(rows)} player values")
