@@ -260,7 +260,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -368,21 +368,33 @@ function efficiency(games){
   }));
   return {ypa, ypc, coef: solve(X, v)};
 }
-function predictor(games){
-  const nm = (t,f) => f ? t : FCS;
+// Last season as a starting point: each team's end-of-last-season margin rating, kept at PRIOR_KEEP, and this
+// season's ratings are pulled toward it (ridge PRIOR_LAM) instead of toward average. Tuned on 2022-25 with each
+// season seeded by the one before: weeks 1-4 went from 67.9% winners / 15.0-pt margin miss to 73.4% / 13.6,
+// later weeks from 69.9% / 12.67 to 70.8% / 12.45. Teams new to FBS start at last season's FCS level.
+const PRIOR_KEEP = 0.9, PRIOR_LAM = 2, PRIOR_CAP = 45;
+function seasonPrior(prev){
+  if(!prev || prev.length < 100) return null;
+  const R = predictor(prev, null, PRIOR_CAP).T, r = {};
+  Object.entries(R).forEach(([t,v]) => r[t] = PRIOR_KEEP*v.r);
+  return {r, fcs: r[FCS] ?? Math.min(...Object.values(r))};
+}
+function predictor(games, prior=null, capOverride=null){
+  const nm = (t,f) => f ? t : FCS, cap = capOverride ?? (prior ? PRIOR_CAP : PRED_CAP), lam = prior ? PRIOR_LAM : PRED_RIDGE;
   const teams = [...new Set(games.flatMap(g => [nm(g.home,g.hf), nm(g.away,g.af)]))].sort();
   const idx = Object.fromEntries(teams.map((t,i)=>[t,i])), n = teams.length;
   const A = Array.from({length:n+1},()=>new Array(n+1).fill(0)), b = new Array(n+1).fill(0);
   const P = Array.from({length:2*n+2},()=>new Array(2*n+2).fill(0)), c = new Array(2*n+2).fill(0);
   const addRow = (M, v, cols, y) => { cols.forEach(([i,x]) => { cols.forEach(([j,z]) => M[i][j]+=x*z); v[i]+=x*y; }); };
   const rows = games.map(g => {
-    const h=idx[nm(g.home,g.hf)], a=idx[nm(g.away,g.af)], x=g.neutral?0:1, y=Math.max(-PRED_CAP,Math.min(PRED_CAP,g.hp-g.ap));
+    const h=idx[nm(g.home,g.hf)], a=idx[nm(g.away,g.af)], x=g.neutral?0:1, y=Math.max(-cap,Math.min(cap,g.hp-g.ap));
     addRow(A, b, [[h,1],[a,-1],[n,x]], y);
     addRow(P, c, [[h,1],[n+a,1],[2*n,1],[2*n+1,x]], g.hp);
     addRow(P, c, [[a,1],[n+h,1],[2*n,1]], g.ap);
     return [h,a,x,y];
   });
-  for(let i=0;i<n;i++) A[i][i]+=PRED_RIDGE;
+  teams.forEach((t,i) => { A[i][i] += lam; if(prior) b[i] += lam*(prior.r[t] ?? prior.fcs); });
+  A[n][n] += 1e-9;
   for(let i=0;i<2*n;i++) P[i][i]+=PTS_RIDGE;
   const m = solve(A,b), q = solve(P,c);
   const se = rows.reduce((s,[h,a,x,y])=>s+(y-(m[h]-m[a]+m[n]*x))**2,0);
@@ -435,20 +447,21 @@ function playerValues(players, games){
   return byTeam;
 }
 
-// Honest accuracy: predict each week from week 5 on using only earlier games.
+// Honest accuracy: predict each week using only earlier games (from week 2 when last season seeds the
+// ratings, otherwise from week 5, when this season alone is enough).
 function backtest(games){
-  let n=0, hit=0, err=0, close=0; const preds = {};
+  let n=0, hit=0, err=0, close=0; const preds = {}, first = PRIOR ? 2 : 5;
   const last = Math.max(0, ...games.map(g=>g.week));
-  for(let w=5; w<=last; w++){
+  for(let w=first; w<=last; w++){
     const train = games.filter(g=>g.week<w); if(!train.length) continue;
-    const M = predictor(train);
+    const M = predictor(train, PRIOR);
     games.filter(g=>g.week===w && g.hf && g.af && g.hp!==g.ap && M.T[g.home] && M.T[g.away]).forEach(g => {
       const p = predict(M, g.home, g.away, g.neutral?"N":"A"), act = g.hp-g.ap;
       n++; hit += (p.margin>0)===(act>0); err += Math.abs(p.margin-act); close += Math.abs(act)<=8;
       preds[`${g.week}|${g.home}|${g.away}`] = p.margin;
     });
   }
-  return n ? {n, hit:hit/n, mae:err/n, close:close/n, preds} : null;
+  return n ? {n, hit:hit/n, mae:err/n, close:close/n, preds, first} : null;
 }
 
 function solve(A,b){ // Gaussian elimination w/ partial pivoting
@@ -563,7 +576,7 @@ function renderMatchup(force){
   MKEY = key;
   $("#mv").options[1].text = ok(a) ? `${a} at home` : "Team 1 at home";
   $("#mv").options[2].text = ok(b) ? `${b} at home` : "Team 2 at home";
-  $("#mnote").innerHTML = `Margins come from a point-margin rating of every game this season${PRED.eff?`, blended (${Math.round(EFF_WEIGHT*100)}%) with each side's expected passing and rushing efficiency`:""}; the score total comes from each team's points scored and allowed, adjusted for opponents.` +
+  $("#mnote").innerHTML = `Margins come from a point-margin rating of every game this season${PRIOR?" that starts from each team's rating at the end of last season (90% of it)":""}${PRED.eff?`, blended (${Math.round(EFF_WEIGHT*100)}%) with each side's expected passing and rushing efficiency`:""}; the score total comes from each team's points scored and allowed, adjusted for opponents.` +
     (BT ? ` Tested on ${BT.n} past games using only the games before each one, it picked the winner ${Math.round(BT.hit*100)}% of the time and missed the margin by ${BT.mae.toFixed(1)} points on average (${Math.round(BT.close*100)}% of those games were decided by one score).` : "");
   if(!ok(a) || !ok(b) || a===b){ $("#mout").innerHTML = `<div class="panel empty">${a&&b&&a===b?"Pick two different teams.":"Pick two FBS teams to see who would win and the predicted score."}</div>`; return; }
   store.set("sor.ma", a); store.set("sor.mb", b);
@@ -647,7 +660,7 @@ function renderLines(){
         <div class="tile"><b>${Math.round(wins("mkt")*100)}%</b><span>Line's winners right</span></div>
       </div>
       <div class="panel scroll"><table><thead><tr><th>When we disagreed by</th><th class="num">Games</th><th class="num">Result on our side</th></tr></thead><tbody>${tiers}</tbody></table></div>
-      <p class="note">${done.length} games from week 5 on. Each of our predictions used only games played before that week. Betting at standard odds needs about 52.4% on your side just to break even, so small samples above that can easily be luck.</p>`;
+      <p class="note">${done.length} games from week ${BT.first} on. Each of our predictions used only games played before that week. Betting at standard odds needs about 52.4% on your side just to break even, so small samples above that can easily be luck.</p>`;
   }
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   $("#ltitle").textContent = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: our lines vs. betting lines` : "Our lines vs. betting lines";
@@ -701,7 +714,7 @@ function renderStatus(){
 function recompute(){
   RESULT = compute(GAMES, BENCH);
   RONLY = colley(GAMES.filter(g => g.hf || g.af));
-  PRED = predictor(GAMES.filter(g => g.hf || g.af));
+  PRED = predictor(GAMES.filter(g => g.hf || g.af), PRIOR);
   PVAL = playerValues(PLAYERS, GAMES);
   BT = backtest(GAMES.filter(g => g.hf || g.af));
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));
@@ -782,6 +795,10 @@ async function loadData(){
       const lr = await fetch("data/lines.json", {cache:"no-store"});
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[]}));
     }catch(e){ LINES = []; }
+    try{
+      const hr = await fetch(`data/history/${d.season-1}.json`, {cache:"no-store"});
+      if(hr.ok){ const h = await hr.json(); PREV = (h.games||[]).map(a => unpack(a[0], a.slice(1))).filter(g => g.hf || g.af); PRIOR = seasonPrior(PREV); }
+    }catch(e){ PREV = []; PRIOR = null; }
     try{
       const pr = await fetch("data/players.json", {cache:"no-store"});
       if(pr.ok) PLAYERS = ((await pr.json()).players || []).map(r => ({team:r[0], name:r[1], pos:r[2], plays:r[3], ppa:r[4]}));

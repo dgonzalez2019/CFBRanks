@@ -315,10 +315,24 @@ def efficiency(games):
     return dict(ypa=ypa, ypc=ypc, coef=coef)
 
 
-def fit_predictor(games):
-    """Margin: ridge fit on point margins capped at PRED_CAP with a home-field term. Score total: ridge fit
-    on each side's points from offense and defense terms. Win chance SD = in-sample RMSE x PRED_SD_INFLATE."""
+# Last season as a starting point (see seasonPrior() in index.html for the tuning results).
+PRIOR_KEEP, PRIOR_LAM, PRIOR_CAP = 0.9, 2.0, 45.0
+
+
+def season_prior(prev):
+    """End-of-last-season margin ratings, kept at PRIOR_KEEP; teams new to FBS start at the FCS level."""
+    prev = [g for g in prev if g["home_fbs"] or g["away_fbs"]]
+    if len(prev) < 100: return None
+    r = {t: PRIOR_KEEP * v["r"] for t, v in fit_predictor(prev, cap=PRIOR_CAP)["T"].items()}
+    return dict(r=r, fcs=r.get(FCS_POOL, min(r.values())))
+
+
+def fit_predictor(games, prior=None, cap=None):
+    """Margin: ridge fit on point margins capped at PRED_CAP with a home-field term (with a prior: capped at
+    PRIOR_CAP and pulled toward last season's ratings). Score total: ridge fit on each side's points from
+    offense and defense terms. Win chance SD = in-sample RMSE x PRED_SD_INFLATE."""
     games = [g for g in games if g["home_fbs"] or g["away_fbs"]]
+    cap = cap or (PRIOR_CAP if prior else PRED_CAP); lam = PRIOR_LAM if prior else PRED_RIDGE
     norm = lambda t, fbs: t if fbs else FCS_POOL
     teams = sorted({norm(g["home"], g["home_fbs"]) for g in games} | {norm(g["away"], g["away_fbs"]) for g in games})
     idx = {t: i for i, t in enumerate(teams)}; n = len(teams)
@@ -327,11 +341,13 @@ def fit_predictor(games):
     for k, g in enumerate(games):
         h, a = idx[norm(g["home"], g["home_fbs"])], idx[norm(g["away"], g["away_fbs"])]
         x = 0 if g["neutral"] else 1
-        X[k, h] = 1; X[k, a] = -1; X[k, n] = x; y[k] = max(-PRED_CAP, min(PRED_CAP, g["hp"] - g["ap"]))
+        X[k, h] = 1; X[k, a] = -1; X[k, n] = x; y[k] = max(-cap, min(cap, g["hp"] - g["ap"]))
         Xp[2 * k, [h, n + a, 2 * n, 2 * n + 1]] = [1, 1, 1, x]; yp[2 * k] = g["hp"]
         Xp[2 * k + 1, [a, n + h, 2 * n]] = 1; yp[2 * k + 1] = g["ap"]
-    P = np.eye(n + 1) * PRED_RIDGE; P[n, n] = 0
-    m = np.linalg.solve(X.T @ X + P, X.T @ y)
+    P = np.eye(n + 1) * lam; P[n, n] = 1e-9
+    pv = np.zeros(n + 1)
+    if prior: pv[:n] = [prior["r"].get(t, prior["fcs"]) for t in teams]
+    m = np.linalg.solve(X.T @ X + P, X.T @ y + lam * pv * (np.arange(n + 1) < n))
     Pp = np.eye(2 * n + 2) * PTS_RIDGE; Pp[2 * n, 2 * n] = Pp[2 * n + 1, 2 * n + 1] = 0
     q = np.linalg.solve(Xp.T @ Xp + Pp, Xp.T @ yp)
     sd = float(np.sqrt(np.mean((y - X @ m) ** 2)) * PRED_SD_INFLATE)
@@ -454,6 +470,7 @@ def main():
     ap.add_argument("--venue", choices=("neutral", "team1", "team2"), default="neutral", help="who is at home for --predict")
     ap.add_argument("--out-players", default="", help="comma-separated players who are out, for --predict (needs --players)")
     ap.add_argument("--players", help="the site's data/players.json, for --out-players")
+    ap.add_argument("--prev", help="last season's games (data/history/<year>.json) to seed --predict ratings")
     a = ap.parse_args()
 
     if a.json:
@@ -467,7 +484,7 @@ def main():
     if not games: sys.exit("No completed games found.")
 
     if a.predict:
-        M = fit_predictor(games); t1, t2 = a.predict
+        M = fit_predictor(games, season_prior(load_json(a.prev)) if a.prev else None); t1, t2 = a.predict
         for t in (t1, t2):
             if t not in M["T"] or t == FCS_POOL: sys.exit(f"Team '{t}' not found.")
         lost = {t1: 0.0, t2: 0.0}
