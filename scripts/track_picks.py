@@ -38,10 +38,19 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import cfb_sor as m
 import math
 
+# --league nfl tracks the NFL from data/nfl/ (research/nfl_conf.py: spread top 10% 134-119, 53.0%, 2016-25 held out;
+# totals showed no edge, 122-128). CFB is the default.
+LEAGUE = sys.argv[sys.argv.index("--league") + 1] if "--league" in sys.argv else "cfb"
+m.use_league(LEAGUE)
 CONF_COEF = (0.08102, 0.018616, 0.047526, -0.059625, 0.063655)  # const, bad, dis, gap, both
 TOP_SHARE, TOP5_SHARE = 0.10, 0.05
 TCONF_COEF = (-0.0018, 0.0605, 0.0039, 0.3163, 0.0626, 0.0974)  # const, gap, last, form, pace, high
-PACE_AVG = 67.2
+PACE_AVG, TOTAL_MID = 67.2, 55.0
+if LEAGUE == "nfl":
+    CONF_COEF = (-0.0037, 0.0217, 0.2282, 0.1098, 0.0618)
+    TCONF_COEF = (-0.0085, -0.1109, -0.0118, 0.2351, -0.1735, -0.0458)
+    PACE_AVG, TOTAL_MID = 60.8, 45.0
+    m.PPA_A, m.PPA_B = 41.734, 1.922  # points per EPA-per-play margin, fit on 2016-25
 
 
 def confidence(la, lo, pm, line, ours):
@@ -52,12 +61,12 @@ def confidence(la, lo, pm, line, ours):
 
 def total_confidence(ours, line, last_sum, form_sum, pace):
     s = 1 if ours > line else -1
-    x = (abs(ours - line) / 7, -s * last_sum / 14, -s * (form_sum - 1), s * (pace - PACE_AVG) / 10, -s * (line - 55) / 10)
+    x = (abs(ours - line) / 7, -s * last_sum / 14, -s * (form_sum - 1), s * (pace - PACE_AVG) / 10, -s * (line - TOTAL_MID) / 10)
     z = TCONF_COEF[0] + sum(c * v for c, v in zip(TCONF_COEF[1:], x))
     return 1 / (1 + math.exp(-z))
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-D = ROOT / "data"
+D = ROOT / "data" / ("nfl" if LEAGUE == "nfl" else "")
 OUT = D / "tracker.json"
 WINDOW_DAYS = 7
 now = datetime.datetime.now(datetime.timezone.utc)

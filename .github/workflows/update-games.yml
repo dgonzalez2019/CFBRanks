@@ -24,6 +24,7 @@ jobs:
       - run: python scripts/track_picks.py || echo "Tracker failed; keeping the previous file."
       - name: NFL data (optional)
         run: python scripts/fetch_nfl.py || echo "NFL fetch failed; keeping the previous files."
+      - run: python scripts/track_picks.py --league nfl || echo "NFL tracker failed; keeping the previous file."
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
