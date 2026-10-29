@@ -20,6 +20,7 @@ python research/confidence.py $W .                        # what makes a top-10%
 python research/criteria.py $W .                          # which yes/no criteria separated correct picks, 2025 <-> 2026
 python research/criteria_check.py $W .                    # leak-free check of the winner on 2022-25
 python research/conf_score.py $W .                      # continuous confidence score, held-out top 10%/5% (-> work/conf_coef.json)
+python research/conf_total.py $W .                     # over/under confidence score, held-out top 10%/5% (-> work/conf_total_coef.json)
 python research/summary.py $W .                          # -> data/research.json (shown on the Lines tab)
 ```
 
@@ -54,3 +55,8 @@ efficiency model vs the line), their AND, and the gap from the line gives every 
 Each week's top 10% is the site's Top confidence, top 5% Top 5%. Trained on the other seasons, the top 10% went
 2022 54%, 2023 46%, 2024 62%, 2025 55%, 2026 59%: 178-148 (54.6%); top 5% 87-74 (54.0%). Scores span about 48-56%;
 games scored 54-56% covered 55.1% in 2025-26. Final coefficients (fit on 2022-25) are in scripts/track_picks.py.
+
+Totals confidence (research/conf_total.py): a logistic model on our side of the total (gap from the line, both teams'
+last-game and season over/under results faded, pace, size of the total). Held out, the top 10% went 2022 47%, 2023 47%,
+2024 72%, 2025 59%, 2026 44%: 169-138 (55.0%), but most of it is 2024. Letting the model choose over or under itself
+instead of our side did worse (top 10% 49-51%). Last season's points model as an input added nothing and was dropped.
