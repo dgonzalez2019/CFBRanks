@@ -126,8 +126,9 @@ if a.lines:
             spread = median([x for x in (num_or_none(b.get("spread")) for b in books) if x is not None])
             total = median([x for x in (num_or_none(b.get("overUnder", b.get("over_under"))) for b in books) if x is not None])
             if spread is None: continue
+            spread_open = median([x for x in (num_or_none(b.get("spreadOpen", b.get("spread_open"))) for b in books) if x is not None])
             out_lines.append([wk, h, aw, int(g["neutral"]), spread, total, g.get("hp"), g.get("ap"),
-                              g.get("start"), sorted({b.get("provider") for b in books if b.get("provider")})])
+                              g.get("start"), sorted({b.get("provider") for b in books if b.get("provider")}), spread_open])
         print(f"Lines ({seas}): {len(L)} games returned, {len(out_lines)} matched so far")
         if L and not out_lines: print("  First line item, for debugging:", json.dumps(L[0])[:600])
     lp = pathlib.Path(a.lines); lp.parent.mkdir(parents=True, exist_ok=True)
