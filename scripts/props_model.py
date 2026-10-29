@@ -6,11 +6,19 @@ proj = c0 + c1*base + c2*base*(opp - 1) + c3*base*(imp - 1), where
   opp  = what the opponent has allowed per game to the player's position group this season vs. the league average,
          shrunk by OPP_SHRINK games (1 = average)
   imp  = the team's implied points from the betting line (total / 2 - own spread / 2) / 22.5
+  vac  = teammates out: their share of the team's targets (carries for rushing props) over its last RECENT games,
+         counting only teammates in the player's position group (passing props: every missing receiver);
+         enters as base * vac / (1 - vac). qb_out = 1 when the team's main passer (most attempts over those games)
+         is out (enters as base * qb_out, receiving and rushing props). History: out = no stats row that week;
+         live: listed Out on the injury report.
+  proj = c0 + c1*base + c2*base*(opp - 1) + c3*base*(imp - 1) + c4*base*vac/(1 - vac) + c5*base*qb_out
 P(over a line) = share of the training seasons' actual / projection spread (by projection bin) above the line."""
 import csv, io, numpy as np
 from collections import defaultdict
 
-DECAY, PRIOR_GAMES, OPP_SHRINK, BINS = 0.85, 3.0, 4.0, 5
+DECAY, PRIOR_GAMES, OPP_SHRINK, BINS, RECENT = 0.85, 3.0, 4.0, 5, 4
+SAME_GROUP = True  # rushing/receiving: only teammates in the player's position group count toward vac; passing: all targets
+NEW_ONLY = True  # history: count only teammates who played the team's previous game (like a fresh injury listing)
 MARKETS = {  # our market -> (stat column, positions, Odds API market key, label)
     "pass_yds": ("passing_yards", ("QB",), "player_pass_yds", "passing yds"),
     "rush_yds": ("rushing_yards", ("QB", "RB"), "player_rush_yds", "rushing yds"),
@@ -56,6 +64,11 @@ class Season:
             for c in ("passing_yards", "rushing_yards", "receiving_yards", "receptions"):
                 self.allowed[(g["opp"], group(g["pos"]), c)].append((g["week"], g[c]))
                 self.league[(group(g["pos"]), c)].append((g["week"], g[c]))
+        self.tw = defaultdict(dict)        # (team, week) -> {player id: row}
+        for g in rows:
+            if g["team"]: self.tw[(g["team"], g["week"])][g["id"]] = g
+        self.tweeks = defaultdict(list)
+        for (t, w) in sorted(self.tw, key=lambda k: k[1]): self.tweeks[t].append(w)
         self._cache, self._lg = {}, {}
         self.prev = defaultdict(dict)
         if prev_rows:
@@ -85,8 +98,33 @@ class Season:
         a = sum(v for w, v in self.allowed[(opp, grp, col)] if w < wk)
         return ((a + OPP_SHRINK * lg) / (od + OPP_SHRINK)) / lg
 
-    def features(self, pid, pos, opp, wk, mk, imp):
-        """[1, base, base*(opp-1), base*(imp-1)] plus the parts, or None if the player isn't prop-eligible."""
+    def absences(self, team, pid, wk, mk, out_ids=None):
+        """(vac, qb_out, names of the teammates counted). out_ids None = history: teammates with no row in week wk."""
+        weeks = [w for w in self.tweeks[team] if w < wk][-RECENT:]
+        if not weeks: return 0.0, 0, []
+        col = "carries" if mk == "rush_yds" else "targets"
+        tot = defaultdict(float); att = defaultdict(float); names = {}
+        for w in weeks:
+            for i, g in self.tw[(team, w)].items(): tot[i] += g[col]; att[i] += g["attempts"]; names[i] = g["name"]
+        if out_ids is None:
+            if (team, wk) not in self.tw: return 0.0, 0, []
+            last = self.tw[(team, weeks[-1])]
+            out_ids = [i for i in tot if i not in self.tw[(team, wk)] and (not NEW_ONLY or i in last)]
+        out_ids = [i for i in out_ids if i != pid and i in tot]
+        T = sum(tot.values())
+        if SAME_GROUP and mk != "pass_yds":
+            me = self.games[pid][0]["pos"] if self.games[pid] else None
+            grp_of = {i: group(g["pos"]) for w in weeks for i, g in self.tw[(team, w)].items()}
+            same = [i for i in out_ids if me and grp_of.get(i) == group(me)]
+        else: same = out_ids
+        vac = min(0.8, sum(tot[i] for i in same) / T) if T else 0.0
+        qb = max(att, key=att.get) if att and max(att.values()) > 0 else None
+        qb_out = int(mk != "pass_yds" and qb in out_ids)
+        return vac, qb_out, [names[i] for i in out_ids if (T and tot[i] / T >= 0.03) or i == qb]
+
+    def features(self, pid, pos, opp, wk, mk, imp, team=None, out_ids=None):
+        """[1, base, base*(opp-1), base*(imp-1), base*vac/(1-vac), base*qb_out] plus the parts, or None if the player
+        isn't prop-eligible."""
         col, poss, *_ = MARKETS[mk]
         h = self.history(pid, wk)
         if pos not in poss or not eligible(pos, h): return None
@@ -96,7 +134,9 @@ class Season:
         if prior is not None: s += PRIOR_GAMES * prior; n += PRIOR_GAMES
         base = s / n
         o = self.opp_factor(opp, group(pos), col, wk); i = imp / 22.5
-        return dict(x=[1, base, base * (o - 1), base * (i - 1)], base=base, opp=o, imp=imp, avg=float(np.mean([g[col] for g in h])),
+        vac, qb_out, who = self.absences(team or h[-1]["team"], pid, wk, mk, out_ids)
+        return dict(x=[1, base, base * (o - 1), base * (i - 1), base * vac / (1 - vac), base * qb_out], base=base, opp=o, imp=imp,
+                    vac=vac, qb_out=qb_out, out=who, avg=float(np.mean([g[col] for g in h])),
                     last3=float(np.mean([g[col] for g in h[-3:]])), games=len(h), prior=prior)
 
 

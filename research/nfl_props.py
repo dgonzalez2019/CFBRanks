@@ -22,15 +22,15 @@ def season_rows(d, y):
         it = imp.get((g["week"], g["team"]))
         if it is None or not g["opp"]: continue
         for mk, (col, *_) in pm.MARKETS.items():
-            f = S.features(g["id"], g["pos"], g["opp"], g["week"], mk, it)
+            f = S.features(g["id"], g["pos"], g["opp"], g["week"], mk, it, g["team"])
             if f: out.append(dict(f, mk=mk, y=g[col]))
     return out
 
-def fit(R):
-    X = np.array([r["x"] for r in R]); y = np.array([r["y"] for r in R])
+def fit(R, k=None):
+    X = np.array([r["x"][:k] for r in R]); y = np.array([r["y"] for r in R])
     coef = np.linalg.lstsq(X, y, rcond=None)[0]
     M = dict(coef=[float(c) for c in coef])
-    M["edges"], M["q"] = pm.fit_quantiles([pm.project(M, r["x"]) for r in R], y)
+    M["edges"], M["q"] = pm.fit_quantiles([pm.project(M, r["x"][:k]) for r in R], y)
     return M
 
 if __name__ == "__main__":
@@ -41,6 +41,12 @@ if __name__ == "__main__":
     for mk in pm.MARKETS:
         tr = [r for y in TRAIN for r in rows[y] if r["mk"] == mk]; te = [r for y in TEST for r in rows[y] if r["mk"] == mk]
         M = fit(tr)
+        # teammate absences: the same model without the two absence terms, on the same held-out games
+        M4 = fit(tr, 4); p4 = np.array([max(0.5, float(np.dot(M4["coef"], r["x"][:4]))) for r in te])
+        pa = np.array([pm.project(M, r["x"]) for r in te]); ya = np.array([r["y"] for r in te])
+        sub = lambda m: f"{np.mean(np.abs(pa[m] - ya[m])):.2f} vs {np.mean(np.abs(p4[m] - ya[m])):.2f} (n={int(m.sum())})"
+        vac = np.array([r["vac"] for r in te]); qo = np.array([r["qb_out"] for r in te])
+        print(f"  teammates out: all {sub(np.ones(len(te), bool))} | 15%+ of volume out {sub(vac >= .15)} | main QB out {sub(qo == 1)}")
         pt = np.array([pm.project(M, r["x"]) for r in te]); yt = np.array([r["y"] for r in te]); av = np.array([r["avg"] for r in te])
         cal = defaultdict(lambda: [0.0, 0, 0])
         for p_, y_ in zip(pt, yt):
