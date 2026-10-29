@@ -427,6 +427,11 @@ tr.moved-up{animation:moveFlash 1.6s ease .9s both} tr.moved-down{animation:move
 .pmeta-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pmeta .pmore{margin-left:auto;padding-left:10px;flex:none;color:var(--accent);font-weight:600;font-size:13px}
 #sheet{border:0;padding:0;margin:auto;width:min(760px,100vw);max-height:min(92vh,980px);background:transparent;color:var(--ink);overflow:visible}
+/* Fallback when <dialog> isn't supported: a fixed full-screen overlay with its own dimmed backdrop. */
+#sheet.nomodal{position:fixed;inset:0;z-index:200;display:grid;place-items:center;width:100%;max-width:none;height:100%;max-height:none;background:rgba(20,16,8,.42)}
+#sheet.nomodal .sheet-in{width:min(760px,100%)}
+html.sheet-open{overflow:hidden}
+@media (max-width:640px){#sheet.nomodal{place-items:end stretch}}
 #sheet::backdrop{background:rgba(20,16,8,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .sheet-in{position:relative;width:100%;overflow-x:hidden;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 40px 80px -30px rgba(0,0,0,.5);max-height:min(92vh,980px);overflow:auto;overscroll-behavior:contain;padding:22px 22px 26px}
 .sheet-x{position:sticky;top:0;z-index:2;width:36px;height:36px;margin:0 0 -36px auto;border-radius:50%;padding:0;font-size:15px;display:grid;place-items:center;background:var(--card);box-shadow:0 2px 8px -2px rgba(0,0,0,.15)}
@@ -635,7 +640,7 @@ html.fx #sheet[open]::backdrop{animation:fadeIn .3s ease both}
         <li><b>Each game gets a difficulty.</b> The page asks how often the benchmark team would win that exact game at that venue. A road game at a top-15 team might be 25%. A home game against a bottom-20 team might be 95%.</li>
         <li><b>Strength of record.</b> Shown alongside the rankings as a résumé check. Wins above benchmark (WAB) is actual wins minus the benchmark's expected wins, and SOR ranks teams by it.</li>
         <li><b>Win and loss quality.</b> A win is worth 1 minus the benchmark's win chance, so hard wins score high. A loss costs the benchmark's win chance, so losing a game a good team should win costs the most.</li>
-        <li><b>Résumé points.</b> Wins earn 4 (Q1), 2 (Q2), 1 (Q3) or 0.5 (Q4). Losses cost 85% of the mirror-image win: 0.43 (Q1), 0.85 (Q2), 1.7 (Q3) or 3.4 (Q4). Beating good teams matters most, and wins count slightly more than losses.</li>
+        <li><b>Résumé points.</b> Wins earn 4 (Q1), 2 (Q2), 1 (Q3) or 0.5 (Q4). Losses cost 85% of the mirror-image win: 0.43 (Q1), 0.85 (Q2), 1.7 (Q3) or 3.4 (Q4). Beating good teams matters most, and wins count slightly more than losses. Points are counted per game and scaled to a typical schedule (the FBS average number of games), so playing one more game than a rival, or having a bye, doesn't move a team by itself.</li>
         <li><b>Quadrants.</b> Opponents are tiered by power rank, at any venue: Q1 is the top 25, Q2 is 26–50, Q3 is 51–80, and everything else, including FCS, is Q4. Power rank is used so one team's résumé never inflates its opponents' ranks, which would let a conference's teams prop each other up.</li>
       </ol>
       <h3>The Results only tab</h3>
@@ -951,13 +956,15 @@ function compute(games, benchRank, prior=null){
     });
   });
   const pbAtLeast = (ps,k) => { let d=[1]; ps.forEach(p=>{const nd=new Array(d.length+1).fill(0); d.forEach((v,i)=>{nd[i]+=v*(1-p); nd[i+1]+=v*p}); d=nd;}); return d.slice(k).reduce((a,c)=>a+c,0); };
+  // Résumé per game, scaled to the average schedule length, so an extra game or a bye doesn't move a team by itself.
+  const avgGames = fbs.reduce((s,t)=>s+sched[t].length,0) / Math.max(1, fbs.filter(t=>sched[t].length).length);
   const out = fbs.map(t => {
     const gs = sched[t].sort((x,y)=>x.week-y.week), w=gs.filter(x=>x.won).length, l=gs.length-w;
     const ps = gs.map(x=>x.pb), exp = ps.reduce((a,c)=>a+c,0);
     const q = {Q1:[0,0],Q2:[0,0],Q3:[0,0],Q4:[0,0]}; gs.forEach(x=>q[x.quad][x.won?0:1]++);
     const W = gs.filter(x=>x.won).sort((x,y)=>y.value-x.value), L = gs.filter(x=>!x.won).sort((x,y)=>x.value-y.value);
-    const resume = gs.reduce((a,x)=>a+(x.won?WIN_PTS[x.quad]:-LOSS_WEIGHT*LOSS_PTS[x.quad]),0);
-    return {team:t,w,l,rating:R[t],power:prank[t],resume,score:R[t]+RESUME_WEIGHT*resume,wab:w-exp,sorp:pbAtLeast(ps,w),sos:gs.length?(gs.length-exp)/gs.length:0,q,W,L,games:gs,
+    const resumeRaw = gs.reduce((a,x)=>a+(x.won?WIN_PTS[x.quad]:-LOSS_WEIGHT*LOSS_PTS[x.quad]),0), resume = gs.length ? resumeRaw/gs.length*avgGames : 0;
+    return {team:t,w,l,rating:R[t],power:prank[t],resume,resumeRaw,avgGames,score:R[t]+RESUME_WEIGHT*resume,wab:w-exp,sorp:pbAtLeast(ps,w),sos:gs.length?(gs.length-exp)/gs.length:0,q,W,L,games:gs,
             winVal:W.reduce((a,x)=>a+x.value,0),lossCost:-L.reduce((a,x)=>a+x.value,0)};
   });
   out.sort((x,y)=>y.wab-x.wab || x.sorp-y.sorp).forEach((r,i)=>r.sor=i+1);
@@ -1047,7 +1054,9 @@ new MutationObserver(() => {
   document.querySelectorAll("main .tiles").forEach(t => [...t.children].forEach((c,i) => c.style.setProperty("--i", i)));
   document.querySelectorAll("main [data-count]:not([data-done])").forEach(el => { el.dataset.done = 1; countUp(el); });
   document.querySelectorAll("main [data-flip]:not([data-done])").forEach(el => { el.dataset.done = 1; flipBoard(el); });
-  document.querySelectorAll("main .pick:not([data-seen])").forEach(el => { el.dataset.seen = 1; pickIO ? pickIO.observe(el) : el.classList.add("in"); });
+  document.querySelectorAll("main .pick:not([data-seen])").forEach(el => { el.dataset.seen = 1; pickIO ? pickIO.observe(el) : el.classList.add("in");
+    // Listener on the card itself: iPhone Safari doesn't always pass taps on plain elements up to the document.
+    el.addEventListener("click", ev => { ev.stopPropagation(); const [kind, ...k] = el.dataset.k.split("|"); openSheet(kind, k.join("|")); }); });
   document.querySelectorAll("main .res.hit:not([data-seen])").forEach(el => { el.dataset.seen = 1; cheerIO?.observe(el); });
 }).observe(document.querySelector("main"), {childList:true, subtree:true});
 function moveInd(){
@@ -1090,6 +1099,7 @@ function teamColor(t){ const c = TEAMS[t]?.color; if(c && /^#[0-9a-f]{6}$/i.test
 // Hovering (or tapping) a team row, podium card or team name washes it in that team's color.
 const washOff = el => { el.classList.remove("tc"); };
 document.addEventListener("pointerover", e => {
+  if(e.pointerType && e.pointerType !== "mouse") return;
   const t = e.target.closest?.(".pteam[data-team]");
   if(t){ const card = t.closest(".pick"); t.style.setProperty("--tc", teamColor(t.dataset.team)); t.classList.add("tcs");
     if(card){ card.style.setProperty("--tc", teamColor(t.dataset.team)); card.classList.add("tc"); } }
@@ -1215,10 +1225,15 @@ function openSheet(kind, key){
     ${ih >= .5 || ia >= .5 ? `<p class="sh-sum" style="margin:0"><b>Injuries counted:</b> ${[[away, ia], [home, ih]].filter(([,v]) => v >= .5).map(([n,v]) => `${esc(n)} −${v.toFixed(1)} pts (${injured(n)})`).join("; ")}.</p>` : ""}
     ${U ? `<h3>Matchups by unit</h3>${units(away, home)}${units(home, away)}<p class="note" style="margin:0">Each unit adjusted for the opponents it faced; # is the national rank (1 = best). The better side of each matchup is highlighted.</p>` : ""}
     <button class="sh-open" type="button" data-open="${esc(away)}|${esc(home)}|${neutral ? "N" : "B"}">Open in the Matchup tab</button>`;
-  const d = $("#sheet"); d.classList.remove("closing"); if(!d.open) d.showModal(); d.querySelector(".sheet-in").scrollTop = 0;
+  const d = $("#sheet"); d.classList.remove("closing");
+  // Older iPhone Safari has no <dialog>.showModal(); fall back to a fixed overlay.
+  if(!d.open){ if(typeof d.showModal === "function"){ try{ d.showModal(); }catch(e){ d.setAttribute("open", ""); d.classList.add("nomodal"); } } else { d.setAttribute("open", ""); d.classList.add("nomodal"); } }
+  document.documentElement.classList.add("sheet-open"); d.querySelector(".sheet-in").scrollTop = 0;
 }
-function closeSheet(){ const d = $("#sheet"); if(!d.open) return;
-  if(REDUCED){ d.close(); return; } d.classList.add("closing"); setTimeout(() => { d.close(); d.classList.remove("closing"); }, 240); }
+function closeSheet(){ const d = $("#sheet"); if(!d.open && !d.hasAttribute("open")) return;
+  const shut = () => { if(typeof d.close === "function" && !d.classList.contains("nomodal")) d.close(); else d.removeAttribute("open"); d.classList.remove("closing", "nomodal"); document.documentElement.classList.remove("sheet-open"); };
+  if(REDUCED){ shut(); return; } d.classList.add("closing"); setTimeout(shut, 240); }
+document.addEventListener("keydown", e => { if(e.key === "Escape" && $("#sheet").classList.contains("nomodal")) closeSheet(); });
 document.addEventListener("click", e => {
   const c = e.target.closest?.(".pick[data-k]");
   if(c){ const [kind, ...k] = c.dataset.k.split("|"); openSheet(kind, k.join("|")); return; }
@@ -1229,6 +1244,7 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("keydown", e => { const c = e.target.closest?.(".pick[data-k]"); if(c && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); c.click(); } });
 $("#sheet").addEventListener("cancel", e => { e.preventDefault(); closeSheet(); });
+$("#sheet").addEventListener("close", () => document.documentElement.classList.remove("sheet-open"));
 
 function renderTop(){
   const rows = SHOWALL ? RESULT.rows : RESULT.rows.slice(0,25);
@@ -1248,7 +1264,7 @@ function renderTop(){
     [...$("#t25").rows].forEach((tr, i) => { const d = moves[tr.dataset.team]; if(!d) return;
       tr.animate([{transform:`translateY(${d*h}px)`, zIndex:2}, {transform:"none", zIndex:2}], {duration:1100, delay:500 + Math.min(i,25)*25, easing:"cubic-bezier(.3,1.2,.4,1)", fill:"backwards"}); }); }
   renderHero();
-  $("#hfaNote").innerHTML = `Score = power rating + résumé. Power is the Matchup model's rating: how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
+  $("#hfaNote").innerHTML = `Score = power rating + résumé (résumé points per game, scaled to the average ${RESULT.rows[0]?.avgGames.toFixed(1) ?? ""}-game schedule). Power is the Matchup model's rating: how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
 function renderResults(){

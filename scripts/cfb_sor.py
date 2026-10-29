@@ -197,6 +197,9 @@ def compute(games, benchmark_rank=25, prior=None):
                 value=(1 - p_bench) if won else -p_bench,   # + win quality / - loss cost
             ))
 
+    # Résumé is counted per game and scaled to the average schedule length, so an extra game (or a bye) doesn't move a
+    # team by itself: with a running total, a 7-1 team out-ranked a 6-1 team that beat it, only for having played more.
+    avg_games = float(np.mean([len(sched[t]) for t in fbs_sorted if sched[t]])) if fbs_sorted else 1.0
     rows = []
     for t in fbs_sorted:
         gs = sched[t]
@@ -210,10 +213,11 @@ def compute(games, benchmark_rank=25, prior=None):
         for x in gs: q[x["quad"]][0 if x["won"] else 1] += 1
         W_ = sorted([x for x in gs if x["won"]], key=lambda x: -x["value"])
         L_ = sorted([x for x in gs if not x["won"]], key=lambda x: x["value"])
-        resume = sum(WIN_PTS[x["quad"]] if x["won"] else -LOSS_WEIGHT * LOSS_PTS[x["quad"]] for x in gs)
+        resume_raw = sum(WIN_PTS[x["quad"]] if x["won"] else -LOSS_WEIGHT * LOSS_PTS[x["quad"]] for x in gs)
+        resume = resume_raw / len(gs) * avg_games if gs else 0.0
         rows.append(dict(
             team=t, record=f"{wins}-{losses}", rating=ratings[t], power_rank=rank[t],
-            resume=resume, score=ratings[t] + RESUME_WEIGHT * resume,
+            resume=resume, resume_raw=resume_raw, score=ratings[t] + RESUME_WEIGHT * resume,
             wab=wins - exp_w, sor_prob=sor_prob, sos=sos,
             win_value=sum(x["value"] for x in W_), loss_cost=-sum(x["value"] for x in L_),
             quads={k: tuple(q[k]) for k in ("Q1", "Q2", "Q3", "Q4")},
