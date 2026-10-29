@@ -45,17 +45,29 @@ def side_stats(t):
     return None if None in vals else [round(v) for v in vals]
 
 
+def side_stats2(t):
+    """Positional-matchup stats: [sacks made, tackles for loss made, QB hurries made, turnovers committed,
+    third downs converted, third downs tried]. The API leaves out counting stats that are zero."""
+    stats = {s.get("category"): s.get("stat") for s in t.get("stats", [])}
+    try: conv, tried = (int(x) for x in str(stats.get("thirdDownEff")).split("-"))
+    except (ValueError, TypeError): return None
+    return [round(num(stats, k) or 0) for k in ("sacks", "tacklesForLoss", "qbHurries", "turnovers")] + [conv, tried]
+
+
 # Box scores already stored are kept, so each run only asks the API for weeks that are missing some.
-# Stats per game: [home pass yds, home pass att, home rush yds, home rush att, same four for away].
+# Stats per game: [home pass yds, home pass att, home rush yds, home rush att, same four for away], and a
+# second list from side_stats2(): home's six, then away's six.
 key_of = lambda w, h, aw: f"{w}|{h}|{aw}"
-stored = {}
+stored, stored2 = {}, {}
 try:
     for g in json.loads(path.read_text()).get("games", []):
         if len(g) > 8 and g[8]: stored[key_of(g[0], g[1], g[2])] = g[8]
+        if len(g) > 9 and g[9]: stored2[key_of(g[0], g[1], g[2])] = g[9]
 except (OSError, ValueError):
     pass
 
-missing_weeks = sorted({g["week"] for g in games if key_of(g["week"], g["home"], g["away"]) not in stored})
+missing_weeks = sorted({g["week"] for g in games
+                        if key_of(g["week"], g["home"], g["away"]) not in stored or key_of(g["week"], g["home"], g["away"]) not in stored2})
 for wk in missing_weeks:
     seas, raw = ("postseason", wk - 20) if wk > 20 else ("regular", wk)
     try:
@@ -66,10 +78,12 @@ for wk in missing_weeks:
     for b in box:
         sides = {}
         for t in b.get("teams", []):
-            sides[t.get("homeAway", t.get("home_away"))] = (t.get("team", t.get("school")), side_stats(t))
+            sides[t.get("homeAway", t.get("home_away"))] = (t.get("team", t.get("school")), side_stats(t), side_stats2(t))
         if "home" not in sides or "away" not in sides or None in (sides["home"][1], sides["away"][1]):
             continue
-        stored[key_of(wk, sides["home"][0], sides["away"][0])] = sides["home"][1] + sides["away"][1]; found += 1
+        k = key_of(wk, sides["home"][0], sides["away"][0])
+        stored[k] = sides["home"][1] + sides["away"][1]; found += 1
+        if None not in (sides["home"][2], sides["away"][2]): stored2[k] = sides["home"][2] + sides["away"][2]
     print(f"Week {wk}: {len(box)} box scores returned, {found} usable")
     if box and not found:
         print("  First box score, for debugging:", json.dumps(box[0])[:600])
@@ -77,12 +91,13 @@ for wk in missing_weeks:
 rows = []
 for g in games:
     row = [g["week"], g["home"], g["away"], g["hp"], g["ap"], int(g["neutral"]), int(g["home_fbs"]), int(g["away_fbs"])]
-    st = stored.get(key_of(g["week"], g["home"], g["away"]))
+    st, st2 = stored.get(key_of(g["week"], g["home"], g["away"])), stored2.get(key_of(g["week"], g["home"], g["away"]))
     if st: row.append(st)
+    if st and st2: row.append(st2)
     rows.append(row)
 out = {"season": a.year, "updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "games": rows}
 path.write_text(json.dumps(out, separators=(",", ":")))
-print(f"Wrote {len(rows)} games ({sum(len(r) > 8 for r in rows)} with box scores) to {path}")
+print(f"Wrote {len(rows)} games ({sum(len(r) > 8 for r in rows)} with box scores, {sum(len(r) > 9 for r in rows)} with matchup stats) to {path}")
 
 
 # Betting lines: one /lines call per season type covers every game. Spreads use the API's convention

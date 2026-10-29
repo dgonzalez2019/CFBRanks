@@ -23,8 +23,8 @@ jobs:
           YEARS: ${{ inputs.years }}
         run: |
           for y in $YEARS; do
-            if [ -f "data/history/$y.json" ]; then echo "$y games already stored"; else
-              python scripts/fetch_games.py --year "$y" --out "data/history/$y.json"; fi
+            # Re-run even when stored: it only requests weeks still missing box-score fields.
+            python scripts/fetch_games.py --year "$y" --out "data/history/$y.json"
             python scripts/fetch_extras.py --year "$y" --dir data/history
           done
       - name: Commit if changed
