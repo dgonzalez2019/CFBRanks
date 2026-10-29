@@ -384,6 +384,41 @@ def player_values(players, games):
     return out
 
 
+# Injury reports (see the injury notes in index.html): players listed Out, valued by player_values() and scaled by
+# the share of the team's games dated on or before the injury's start (ratings already reflect games he missed).
+def name_key(n):
+    import re
+    n = re.sub(r"[^a-z ]", "", n.lower()); n = re.sub(r"\b(jr|sr|ii|iii|iv)\b", "", n)
+    return re.sub(r"\s+", " ", n).strip()
+
+
+def injury_adjustments(values, injuries, games, lines):
+    """values: player_values() output; injuries: data/injuries.json rows; lines: data/lines.json rows (for dates).
+    Returns {team: points per game lost to players listed Out}."""
+    gdate, wdate = {}, {}
+    for r in lines:
+        if not r[8]: continue
+        d = r[8][:10]; gdate[(r[0], r[1], r[2])] = d
+        if r[0] not in wdate or d < wdate[r[0]]: wdate[r[0]] = d
+    date_of = lambda g: gdate.get((g["week"], g["home"], g["away"])) or wdate.get(g["week"])
+    out = {}
+    listed = defaultdict(dict)
+    for team, name, pos, status, body, start, upd, note in injuries:
+        listed[team][name_key(name)] = (status, start)
+    for team, players in values.items():
+        gs = [g for g in games if g["home"] == team or g["away"] == team]
+        total = 0.0
+        for p in players:
+            st = listed.get(team, {}).get(name_key(p["name"]))
+            if not st or st[0] != "Out": continue
+            share = 1.0
+            if st[1] and gs:
+                share = sum(1 for g in gs if date_of(g) and date_of(g) <= st[1]) / len(gs)
+            total += p["value"] * share
+        if total: out[team] = total
+    return out
+
+
 def predict(M, a, b, venue="N", out_a=0.0, out_b=0.0):
     """venue: 'N' neutral, 'A' team a at home, 'B' team b at home. out_a/out_b: points per game lost to injuries."""
     A, B = M["T"][a], M["T"][b]; ha, hb = int(venue == "A"), int(venue == "B")

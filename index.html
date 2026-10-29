@@ -266,7 +266,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -729,7 +729,7 @@ function renderLines(){
     const wins = k => { const d = done.filter(l=>l.act!==0 && l[k]!==0); return d.filter(l=>(l[k]>0)===(l.act>0)).length/d.length; };
     const tiers = [0,3,5,7].map(t => { const d = done.filter(l => Math.abs(l.ours-l.mkt)>=t && l.act!==l.mkt);
       return d.length ? `<tr><td>${t ? `${t}+ points` : "Any"}</td><td class="num">${d.length}</td><td class="num">${Math.round(100*d.filter(l=>(l.act>l.mkt)===(l.ours>l.mkt)).length/d.length)}%</td></tr>` : ""; }).join("");
-    record = `<div class="bar"><h2>Track record this season</h2></div>
+    record = `<div class="bar"><h2>Replay of this season</h2></div>
       <div class="tiles">
         <div class="tile"><b>${mae("ours").toFixed(1)}</b><span>Our avg miss (pts)</span></div>
         <div class="tile"><b>${mae("mkt").toFixed(1)}</b><span>Betting line avg miss</span></div>
@@ -749,12 +749,25 @@ function renderLines(){
     <div class="panel" style="padding:14px 16px"><b>Can it beat the spread or the total? Not with this data.</b>
       <p style="margin:6px 0 0">Pick models for the spread and the over/under, trained on 2022–24 with our margin and total, spread and total size, favorite or underdog, home or road, week, line movement and pace, then tested once on 2025–26: spreads ${pct(R.picks.spread["2025+2026"].all)}, totals ${pct(R.picks.total["2025+2026"].all)}. Their most confident 10% did no better: spreads ${pct(R.picks.spread["2025+2026"].top10)}, totals ${pct(R.picks.total["2025+2026"].top10)}. So no confidence rating is shown: none we built predicted anything.</p>
       <p style="margin:6px 0 0">Betting against a team in the first game its starting QB sat (starter named from earlier games only): ${Object.entries(R.qb_rule).map(([y,r])=>`${y} ${pct(r)}`).join(", ")}. The line already prices most of a QB's absence. QBs do matter: those teams fell short of our model by about 1.3× the gap between starter and backup, which is how the injury picker values them.</p></div>` : "";
+  // Live tracker (scripts/track_picks.py): predictions saved before kickoff, graded after the final.
+  const TG = TRACKER?.games || [], graded = TG.filter(g => g.results), openN = TG.length - graded.length;
+  const rec = (key, minEdge=0) => { const g = graded.filter(x => x.results[key] && (key==="fav37" || (x.edges[key] ?? -1) >= minEdge));
+    const w = g.filter(x=>x.results[key]==="W").length, l = g.filter(x=>x.results[key]==="L").length, p = g.filter(x=>x.results[key]==="P").length;
+    return `${w}–${l}${p?`–${p}`:""}${w+l ? ` <span class="sub">${Math.round(100*w/(w+l))}%</span>` : ""}`; };
+  const firstSaved = TG.length ? TG.map(g=>g.first_saved).sort()[0] : null;
+  const tracker = `<div class="bar"><h2>Live track record</h2></div>
+    <div class="panel scroll"><table><thead><tr><th>Strategy (fixed in advance)</th><th class="num">All</th><th class="num">Edge 3+</th><th class="num">Edge 5+</th></tr></thead><tbody>
+      <tr><td>Our side of the line at kickoff</td><td class="num">${rec("model_close")}</td><td class="num">${rec("model_close",3)}</td><td class="num">${rec("model_close",5)}</td></tr>
+      <tr><td>Our side of the opening line</td><td class="num">${rec("model_open")}</td><td class="num">${rec("model_open",3)}</td><td class="num">${rec("model_open",5)}</td></tr>
+      <tr><td>Favorite when the line is 3 or 7</td><td class="num">${rec("fav37")}</td><td class="num">—</td><td class="num">—</td></tr>
+    </tbody></table></div>
+    <p class="note">Predictions are saved before kickoff by each data update (with players listed Out), frozen at kickoff and graded after the final${firstSaved ? `; tracking since ${new Date(firstSaved).toLocaleDateString([], {month:"short", day:"numeric"})}` : ""}. ${graded.length} graded, ${openN} waiting. Unlike the past-season numbers below, nothing here could have been tuned on the results. A few hundred graded games are needed before the percentages mean much; 52.4% is break-even at standard odds.</p>`;
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   $("#ltitle").textContent = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: our lines vs. betting lines` : "Our lines vs. betting lines";
   $("#lout").innerHTML = (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines.</div>`) +
     `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by biggest difference. The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
     (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : "") +
-    record + past;
+    tracker + record + past;
 }
 
 function renderTeam(name){
@@ -882,6 +895,10 @@ async function loadData(){
       const lr = await fetch("data/lines.json", {cache:"no-store"});
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[]}));
     }catch(e){ LINES = []; }
+    try{
+      const tr = await fetch("data/tracker.json", {cache:"no-store"});
+      if(tr.ok) TRACKER = await tr.json();
+    }catch(e){ TRACKER = null; }
     try{
       const ir = await fetch("data/injuries.json", {cache:"no-store"});
       if(ir.ok){ const j = await ir.json(); INJ_UPDATED = j.updated; INJURIES = {};

@@ -21,6 +21,7 @@ jobs:
         run: python scripts/fetch_injuries.py --out data/injuries.json || echo "Injury fetch failed; keeping the previous file."
         env:
           SPORTSDATAIO_API_KEY: ${{ secrets.SPORTSDATAIO_API_KEY }}
+      - run: python scripts/track_picks.py || echo "Tracker failed; keeping the previous file."
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
@@ -28,4 +29,5 @@ jobs:
           git add data/games.json data/lines.json
           if [ -f data/players.json ]; then git add data/players.json; fi
           if [ -f data/injuries.json ]; then git add data/injuries.json; fi
+          if [ -f data/tracker.json ]; then git add data/tracker.json; fi
           git diff --cached --quiet || (git commit -m "Update game results" && git push)
