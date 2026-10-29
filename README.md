@@ -21,5 +21,5 @@ export CFBD_API_KEY=your_key
 python scripts/fetch_games.py
 python -m http.server 8000   # then open http://localhost:8000
 python scripts/cfb_sor.py --year 2026 --team "Miami"   # --rank power|sor|colley for other orders
-python scripts/cfb_sor.py --year 2026 --predict "Alabama" "Georgia" --venue team1
+python scripts/cfb_sor.py --json data/games.json --predict "Alabama" "Georgia" --venue team1
 ```

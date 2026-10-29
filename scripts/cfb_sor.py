@@ -94,6 +94,15 @@ def load_csv(path):
     return games
 
 
+def load_json(path):
+    """The site's data/games.json, including box scores when present."""
+    games = []
+    for r in json.load(open(path))["games"]:
+        games.append(dict(week=r[0], home=r[1], away=r[2], hp=r[3], ap=r[4], neutral=bool(r[5]),
+                          home_fbs=bool(r[6]), away_fbs=bool(r[7]), box=r[8] if len(r) > 8 else None))
+    return games
+
+
 def load_cfbd(year, key):
     def get(url):
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {key}"})
@@ -253,6 +262,51 @@ def colley(games):
 
 # Matchup predictor. Separate from the ranking models, which compress margins: predictions need real points.
 PRED_CAP, PRED_RIDGE, PTS_RIDGE, PRED_SD_INFLATE = 35.0, 1.0, 2.0, 1.4
+# Passing and rushing efficiency, adjusted for opponents (see efficiency()); gets EFF_WEIGHT of the margin.
+EFF_RIDGE, EFF_WEIGHT, EFF_MIN_GAMES = 50.0, 0.25, 50
+
+
+def adj_od(games, val, ridge):
+    """Weighted ridge: y = league avg + offense + opposing defense (+ home). val(g, side) -> (y, weight) or None."""
+    norm = lambda t, fbs: t if fbs else FCS_POOL
+    teams = sorted({norm(g["home"], g["home_fbs"]) for g in games} | {norm(g["away"], g["away_fbs"]) for g in games})
+    idx = {t: i for i, t in enumerate(teams)}; n = len(teams)
+    A = np.zeros((2 * n + 2, 2 * n + 2)); b = np.zeros(2 * n + 2)
+    for g in games:
+        h, a = idx[norm(g["home"], g["home_fbs"])], idx[norm(g["away"], g["away_fbs"])]
+        for side in (0, 1):
+            v = val(g, side)
+            if v is None: continue
+            y, w = v; o, d = (h, a) if side == 0 else (a, h)
+            cols = [o, n + d, 2 * n] + ([2 * n + 1] if side == 0 and not g["neutral"] else [])
+            for i in cols:
+                b[i] += w * y
+                for j in cols: A[i, j] += w
+    A[np.arange(2 * n), np.arange(2 * n)] += ridge
+    A[[2 * n, 2 * n + 1], [2 * n, 2 * n + 1]] += 1e-9
+    x = np.linalg.solve(A, b)
+    return dict(off={t: x[i] for i, t in enumerate(teams)}, defn={t: x[n + i] for i, t in enumerate(teams)},
+                mu=x[2 * n], hp=x[2 * n + 1])
+
+
+def exp_od(M, o, d, home):
+    return M["mu"] + M["off"].get(o, 0) + M["defn"].get(d, 0) + (M["hp"] if home else 0)
+
+
+def efficiency(games):
+    """Opponent-adjusted yards per pass attempt and per carry, and points per YPA/YPC from this season's games."""
+    bx = [g for g in games if g.get("box")]
+    if len(bx) < EFF_MIN_GAMES: return None
+    rate = lambda y, att: (y / att, att) if att else None
+    ypa = adj_od(bx, lambda g, s: rate(g["box"][4 * s], g["box"][4 * s + 1]), EFF_RIDGE)
+    ypc = adj_od(bx, lambda g, s: rate(g["box"][4 * s + 2], g["box"][4 * s + 3]), EFF_RIDGE)
+    X = []; y = []
+    for g in bx:
+        for s in (0, 1):
+            pa, ra = g["box"][4 * s + 1], g["box"][4 * s + 3]
+            if pa and ra: X.append([1, g["box"][4 * s] / pa, g["box"][4 * s + 2] / ra]); y.append(g["ap"] if s else g["hp"])
+    X = np.array(X); coef = np.linalg.solve(X.T @ X, X.T @ np.array(y, float))
+    return dict(ypa=ypa, ypc=ypc, coef=coef)
 
 
 def fit_predictor(games):
@@ -276,13 +330,20 @@ def fit_predictor(games):
     q = np.linalg.solve(Xp.T @ Xp + Pp, Xp.T @ yp)
     sd = float(np.sqrt(np.mean((y - X @ m) ** 2)) * PRED_SD_INFLATE)
     T = {t: dict(r=m[i], off=q[i], defn=q[n + i]) for i, t in enumerate(teams)}
-    return dict(T=T, hfa=m[n], mu=q[2 * n], hp=q[2 * n + 1], sd=sd)
+    return dict(T=T, hfa=m[n], mu=q[2 * n], hp=q[2 * n + 1], sd=sd, eff=efficiency(games))
 
 
 def predict(M, a, b, venue="N"):
     """venue: 'N' neutral, 'A' team a at home, 'B' team b at home."""
     A, B = M["T"][a], M["T"][b]; ha, hb = int(venue == "A"), int(venue == "B")
-    margin = A["r"] - B["r"] + M["hfa"] * (ha - hb)
+    margin = A["r"] - B["r"] + M["hfa"] * (ha - hb); eff = None
+    if M["eff"]:
+        E = M["eff"]
+        def side(o, d, home):
+            y, c = exp_od(E["ypa"], o, d, home), exp_od(E["ypc"], o, d, home)
+            return dict(ypa=y, ypc=c, pts=E["coef"][0] + E["coef"][1] * y + E["coef"][2] * c)
+        eff = dict(a=side(a, b, ha), b=side(b, a, hb))
+        margin = (1 - EFF_WEIGHT) * margin + EFF_WEIGHT * (eff["a"]["pts"] - eff["b"]["pts"])
     pa = 0.5 * (1 + math.erf(margin / (M["sd"] * math.sqrt(2))))
     total = (M["mu"] + A["off"] + B["defn"] + M["hp"] * ha) + (M["mu"] + B["off"] + A["defn"] + M["hp"] * hb)
     total = max(total, abs(margin) + 7)
@@ -290,7 +351,7 @@ def predict(M, a, b, venue="N"):
     if sa == sb:  # no ties in college football
         if margin >= 0: sa += 1
         else: sb += 1
-    return dict(margin=margin, pa=pa, sa=sa, sb=sb)
+    return dict(margin=margin, pa=pa, sa=sa, sb=sb, eff=eff)
 
 
 def print_colley(rows, top):
@@ -347,7 +408,8 @@ def write_csv(rows, path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--csv"); ap.add_argument("--year", type=int, default=2026)
+    ap.add_argument("--csv"); ap.add_argument("--json", help="the site's data/games.json (includes box scores)")
+    ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--benchmark", type=int, default=25)
     ap.add_argument("--top", type=int, default=25)
     ap.add_argument("--rank", choices=("score", "power", "sor", "colley"), default="score",
@@ -357,11 +419,13 @@ def main():
     ap.add_argument("--venue", choices=("neutral", "team1", "team2"), default="neutral", help="who is at home for --predict")
     a = ap.parse_args()
 
-    if a.csv:
+    if a.json:
+        games = load_json(a.json)
+    elif a.csv:
         games = load_csv(a.csv)
     else:
         key = os.environ.get("CFBD_API_KEY")
-        if not key: sys.exit("Set CFBD_API_KEY or pass --csv games.csv")
+        if not key: sys.exit("Set CFBD_API_KEY or pass --json data/games.json or --csv games.csv")
         games = load_cfbd(a.year, key)
     if not games: sys.exit("No completed games found.")
 
@@ -375,6 +439,9 @@ def main():
         print(f"\n{t1} {p['sa']}, {t2} {p['sb']}  ({where})")
         pts = max(1, round(abs(p["margin"])))
         print(f"{w} wins {wp:.0%} of the time by about {pts} point{'' if pts == 1 else 's'}")
+        if p["eff"]:
+            print(f"Expected yds/att: {t1} {p['eff']['a']['ypa']:.1f}, {t2} {p['eff']['b']['ypa']:.1f} | "
+                  f"yds/carry: {t1} {p['eff']['a']['ypc']:.1f}, {t2} {p['eff']['b']['ypc']:.1f}")
         return
     if a.rank == "colley":
         print_colley(colley(games), a.top); return
