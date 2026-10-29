@@ -93,6 +93,11 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .show-sm{display:none}
 .injgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:12px}
 .tag{display:inline-block;font:600 10.5px/1 var(--mono);padding:3px 5px;border-radius:4px;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line);vertical-align:1px}
+.conf{display:inline-grid;justify-items:end;gap:2px;font:700 18px/1 var(--mono);color:var(--ink);text-align:right}
+.conf small{font:600 10.5px/1.1 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.conf.top{color:var(--accent)} .conf.top small:first-child{color:var(--accent)}
+.conf.none{font:600 11px/1 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+td .conf{font-size:15px}
 .tag.top10{color:var(--accent);background:var(--accent-soft);box-shadow:none}
 .tag.out{color:var(--loss);background:var(--loss-soft);box-shadow:none}
 .inj{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
@@ -679,9 +684,11 @@ function renderMatchup(force){
   }
   const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
   const side = (t, s, r, win) => `<div class="side${win?" win":""}"><b>${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
+  const cg = trackedGame(a, b);
   $("#mout").innerHTML = `
-    <div class="panel">
-      <div class="score">${side(a, p.sa, ra, winA)}<div class="dash">–</div>${side(b, p.sb, rb, !winA)}</div>
+    <div class="panel" style="position:relative">
+      ${cg ? `<div style="position:absolute;top:10px;right:12px">${confBadge(cg)}</div>` : `<div style="position:absolute;top:10px;right:12px"><span class="conf none" title="Confidence is shown for games this week that have a betting line.">Confidence —</span></div>`}
+      <div class="score" style="padding-top:34px">${side(a, p.sa, ra, winA)}<div class="dash">–</div>${side(b, p.sb, rb, !winA)}</div>
       <div style="padding:0 16px 18px;display:grid;gap:8px">
         <div class="pbar" role="img" aria-label="${esc(a)} ${Math.round(p.pa*100)}%, ${esc(b)} ${Math.round((1-p.pa)*100)}%"><i style="width:${p.pa*100}%;background:var(${winA?"--accent":"--muted"})"></i><i style="width:${(1-p.pa)*100}%;background:var(${winA?"--muted":"--accent"})"></i></div>
         <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px"><span>${esc(a)} ${Math.round(p.pa*100)}%</span><span>${esc(b)} ${Math.round((1-p.pa)*100)}%</span></div>
@@ -706,6 +713,17 @@ const MKT_SD = 15.2;
 // against the spread in its last game than its opponent did, AND the play-efficiency model sides against our pick.
 // Found by searching 2026 for the criteria that best separated correct picks (research/criteria.py) and checked
 // leak-free on seasons it wasn't found on (research/criteria_check.py). About 15% of games.
+// Confidence % shown on each game = how often picks in the same group covered on seasons the rule wasn't found on
+// (2022-25, research/criteria_check.py): top confidence 238-202, every other pick 1234-1205.
+const CONF_PCT = {top: 238/440, other: 1234/2439};
+// The tracked record for a game (either team order), with our pick and its confidence group, or null.
+function trackedGame(a, b){
+  const t = (TRACKER?.games||[]).find(g => (g.home===a && g.away===b) || (g.home===b && g.away===a));
+  if(!t || t.line==null || t.ours===t.line) return null;
+  const pick = t.ours > t.line ? t.home : t.away, opp = pick===t.home ? t.away : t.home;
+  return {t, pick, opp, pts: Math.abs(t.line), getsPts: (pick===t.home) === (t.line < 0), top: !!t.top_conf, pct: t.top_conf ? CONF_PCT.top : CONF_PCT.other};
+}
+const confBadge = (c, compact) => !c ? "" : `<span class="conf${c.top ? " top" : ""}" title="Our pick against the spread: ${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}. Picks in this group covered ${Math.round(c.pct*100)}% of the time on past seasons (2022–25).${c.top ? " Top confidence: our pick did worse against the spread last game than its opponent, and the efficiency model sides against it." : ""}">${compact ? "" : `<small>${c.top ? "Top confidence" : "Confidence"}</small>`}${Math.round(c.pct*100)}%${compact ? "" : `<small>${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}</small>`}</span>`;
 const TOPCONF_RECORD = [["2022", 55, 51], ["2023", 56, 49], ["2024", 71, 48], ["2025", 56, 54]], TOPCONF_FOUND = ["2026", 33, 23];
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 function renderLines(){
@@ -722,7 +740,7 @@ function renderLines(){
       <tbody>${rows.map(l => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
         return `<tr>
         <td class="rk" style="font-size:17px">${Math.abs(l.diff).toFixed(1)}</td>
-        <td><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${(() => { const t = (TRACKER?.games||[]).find(g => g.key===`${l.week}|${l.home}|${l.away}`); return t?.top_conf ? `<span class="tag top10">Top confidence: ${esc(t.ours>t.line?t.home:t.away)}</span> ` : ""; })()}${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
+        <td><span style="float:right;margin-left:8px">${confBadge(trackedGame(l.home, l.away))}</span><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${(() => { const t = (TRACKER?.games||[]).find(g => g.key===`${l.week}|${l.home}|${l.away}`); return t?.top_conf ? `<span class="tag top10">Top confidence: ${esc(t.ours>t.line?t.home:t.away)}</span> ` : ""; })()}${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
           <span class="show-sm" style="font-size:13px;margin-top:4px">Line ${lineStr(l.home, l.away, l.mkt)} · Ours <b>${lineStr(l.home, l.away, l.ours)}</b><br>${esc(fav)} wins ${Math.round(fp*100)}%${l.total!=null?` · Total ${l.total.toFixed(1)} vs ${l.ourTotal}`:""}</span></td>
         <td class="hide-sm">${lineStr(l.home, l.away, l.mkt)}</td><td class="hide-sm"><b>${lineStr(l.home, l.away, l.ours)}</b></td>
         <td class="num hide-sm">${esc(fav)} ${Math.round(fp*100)}%</td>
