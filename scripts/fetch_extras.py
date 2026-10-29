@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pull a past season's betting lines and per-game passers from collegefootballdata.com, for tuning.
-Writes <dir>/<year>_lines.json, _qb.json, _players.json, _ppa.json, _talent.json and _returning.json; skips
-files that exist.
+Writes <dir>/<year>_lines.json, _qb.json, _players.json, _ppa.json, _talent.json, _returning.json and
+_meta.json, plus <dir>/venues.json once; skips files that exist.
 Usage: CFBD_API_KEY=... python scripts/fetch_extras.py --year 2024 [--dir data/history]"""
 import argparse, json, os, sys, pathlib, urllib.request
 
@@ -115,3 +115,28 @@ if not rp.exists():
              x.get("percentRushingPPA", x.get("percent_rushing_ppa")), x.get("percentReceivingPPA", x.get("percent_receiving_ppa"))] for x in r]
     rp.write_text(json.dumps({"season": a.year, "returning": rows}, separators=(",", ":")))
     print(f"{a.year}: wrote returning production for {len(rows)} teams")
+
+# Game details for situational angles (rest, travel): [week, home, away, start, venue id, neutral, conference game,
+# home conference, away conference], every game including unplayed ones.
+mp = out_dir / f"{a.year}_meta.json"
+if not mp.exists():
+    rows = []
+    for seas in ("regular", "postseason"):
+        for g in get(f"https://api.collegefootballdata.com/games?year={a.year}&seasonType={seas}"):
+            rows.append([g.get("week", 0) + (20 if seas == "postseason" else 0), g.get("homeTeam", g.get("home_team")),
+                         g.get("awayTeam", g.get("away_team")), g.get("startDate", g.get("start_date")), g.get("venueId", g.get("venue_id")),
+                         int(bool(g.get("neutralSite", g.get("neutral_site")))), int(bool(g.get("conferenceGame", g.get("conference_game")))),
+                         g.get("homeConference", g.get("home_conference")), g.get("awayConference", g.get("away_conference"))])
+    mp.write_text(json.dumps({"season": a.year, "games": rows}, separators=(",", ":")))
+    print(f"{a.year}: wrote details for {len(rows)} games")
+
+# Stadium locations (one call, all seasons): [venue id, name, latitude, longitude, timezone, dome]
+vp = out_dir / "venues.json"
+if not vp.exists():
+    rows = []
+    for v in get("https://api.collegefootballdata.com/venues"):
+        loc = v.get("location") or {}
+        lat, lon = loc.get("x", v.get("latitude")), loc.get("y", v.get("longitude"))
+        rows.append([v.get("id"), v.get("name"), lat, lon, v.get("timezone"), int(bool(v.get("dome")))])
+    vp.write_text(json.dumps({"venues": rows}, separators=(",", ":")))
+    print(f"wrote {len(rows)} venues")
