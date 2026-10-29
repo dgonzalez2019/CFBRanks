@@ -445,7 +445,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
       <h3>Positional matchups</h3>
       <p>The Matchup tab compares each offense with the other team's defense unit by unit: passing and rushing efficiency, sacks and QB pressure (offensive line vs. pass rush), tackles for loss, turnovers (ball security vs. takeaways) and third downs. Each rating is adjusted for opponents, the same way as the power ratings. Only passing and rushing feed the predicted score, because adding the rest didn't improve predictions on past seasons.</p>
       <h3>The Lines tab</h3>
-      <p>Compares our predicted line with the betting market's (the median spread across sportsbooks from collegefootballdata.com) for this week's games, biggest difference first. The track record replays the season: each of our predictions is made only from games played before that week, then compared with the betting line and the final score. Betting markets are hard to beat, so the record is the honest test of whether our differences mean anything.</p>
+      <p>Compares our predicted line with the betting market's (the median spread across sportsbooks from collegefootballdata.com) for this week's games, most confident pick first. The track record replays the season: each of our predictions is made only from games played before that week, then compared with the betting line and the final score. Betting markets are hard to beat, so the record is the honest test of whether our differences mean anything.</p>
       <h3>Updating the data</h3>
       <p>Upload a CSV with the columns <code>week,home_team,away_team,home_points,away_points,neutral_site,home_fbs,away_fbs</code>. Rows without scores are skipped. An uploaded file only changes your own view. The published rankings come from <code>data/games.json</code>, which the scheduled GitHub Action refreshes from collegefootballdata.com.</p>
       <div class="upload panel" style="border-style:dashed">
@@ -995,7 +995,8 @@ function renderLines(){
     const ih = autoModelOut(l.home), ia = autoModelOut(l.away);
     const p = predict(PRED, l.home, l.away, l.neutral?"N":"A", ih, ia), mkt = -l.spread;
     return {...l, ours:p.margin, mkt, diff:p.margin-mkt, ourTotal:p.sa+p.sb, pHome:p.pa, ih, ia};
-  }).sort((x,y) => Math.abs(y.diff)-Math.abs(x.diff));
+  }).map(l => ({...l, conf: trackedGame(l.home, l.away)?.pct ?? null}))
+    .sort((x,y) => (y.conf ?? -1)-(x.conf ?? -1) || Math.abs(y.diff)-Math.abs(x.diff));  // most confident first; games without a score after, by difference
   const thisWeek = up.length ? Math.min(...up.map(l=>l.week)) : null;
   const day = s => s ? new Date(s).toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"}) : "";
   const table = rows => `<div class="panel scroll"><table class="top lines">
@@ -1055,7 +1056,7 @@ function renderLines(){
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   $("#ltitle").textContent = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: our lines vs. betting lines` : "Our lines vs. betting lines";
   $("#lout").innerHTML = (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines.</div>`) +
-    `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by biggest difference. The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
+    `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by confidence, highest first (games without a confidence score last, by difference). The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
     (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : "") +
     tracker + record + past;
 }
