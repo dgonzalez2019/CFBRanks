@@ -678,7 +678,7 @@ h1 small b{font-weight:inherit}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
+let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], ROLES = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -758,7 +758,7 @@ async function setLeague(l){
   LEAGUE = l; store.set("sor.league", l);
   const go = async () => {
     applyLeague();
-    SCHED = []; TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
+    SCHED = []; TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; ROLES = []; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
     MKEY = ""; Object.keys(FLIPPED).forEach(k => delete FLIPPED[k]);
     $("#ma").value = store.get(SK("sor.ma")) || ""; $("#mb").value = store.get(SK("sor.mb")) || ""; $("#q").value = "";
     await loadData();
@@ -947,6 +947,29 @@ function playerValues(players, games){
   });
   Object.values(byTeam).forEach(l => l.sort((x,y) => y.value-x.value));
   return byTeam;
+}
+
+// Estimated values for injured players the play data doesn't cover (linemen, defenders, kickers, depth players):
+// a full-time starter's worth by position (points per game vs his backup, NFL scale; CFB ×1.25 for its wider
+// talent gaps) times his role: NFL snap share, CFB defensive involvement per game against a starter's (roles.json),
+// kickers/punters 1 when they kick. Untested estimates, marked "est."; keep in sync with POS_BASE in cfb_sor.py.
+const POS_BASE = {QB:1.5, RB:.3, WR:.35, TE:.3, FB:.1, OL:.4, DT:.35, EDGE:.5, LB:.3, CB:.45, S:.3, DB:.4, K:.3, P:.15, LS:.05};
+const POS_GROUP = {QB:"QB",RB:"RB",HB:"RB",FB:"FB",WR:"WR",TE:"TE",OL:"OL",OT:"OL",T:"OL",G:"OL",OG:"OL",C:"OL",IOL:"OL",DL:"DT",DT:"DT",NT:"DT",IDL:"DT",
+  DE:"EDGE",EDGE:"EDGE",OLB:"EDGE",LB:"LB",ILB:"LB",MLB:"LB",CB:"CB",S:"S",FS:"S",SS:"S",SAF:"S",DB:"DB",K:"K",PK:"K",P:"P",LS:"LS"};
+const EST_SCALE = {cfb:1.25, nfl:1};
+const estDefaultShare = g => LEAGUE==="cfb" && (g==="OL" || g==="LS") ? .5 : LEAGUE==="cfb" && (g==="K" || g==="P") ? .3 : .15;
+function estimateValues(values){
+  const role = {}; ROLES.forEach(r => role[r[0]+"|"+nameKey(r[1])] = r);
+  const have = new Set(); Object.entries(values).forEach(([t,l]) => l.forEach(x => have.add(t+"|"+nameKey(x.name))));
+  Object.entries(INJURIES).forEach(([team, rows]) => rows.forEach(r => {
+    const k = team+"|"+nameKey(r.name); if(have.has(k)) return; have.add(k);
+    const ro = role[k], rpos = ro ? (ro[2]||"") : "";
+    const group = POS_GROUP[(r.pos || rpos).toUpperCase()] || POS_GROUP[rpos.toUpperCase()] || "DB";
+    const share = ro ? ro[3] : estDefaultShare(group);
+    const value = Math.round((POS_BASE[group] ?? .2) * (EST_SCALE[LEAGUE] ?? 1) * share * 1000) / 1000;
+    (values[team] ||= []).push({team, name:r.name, pos:r.pos, plays:null, ppa:null, value, est:true});
+  }));
+  return values;
 }
 
 // Injury reports (SportsDataIO, data/injuries.json). Players listed Out are marked automatically. For our model
@@ -1400,18 +1423,17 @@ function renderMatchup(force){
       <thead>${mhead(a,b)}</thead><tbody>${muRows(a, b, v==="A")}</tbody>
       <thead>${mhead(b,a)}</thead><tbody>${muRows(b, a, v==="B")}</tbody></table></div>
       <p class="note" style="margin:0">Positional matchups, each adjusted for opponents: a unit is rated against what its opponents did against everyone else. # is the national rank among FBS teams (1 = best). "Game" is the expected rate when these two units meet.${MATCHUP_NOTE}</p>` : "";
-  const injList = t => { const all = PVAL[t]||[], l = all.filter((x,i) => i < 10 && x.value >= .1 || injuryOf(t, x.name));
+  const injList = t => { const all = PVAL[t]||[], l = all.filter((x,i) => !x.est && i < 10 && x.value >= .1 || injuryOf(t, x.name)).sort((x,y) => y.value-x.value);
     const badge = r => !r ? "" : `<span class="tag ${r.status==="Out"?"out":""}" title="${esc(r.note||"")}">${esc(r.status)}${r.body && r.body!=="Undisclosed" ? " · "+esc(r.body) : ""}</span>`;
-    const others = (INJURIES[t]||[]).filter(r => !all.some(x => nameKey(x.name)===nameKey(r.name)) && (r.status==="Out"||r.status==="Doubtful")).length;
     return `<div><b>${esc(t)}</b>${outVal(t) ? ` <span class="neg" style="font-family:var(--mono);font-size:13px">−${outVal(t).toFixed(1)} pts</span>` : ""}
       ${l.length ? l.map(x => { const r = injuryOf(t, x.name), sh = r && publicOut(t, x.name) ? shareBefore(t, r.start) : 1;
-        return `<label class="inj"><input type="checkbox" data-team="${esc(t)}" data-name="${esc(x.name)}"${outSet(t).has(x.name)?" checked":""}> <span>${esc(x.name)} <span class="sub">${esc(x.pos)}</span> ${badge(r)}</span><span class="sub" style="font-family:var(--mono)" title="${sh<1?`Full value ${x.value.toFixed(1)}; ratings already include the ${Math.round((1-sh)*100)}% of games he missed`:""}">${(x.value*sh).toFixed(1)}</span></label>`; }).join("")
+        return `<label class="inj"><input type="checkbox" data-team="${esc(t)}" data-name="${esc(x.name)}"${outSet(t).has(x.name)?" checked":""}> <span>${esc(x.name)} <span class="sub">${esc(x.pos)}${x.est ? " · est." : ""}</span> ${badge(r)}</span><span class="sub" style="font-family:var(--mono)" title="${sh<1?`Full value ${x.value.toFixed(1)}; ratings already include the ${Math.round((1-sh)*100)}% of games he missed`:""}">${(x.value*sh).toFixed(x.est ? 2 : 1)}</span></label>`; }).join("")
         : `<p class="sub" style="margin:6px 0 0">No player data.</p>`}
-      ${others ? `<p class="sub" style="margin:6px 0 0">${others} more listed Out or Doubtful (defense, line or depth players we can't value).</p>` : ""}</div>`; };
+</div>`; };
   const inj = PLAYERS.length ? `<details id="injbox" class="panel" style="padding:12px 16px"${INJOPEN?" open":""}>
       <summary><b>Injuries</b> <span class="sub">${outSet(a).size+outSet(b).size} marked out${INJ_UPDATED ? ` · report updated ${new Date(INJ_UPDATED).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})}` : ""}</span></summary>
       <div class="injgrid">${injList(a)}${injList(b)}</div>
-      <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him: his points added per play this season versus his backup's, times his plays per game. ${LG.qbNote} Other positions are halved because passing credit is shared between passer and receiver, and are untested. Offensive players only: there is no free per-player data for defenders or linemen.</p>
+      <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him: his points added per play this season versus his backup's, times his plays per game. ${LG.qbNote} Other positions are halved because passing credit is shared between passer and receiver, and are untested. Players marked "est." (linemen, defenders, kickers, depth players) have no per-play data: their number is a rough, untested estimate of a full-time starter's worth at the position, scaled by how much he plays (${LEAGUE==="nfl" ? "snap share" : "tackles, tackles for loss, sacks, pass breakups and hurries per game against a typical starter's; linemen get half a starter's worth"}).</p>
     </details>` : "";
   const ln = LINES.find(l => l.hp==null && ((l.home===a && l.away===b) || (l.home===b && l.away===a)));
   let mkt = "";
@@ -1733,7 +1755,7 @@ function recompute(){
   RESULT = compute(GAMES, BENCH, PRIOR);
   RONLY = colley(GAMES.filter(g => g.hf || g.af));
   PRED = RESULT.M;
-  PVAL = playerValues(PLAYERS, GAMES);
+  PVAL = estimateValues(playerValues(PLAYERS, GAMES));
   BT = backtest(GAMES.filter(g => g.hf || g.af));
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));
   renderResults();
@@ -1859,6 +1881,10 @@ async function loadData(){
       const pr = await fetch(`${LG.dir}players.json`, {cache:"no-store"});
       if(pr.ok) PLAYERS = ((await pr.json()).players || []).map(r => ({team:r[0], name:r[1], pos:r[2], plays:r[3], ppa:r[4]}));
     }catch(e){ PLAYERS = []; }
+    try{
+      const rl = await fetch(`${LG.dir}roles.json`, {cache:"no-store"});
+      ROLES = rl.ok ? ((await rl.json()).players || []) : [];
+    }catch(e){ ROLES = []; }
     OUT = {};  // marks made against the sample season or before the injury report loaded don't carry over
     recompute();
   }catch(e){ /* keep sample season */ }

@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install numpy
-      - run: python scripts/fetch_games.py --lines data/lines.json --players data/players.json --ppa data/ppa.json --teams data/teams.json
+      - run: python scripts/fetch_games.py --lines data/lines.json --players data/players.json --ppa data/ppa.json --teams data/teams.json --roles data/roles.json
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
       - name: Fetch injuries (optional)
@@ -36,5 +36,6 @@ jobs:
           if [ -f data/ppa.json ]; then git add data/ppa.json; fi
           if [ -f data/teams.json ]; then git add data/teams.json; fi
           if [ -f data/schedule.json ]; then git add data/schedule.json; fi
+          if [ -f data/roles.json ]; then git add data/roles.json; fi
           if [ -d data/nfl ]; then git add data/nfl; fi
           git diff --cached --quiet || (git commit -m "Update game results" && git push)

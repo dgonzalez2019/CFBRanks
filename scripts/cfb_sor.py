@@ -438,6 +438,43 @@ def ppa_margin(P, home, away):
     return PPA_A * ((o(home) + d(away)) - (o(away) + d(home))) + PPA_B
 
 
+# Estimated values for injured players the play-value data doesn't cover (linemen, defenders, kickers, depth players):
+# a full-time starter's worth by position (points per game vs his backup, NFL scale; CFB x1.25 for its wider talent
+# gaps), times his role: NFL snap share (nflverse snap counts), CFB defensive involvement per game against a
+# starter's (fetch_games.py --roles), kickers/punters 1 when they kick. Untested estimates, shown with "est." on the
+# page; keep in sync with POS_BASE etc. in index.html.
+POS_BASE = {"QB": 1.5, "RB": 0.3, "WR": 0.35, "TE": 0.3, "FB": 0.1, "OL": 0.4, "DT": 0.35, "EDGE": 0.5, "LB": 0.3,
+            "CB": 0.45, "S": 0.3, "DB": 0.4, "K": 0.3, "P": 0.15, "LS": 0.05}
+POS_GROUP = {"QB": "QB", "RB": "RB", "HB": "RB", "FB": "FB", "WR": "WR", "TE": "TE", "OL": "OL", "OT": "OL", "T": "OL",
+             "G": "OL", "OG": "OL", "C": "OL", "IOL": "OL", "DL": "DT", "DT": "DT", "NT": "DT", "IDL": "DT", "DE": "EDGE",
+             "EDGE": "EDGE", "OLB": "EDGE", "LB": "LB", "ILB": "LB", "MLB": "LB", "CB": "CB", "S": "S", "FS": "S", "SS": "S",
+             "SAF": "S", "DB": "DB", "K": "K", "PK": "K", "P": "P", "LS": "LS"}
+EST_SCALE = {"cfb": 1.25, "nfl": 1.0}
+
+
+def est_default_share(group, league):
+    """Role share when there is no playing-time data for the player."""
+    if league == "cfb" and group in ("OL", "LS"): return 0.5   # no CFB data for linemen or snappers
+    if league == "cfb" and group in ("K", "P"): return 0.3
+    return 0.15  # skill players outside the play-value data and defenders with no stats rarely play
+
+
+def estimate_values(values, injuries, roles, league):
+    """Adds an estimated value (est=True) for every injured player without one. roles: [team, name, pos, share]."""
+    role = {(t, name_key(n)): (p, sh) for t, n, p, sh in roles}
+    have = {(t, name_key(p["name"])) for t, ps in values.items() for p in ps}
+    for team, name, pos, status, *_ in injuries:
+        k = (team, name_key(name))
+        if k in have: continue
+        have.add(k)
+        rpos, share = role.get(k, (None, None))
+        group = POS_GROUP.get((pos or rpos or "").upper(), POS_GROUP.get((rpos or "").upper(), "DB"))
+        if share is None: share = est_default_share(group, league)
+        v = POS_BASE.get(group, 0.2) * EST_SCALE.get(league, 1.0) * share
+        values.setdefault(team, []).append(dict(team=team, name=name, pos=pos, plays=None, ppa=None, value=round(v, 3), est=True))
+    return values
+
+
 # Injury reports (see the injury notes in index.html): players listed Out, valued by player_values() and scaled by
 # the share of the team's games dated on or before the injury's start (ratings already reflect games he missed).
 def name_key(n):

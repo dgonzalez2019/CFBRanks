@@ -3,6 +3,7 @@
 passing and rushing box score where available.
 Usage: CFBD_API_KEY=... python scripts/fetch_games.py [--year 2026] [--out data/games.json] [--lines data/lines.json]"""
 import argparse, json, os, sys, datetime, pathlib, urllib.request
+from collections import defaultdict
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from cfb_sor import load_cfbd
 
@@ -12,6 +13,7 @@ ap.add_argument("--lines", help="also write betting lines for the season's games
 ap.add_argument("--players", help="also write player value (season PPA per play, offensive players) here")
 ap.add_argument("--ppa", help="also write this season's per-game team PPA (play efficiency) here")
 ap.add_argument("--teams", help="also write team logos and colors here (refreshed at most once a week)")
+ap.add_argument("--roles", help="also write each defender's and kicker's role share here (for injured-player estimates)")
 a = ap.parse_args()
 key = os.environ.get("CFBD_API_KEY") or sys.exit("CFBD_API_KEY is not set")
 upcoming = []
@@ -206,3 +208,32 @@ if a.teams:
             if T and not rows: print("  First team item, for debugging:", json.dumps(T[0])[:600])
         except Exception as e:
             print(f"Teams unavailable: {e}")
+
+
+# Roles for injured-player estimates: defenders' involvement per game (tackles + 2 x (TFL + sacks + pass breakups) +
+# QB hurries) against a typical starter's, and 1 for anyone who kicks or punts. Stored: [team, name, position, share].
+if a.roles:
+    try:
+        gp = defaultdict(int)
+        for g in games: gp[g["home"]] += 1; gp[g["away"]] += 1
+        agg = {}
+        for cat in ("defensive", "kicking", "punting"):
+            for x in get(f"https://api.collegefootballdata.com/stats/player/season?year={a.year}&category={cat}"):
+                k = (x.get("team"), x.get("player")); pos = (x.get("position") or "").upper()
+                if not k[0] or not k[1]: continue
+                r = agg.setdefault(k, {"pos": pos, "inv": 0.0, "kick": False})
+                st = (x.get("statType") or x.get("stat_type") or "").upper(); v = num({"v": x.get("stat")}, "v") or 0.0
+                if cat == "defensive":
+                    r["inv"] += v * {"TOT": 1, "TFL": 2, "SACKS": 2, "PD": 2, "QB HUR": 1}.get(st, 0)
+                elif v > 0 and st in ("FGA", "XPA", "NO", "PUNTS"): r["kick"] = True; r["pos"] = r["pos"] or ("K" if cat == "kicking" else "P")
+        bench = {"DL": 3.0, "DT": 3.0, "NT": 3.0, "DE": 3.5, "EDGE": 3.5, "LB": 6.0, "OLB": 4.5, "ILB": 6.0, "CB": 4.5, "S": 5.0, "DB": 4.5}
+        rows = []
+        for (team, name), r in agg.items():
+            if r["kick"]: share = 1.0
+            elif gp[team]: share = min(1.0, r["inv"] / gp[team] / bench.get(r["pos"], 4.5))
+            else: continue
+            rows.append([team, name, r["pos"], round(share, 3)])
+        rp = pathlib.Path(a.roles); rp.write_text(json.dumps({"season": a.year, "updated": out["updated"], "players": rows}, separators=(",", ":")))
+        print(f"Roles: wrote {len(rows)} defenders/kickers")
+    except Exception as e:
+        print(f"Roles unavailable: {e}")

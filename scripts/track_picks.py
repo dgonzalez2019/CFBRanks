@@ -87,6 +87,7 @@ prior = m.season_prior(m.load_json(prev_path)) if prev_path.exists() else None
 M = m.fit_predictor(games, prior)
 fbs = [g for g in games if g["home_fbs"] or g["away_fbs"]]
 values = m.player_values(load(D / "players.json", "players"), fbs)
+values = m.estimate_values(values, load(D / "injuries.json", "injuries"), load(D / "roles.json", "players"), LEAGUE)
 inj = m.injury_adjustments(values, load(D / "injuries.json", "injuries"), games, lines)
 fbs_teams = {g["home"] for g in games if g["home_fbs"]} | {g["away"] for g in games if g["away_fbs"]}
 cur_ppa = load(D / "ppa.json", "games") or load(D / "history" / f"{season}_ppa.json", "games")

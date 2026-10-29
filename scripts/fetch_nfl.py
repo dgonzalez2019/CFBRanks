@@ -160,19 +160,41 @@ def players(season):
     print(f"  wrote {len(out)} players")
 
 
+def roles(season):
+    """Each player's average snap share in the games he played (offense or defense; kickers/punters 1), for the
+    injured-player estimates: [team, name, position, share]."""
+    try: R = rows(f"{REL}/snap_counts/snap_counts_{season}.csv")
+    except Exception as e: print(f"  snap counts unavailable: {e}"); return
+    if R: print(f"  snap counts: {len(R)} rows; columns: {', '.join(list(R[0]))}")
+    agg = defaultdict(list); pos_of = {}
+    for r in R:
+        t = name(r.get("team")); nm = r.get("player")
+        if not t or not nm: continue
+        f = lambda k: (lambda v: v / 100 if v and v > 1 else (v or 0.0))(num(r.get(k)))
+        pos = (r.get("position") or "").upper(); pos_of[(t, nm)] = pos
+        agg[(t, nm)].append(1.0 if pos in ("K", "P", "LS") and f("st_pct") > 0 else max(f("offense_pct"), f("defense_pct")))
+    out = [[t, nm, pos_of[(t, nm)], round(sum(v) / len(v), 3)] for (t, nm), v in agg.items() if v]
+    (OUT / "roles.json").write_text(json.dumps({"season": season, "updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "players": out}, separators=(",", ":")))
+    print(f"  wrote {len(out)} player roles")
+
+
 def injuries(season):
     try: R = rows(f"{REL}/injuries/injuries_{season}.csv")
     except Exception as e: print(f"  injuries unavailable: {e}"); return
     if not R: print("  no injury rows"); return
     print(f"  injuries: {len(R)} rows; columns: {', '.join(list(R[0]))}")
     last = max(int(r["week"]) for r in R if r.get("week"))
+    first = {}
+    for r in R:
+        d = (r.get("date_modified") or "")[:10]; k = (name(r.get("team")), r.get("full_name"))
+        if d and (k not in first or d < first[k]): first[k] = d
     out = []
     for r in R:
         if int(r.get("week") or 0) != last: continue
         t = name(r.get("team")); st = (r.get("report_status") or "").strip()
         if not t or not st: continue
-        d = (r.get("date_modified") or "")[:10]
-        out.append([t, r.get("full_name") or "", r.get("position") or "", st, r.get("report_primary_injury") or "", d, d,
+        d = (r.get("date_modified") or "")[:10]; start = first.get((t, r.get("full_name")), d)
+        out.append([t, r.get("full_name") or "", r.get("position") or "", st, r.get("report_primary_injury") or "", start, d,
                     r.get("practice_status") or ""])
     (OUT / "injuries.json").write_text(json.dumps({"updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "source": f"nflverse injury report, week {last}", "injuries": out}, separators=(",", ":")))
     print(f"  wrote {len(out)} injury rows (week {last})")
@@ -204,7 +226,7 @@ if __name__ == "__main__":
     season = a.season or (today.year if today.month >= 8 else today.year - 1)
     OUT.mkdir(parents=True, exist_ok=True)
     if not season_files(season, OUT, True): sys.exit(f"No {season} schedule in nflverse games.csv")
-    players(season); injuries(season); teams()
+    players(season); injuries(season); roles(season); teams()
     if a.history:
         y1, y2 = (int(x) for x in a.history.split("-"))
         for y in range(y1, y2 + 1): season_files(y, OUT / "history", False)
