@@ -7,6 +7,10 @@ on:
       years:
         description: "Seasons to fetch, space separated"
         default: "2021 2022 2023 2024 2025"
+      extras_only:
+        description: "Only fetch lines, passers and player values (for an in-progress season)"
+        type: boolean
+        default: false
 permissions:
   contents: write
 jobs:
@@ -21,10 +25,11 @@ jobs:
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
           YEARS: ${{ inputs.years }}
+          EXTRAS_ONLY: ${{ inputs.extras_only }}
         run: |
           for y in $YEARS; do
             # Re-run even when stored: it only requests weeks still missing box-score fields.
-            python scripts/fetch_games.py --year "$y" --out "data/history/$y.json"
+            if [ "$EXTRAS_ONLY" != "true" ]; then python scripts/fetch_games.py --year "$y" --out "data/history/$y.json"; fi
             python scripts/fetch_extras.py --year "$y" --dir data/history
           done
       - name: Commit if changed
