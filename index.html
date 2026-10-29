@@ -89,6 +89,8 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .score .dash{font:700 28px/1 var(--display);color:var(--muted)}
 .eff th,.eff td:first-child{white-space:normal}
 .show-sm{display:none}
+.injgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:12px}
+.inj{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
 .lines td:nth-child(2){white-space:normal}
 .eff td:first-child .sub{display:block}
 .pbar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
@@ -258,7 +260,7 @@ body{margin:0}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
+let PLAYERS = [], PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -387,7 +389,7 @@ function predictor(games){
   const T = {}; teams.forEach((t,i)=>T[t]={r:m[i], off:q[i], def:q[n+i]});
   return {T, hfa:m[n], mu:q[2*n], hp:q[2*n+1], sd:Math.sqrt(se/rows.length)*PRED_SD_INFLATE, eff:efficiency(games)};
 }
-function predict(M, a, b, venue){
+function predict(M, a, b, venue, outA=0, outB=0){  // outA/outB: points per game lost to injuries
   const A=M.T[a], B=M.T[b], ha=venue==="A"?1:0, hb=venue==="B"?1:0;
   let margin = A.r - B.r + M.hfa*(ha-hb), eff = null;
   if(M.eff){
@@ -395,12 +397,42 @@ function predict(M, a, b, venue){
     eff = {a: side(a,b,ha), b: side(b,a,hb)};
     margin = (1-EFF_WEIGHT)*margin + EFF_WEIGHT*(eff.a.pts - eff.b.pts);
   }
+  margin += outB - outA;
   const pa = .5*(1+erf(margin/(M.sd*Math.SQRT2)));
-  let total = (M.mu+A.off+B.def+M.hp*ha) + (M.mu+B.off+A.def+M.hp*hb);
+  let total = (M.mu+A.off+B.def+M.hp*ha) + (M.mu+B.off+A.def+M.hp*hb) - outA - outB;
   total = Math.max(total, Math.abs(margin)+7);
   let sa = Math.round((total+margin)/2), sb = Math.round((total-margin)/2);
   if(sa===sb){ if(margin>=0) sa++; else sb++; }  // no ties in college football
   return {margin, pa, sa, sb, eff};
+}
+
+// Injury picker. A player's worth in points per game = (his PPA per play - his replacement's) x his plays per
+// game x INJ_SHARE. PPA credits a pass to both passer and receiver, so INJ_SHARE halves the raw value (an
+// estimate: there is no injury history to test it on). PPA is shrunk toward the position average by INJ_SHRINK
+// plays. A team's top player at a position is replaced by its own next player there (shrunk toward the
+// league-wide backup level); anyone else is replaced at the backup level. Offense only: the free data has no
+// per-player value for defenders or linemen.
+const INJ_POS = ["QB","RB","WR","TE"], INJ_SHRINK = 50, INJ_SHARE = 0.5;
+function playerValues(players, games){
+  const gp = {}; games.forEach(g => { gp[g.home] = (gp[g.home]||0)+1; gp[g.away] = (gp[g.away]||0)+1; });
+  const ps = players.filter(p => INJ_POS.includes(p.pos) && gp[p.team]);
+  const groups = {}; ps.forEach(p => (groups[p.team+"|"+p.pos] ||= []).push(p));
+  Object.values(groups).forEach(l => l.sort((x,y) => y.plays-x.plays));
+  const wavg = l => { const w = l.reduce((s,p)=>s+p.plays,0); return w ? l.reduce((s,p)=>s+p.ppa*p.plays,0)/w : 0; };
+  const posAvg = {}, backup = {};
+  INJ_POS.forEach(pos => { const g = Object.entries(groups).filter(([k]) => k.endsWith("|"+pos)).map(([,l]) => l);
+    posAvg[pos] = wavg(g.flat()); backup[pos] = g.some(l=>l.length>1) ? wavg(g.flatMap(l=>l.slice(1))) : posAvg[pos]; });
+  const shrink = (p, to) => (p.plays*p.ppa + INJ_SHRINK*to)/(p.plays + INJ_SHRINK);
+  const byTeam = {};
+  Object.entries(groups).forEach(([k,l]) => { const [team,pos] = k.split("|");
+    l.forEach((p,i) => {
+      const repl = i===0 && l[1] ? shrink(l[1], backup[pos]) : backup[pos];
+      const value = Math.max(0, shrink(p, posAvg[pos]) - repl) * p.plays / gp[team] * INJ_SHARE;
+      (byTeam[team] ||= []).push({...p, value});
+    });
+  });
+  Object.values(byTeam).forEach(l => l.sort((x,y) => y.value-x.value));
+  return byTeam;
 }
 
 // Honest accuracy: predict each week from week 5 on using only earlier games.
@@ -522,15 +554,21 @@ function unitRatings(E, teams){
   return out;
 }
 
-function renderMatchup(){
+let MKEY = "";
+function renderMatchup(force){
   const a = $("#ma").value, b = $("#mb").value, ok = t => RESULT.byTeam[t];
+  // Leaving a text box fires "change" too; redrawing then would swallow the click that caused it.
+  const key = [a, b, $("#mv").value, [...(OUT[a]||[])], [...(OUT[b]||[])]].join("|");
+  if(!force && key === MKEY) return;
+  MKEY = key;
   $("#mv").options[1].text = ok(a) ? `${a} at home` : "Team 1 at home";
   $("#mv").options[2].text = ok(b) ? `${b} at home` : "Team 2 at home";
   $("#mnote").innerHTML = `Margins come from a point-margin rating of every game this season${PRED.eff?`, blended (${Math.round(EFF_WEIGHT*100)}%) with each side's expected passing and rushing efficiency`:""}; the score total comes from each team's points scored and allowed, adjusted for opponents.` +
     (BT ? ` Tested on ${BT.n} past games using only the games before each one, it picked the winner ${Math.round(BT.hit*100)}% of the time and missed the margin by ${BT.mae.toFixed(1)} points on average (${Math.round(BT.close*100)}% of those games were decided by one score).` : "");
   if(!ok(a) || !ok(b) || a===b){ $("#mout").innerHTML = `<div class="panel empty">${a&&b&&a===b?"Pick two different teams.":"Pick two FBS teams to see who would win and the predicted score."}</div>`; return; }
   store.set("sor.ma", a); store.set("sor.mb", b);
-  const v = $("#mv").value, p = predict(PRED, a, b, v), winA = p.pa >= .5, w = winA ? a : b, wp = winA ? p.pa : 1-p.pa;
+  const outVal = t => (PVAL[t]||[]).filter(x => OUT[t]?.has(x.name)).reduce((s,x)=>s+x.value,0);
+  const v = $("#mv").value, p = predict(PRED, a, b, v, outVal(a), outVal(b)), winA = p.pa >= .5, w = winA ? a : b, wp = winA ? p.pa : 1-p.pa;
   const ra = RESULT.byTeam[a], rb = RESULT.byTeam[b];
   const U = UNITS, cell = u => `${u.v.toFixed(1)} <span class="sub">#${u.rank}</span>`;
   const eff = p.eff && U ? `<div class="panel scroll"><table class="eff">
@@ -544,6 +582,15 @@ function renderMatchup(){
         <tr><td><b>This game: expected yds/carry</b></td><td class="num"><b>${p.eff.a.ypc.toFixed(1)}</b></td><td class="num"><b>${p.eff.b.ypc.toFixed(1)}</b></td></tr>
       </tbody></table></div>
       <p class="note" style="margin:0">All four units are adjusted for opponents: a defense is rated on what its opponents gained against everyone else, and an offense on what its opponents allowed. Ranks are among FBS teams.</p>` : "";
+  const injList = t => { const l = (PVAL[t]||[]).filter(x => x.value >= .1).slice(0,10);
+    return `<div><b>${esc(t)}</b>${outVal(t) ? ` <span class="neg" style="font-family:var(--mono);font-size:13px">−${outVal(t).toFixed(1)} pts</span>` : ""}
+      ${l.length ? l.map(x => `<label class="inj"><input type="checkbox" data-team="${esc(t)}" data-name="${esc(x.name)}"${OUT[t]?.has(x.name)?" checked":""}> <span>${esc(x.name)} <span class="sub">${esc(x.pos)}</span></span><span class="sub" style="font-family:var(--mono)">${x.value.toFixed(1)}</span></label>`).join("")
+        : `<p class="sub" style="margin:6px 0 0">No player data.</p>`}</div>`; };
+  const inj = PLAYERS.length ? `<details id="injbox" class="panel" style="padding:12px 16px"${INJOPEN?" open":""}>
+      <summary><b>Injuries: mark players who are out</b> <span class="sub">${(OUT[a]?.size||0)+(OUT[b]?.size||0)} marked</span></summary>
+      <div class="injgrid">${injList(a)}${injList(b)}</div>
+      <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him, from his points added per play this season versus his backup's, times his plays per game, halved because passing credit is shared between passer and receiver. Offensive players only: there is no free per-player data for defenders or linemen. An estimate; nothing to test it against.</p>
+    </details>` : "";
   const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
   const side = (t, s, r, win) => `<div class="side${win?" win":""}"><b>${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
   $("#mout").innerHTML = `
@@ -555,7 +602,13 @@ function renderMatchup(){
         <p style="margin:6px 0 0"><b>${esc(w)}</b> wins ${Math.round(wp*100)}% of the time by about <b>${Math.max(1,Math.round(Math.abs(p.margin)))}</b> point${Math.round(Math.abs(p.margin))===1?"":"s"}${v==="N"?" on a neutral field":` with ${esc(v==="A"?a:b)} at home`}.</p>
         ${met.map(g=>`<p class="sub" style="margin:0">Already played, week ${g.week}: ${esc(g.away)} ${g.ap} ${g.neutral?"vs.":"at"} ${esc(g.home)} ${g.hp}${g.neutral?" (neutral site)":""}.</p>`).join("")}
       </div>
-    </div>${eff}`;
+    </div>${inj}${eff}`;
+  $("#injbox")?.addEventListener("toggle", e => INJOPEN = e.target.open);
+  $("#mout").querySelectorAll(".inj input").forEach(cb => cb.addEventListener("change", () => {
+    const t = cb.dataset.team, s = (OUT[t] ||= new Set());
+    cb.checked ? s.add(cb.dataset.name) : s.delete(cb.dataset.name);
+    renderMatchup();
+  }));
 }
 
 // Betting lines use the home team's spread (negative = home favored), so the market's home margin is -spread.
@@ -649,12 +702,13 @@ function recompute(){
   RESULT = compute(GAMES, BENCH);
   RONLY = colley(GAMES.filter(g => g.hf || g.af));
   PRED = predictor(GAMES.filter(g => g.hf || g.af));
+  PVAL = playerValues(PLAYERS, GAMES);
   BT = backtest(GAMES.filter(g => g.hf || g.af));
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));
   renderResults();
   renderLines();
   if(!$("#ma").value){ $("#ma").value = store.get("sor.ma") || RESULT.rows[0]?.team || ""; $("#mb").value = store.get("sor.mb") || RESULT.rows[1]?.team || ""; }
-  renderMatchup();
+  renderMatchup(true);
   $("#teamlist").innerHTML = RESULT.rows.map(r=>`<option value="${esc(r.team)}">`).join("");
   renderStatus(); renderTop();
   const cur = $("#q").value || store.get("sor.team") || "";
@@ -678,8 +732,8 @@ $("#q").addEventListener("change", e => renderTeam(e.target.value));
 $("#bench").addEventListener("change", e => { BENCH = +e.target.value; store.set("sor.bench", BENCH); recompute(); });
 $("#showall").addEventListener("change", e => { SHOWALL = e.target.value==="all"; renderTop(); });
 $("#rshowall").addEventListener("change", renderResults);
-["#ma","#mb"].forEach(id => { $(id).addEventListener("input", renderMatchup); $(id).addEventListener("change", renderMatchup); });
-$("#mv").addEventListener("change", renderMatchup);
+["#ma","#mb"].forEach(id => { $(id).addEventListener("input", () => renderMatchup()); $(id).addEventListener("change", () => renderMatchup()); });
+$("#mv").addEventListener("change", () => renderMatchup());
 
 /* ---------------- CSV + shared data ---------------- */
 function parseCSV(text){
@@ -728,6 +782,10 @@ async function loadData(){
       const lr = await fetch("data/lines.json", {cache:"no-store"});
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[]}));
     }catch(e){ LINES = []; }
+    try{
+      const pr = await fetch("data/players.json", {cache:"no-store"});
+      if(pr.ok) PLAYERS = ((await pr.json()).players || []).map(r => ({team:r[0], name:r[1], pos:r[2], plays:r[3], ppa:r[4]}));
+    }catch(e){ PLAYERS = []; }
     recompute();
   }catch(e){ /* keep sample season */ }
 }

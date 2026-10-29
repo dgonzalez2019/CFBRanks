@@ -339,8 +339,36 @@ def fit_predictor(games):
     return dict(T=T, hfa=m[n], mu=q[2 * n], hp=q[2 * n + 1], sd=sd, eff=efficiency(games))
 
 
-def predict(M, a, b, venue="N"):
-    """venue: 'N' neutral, 'A' team a at home, 'B' team b at home."""
+# Injury picker: see playerValues() in index.html for the reasoning behind these.
+INJ_POS, INJ_SHRINK, INJ_SHARE = ("QB", "RB", "WR", "TE"), 50, 0.5
+
+
+def player_values(players, games):
+    """Points per game each offensive player is worth over his replacement. players: [team, name, pos, plays, ppa]."""
+    gp = defaultdict(int)
+    for g in games: gp[g["home"]] += 1; gp[g["away"]] += 1
+    groups = defaultdict(list)
+    for team, name, pos, plays, ppa in players:
+        if pos in INJ_POS and gp[team]: groups[(team, pos)].append(dict(team=team, name=name, pos=pos, plays=plays, ppa=ppa))
+    for l in groups.values(): l.sort(key=lambda p: -p["plays"])
+    wavg = lambda l: sum(p["ppa"] * p["plays"] for p in l) / sum(p["plays"] for p in l) if l and sum(p["plays"] for p in l) else 0.0
+    pos_avg, backup = {}, {}
+    for pos in INJ_POS:
+        ls = [l for (t, ps), l in groups.items() if ps == pos]
+        pos_avg[pos] = wavg([p for l in ls for p in l])
+        backup[pos] = wavg([p for l in ls for p in l[1:]]) if any(len(l) > 1 for l in ls) else pos_avg[pos]
+    shrink = lambda p, to: (p["plays"] * p["ppa"] + INJ_SHRINK * to) / (p["plays"] + INJ_SHRINK)
+    out = defaultdict(list)
+    for (team, pos), l in groups.items():
+        for i, p in enumerate(l):
+            repl = shrink(l[1], backup[pos]) if i == 0 and len(l) > 1 else backup[pos]
+            out[team].append(dict(p, value=max(0.0, shrink(p, pos_avg[pos]) - repl) * p["plays"] / gp[team] * INJ_SHARE))
+    for l in out.values(): l.sort(key=lambda p: -p["value"])
+    return out
+
+
+def predict(M, a, b, venue="N", out_a=0.0, out_b=0.0):
+    """venue: 'N' neutral, 'A' team a at home, 'B' team b at home. out_a/out_b: points per game lost to injuries."""
     A, B = M["T"][a], M["T"][b]; ha, hb = int(venue == "A"), int(venue == "B")
     margin = A["r"] - B["r"] + M["hfa"] * (ha - hb); eff = None
     if M["eff"]:
@@ -350,8 +378,9 @@ def predict(M, a, b, venue="N"):
             return dict(ypa=y, ypc=c, pts=E["coef"][0] + E["coef"][1] * y + E["coef"][2] * c)
         eff = dict(a=side(a, b, ha), b=side(b, a, hb))
         margin = (1 - EFF_WEIGHT) * margin + EFF_WEIGHT * (eff["a"]["pts"] - eff["b"]["pts"])
+    margin += out_b - out_a
     pa = 0.5 * (1 + math.erf(margin / (M["sd"] * math.sqrt(2))))
-    total = (M["mu"] + A["off"] + B["defn"] + M["hp"] * ha) + (M["mu"] + B["off"] + A["defn"] + M["hp"] * hb)
+    total = (M["mu"] + A["off"] + B["defn"] + M["hp"] * ha) + (M["mu"] + B["off"] + A["defn"] + M["hp"] * hb) - out_a - out_b
     total = max(total, abs(margin) + 7)
     sa, sb = round((total + margin) / 2), round((total - margin) / 2)
     if sa == sb:  # no ties in college football
@@ -423,6 +452,8 @@ def main():
     ap.add_argument("--team"); ap.add_argument("--out")
     ap.add_argument("--predict", nargs=2, metavar=("TEAM1", "TEAM2"), help="predict a matchup")
     ap.add_argument("--venue", choices=("neutral", "team1", "team2"), default="neutral", help="who is at home for --predict")
+    ap.add_argument("--out-players", default="", help="comma-separated players who are out, for --predict (needs --players)")
+    ap.add_argument("--players", help="the site's data/players.json, for --out-players")
     a = ap.parse_args()
 
     if a.json:
@@ -439,7 +470,15 @@ def main():
         M = fit_predictor(games); t1, t2 = a.predict
         for t in (t1, t2):
             if t not in M["T"] or t == FCS_POOL: sys.exit(f"Team '{t}' not found.")
-        p = predict(M, t1, t2, {"neutral": "N", "team1": "A", "team2": "B"}[a.venue])
+        lost = {t1: 0.0, t2: 0.0}
+        if a.out_players:
+            if not a.players: sys.exit("--out-players needs --players data/players.json")
+            V = player_values(json.load(open(a.players))["players"], [g for g in games if g["home_fbs"] or g["away_fbs"]])
+            for name in [n.strip() for n in a.out_players.split(",") if n.strip()]:
+                hit = [(t, p) for t in (t1, t2) for p in V.get(t, []) if p["name"].lower() == name.lower()]
+                if not hit: sys.exit(f"Player '{name}' not found on {t1} or {t2}.")
+                t, pl = hit[0]; lost[t] += pl["value"]; print(f"Out: {pl['name']} ({t} {pl['pos']}), worth {pl['value']:.1f} pts/game")
+        p = predict(M, t1, t2, {"neutral": "N", "team1": "A", "team2": "B"}[a.venue], lost[t1], lost[t2])
         w, wp = (t1, p["pa"]) if p["pa"] >= 0.5 else (t2, 1 - p["pa"])
         where = "neutral site" if a.venue == "neutral" else f"at {t1 if a.venue == 'team1' else t2}"
         print(f"\n{t1} {p['sa']}, {t2} {p['sb']}  ({where})")
