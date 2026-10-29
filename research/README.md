@@ -12,10 +12,15 @@ python research/qb_injuries.py $W .                      # games a starting QB m
 python research/picks_features.py research $W .           # pre-game features for spread / total picks -> $W/picks.json
 python research/picks_model.py $W .                       # picks trained on 2022-24, tested on 2025-26
 python research/qb_rule.py $W .                           # QB-out betting rule with the starter named pre-game
+python research/ppa_model.py research $W .               # play-efficiency (PPA) ratings with talent priors -> $W/ppa_preds.json
+python research/ppa_eval.py $W                            # vs opening and closing lines, held-out seasons
 python research/summary.py $W .                          # -> data/research.json (shown on the Lines tab)
 ```
 
 `tune.py` also holds the backtest harness used to choose the prior, margin cap and efficiency weight.
 
-`data/history/2026_qb.json` is this season's passers through the week it was fetched (extras-only run), kept so
+Held-out results so far (edge 3+ points vs the opening line, 2022-25 pooled): score model 51.1%, play efficiency
+51.6%, both 50.9%; vs closing lines 48-50%. 2025 alone reaches 55-58%, but 2022 is 43-49%.
+
+`data/history/2026_qb.json` (and 2026's PPA, talent and returning files) are this season's data through the week it was fetched (extras-only run), kept so
 the QB rule's 2026 test can be reproduced; it does not update.
