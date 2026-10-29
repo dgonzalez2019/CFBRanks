@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """Pull completed FBS games from collegefootballdata.com into data/games.json, plus each game's
 passing and rushing box score where available.
-Usage: CFBD_API_KEY=... python scripts/fetch_games.py [--year 2026]"""
+Usage: CFBD_API_KEY=... python scripts/fetch_games.py [--year 2026] [--out data/games.json]"""
 import argparse, json, os, sys, datetime, pathlib, urllib.request
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from cfb_sor import load_cfbd
 
 ap = argparse.ArgumentParser(); ap.add_argument("--year", type=int, default=datetime.date.today().year)
+ap.add_argument("--out", help="output file (default: data/games.json)")
 a = ap.parse_args()
 key = os.environ.get("CFBD_API_KEY") or sys.exit("CFBD_API_KEY is not set")
 games = load_cfbd(a.year, key)
 if not games: sys.exit("No completed games returned; leaving data/games.json unchanged.")
-path = pathlib.Path(__file__).resolve().parent.parent / "data" / "games.json"
+path = pathlib.Path(a.out) if a.out else pathlib.Path(__file__).resolve().parent.parent / "data" / "games.json"
+path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def get(url):

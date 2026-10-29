@@ -1,0 +1,34 @@
+name: Fetch past seasons
+# One-time (or occasional) download of completed past seasons into data/history/<year>.json,
+# used to seed preseason ratings and to tune the model. Seasons already stored are skipped.
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Seasons to fetch, space separated"
+        default: "2021 2022 2023 2024 2025"
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy
+      - name: Fetch seasons
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          YEARS: ${{ inputs.years }}
+        run: |
+          for y in $YEARS; do
+            if [ -f "data/history/$y.json" ]; then echo "$y already stored"; continue; fi
+            python scripts/fetch_games.py --year "$y" --out "data/history/$y.json"
+          done
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/history
+          git diff --cached --quiet || (git commit -m "Add past seasons" && git pull --no-rebase && git push)
