@@ -488,6 +488,14 @@ html.fx #sheet[open]::backdrop{animation:fadeIn .3s ease both}
 }
 @keyframes sheetUp{from{transform:translateY(100%)}}
 @keyframes sheetDown{to{transform:translateY(100%)}}
+/* ---------- league switch ---------- */
+.lgswitch{display:inline-flex;padding:3px;border-radius:999px;background:color-mix(in srgb,var(--ink) 7%,transparent);gap:2px}
+.lgswitch button{border:0;background:transparent;border-radius:999px;padding:7px 13px;font:700 13px/1 var(--body);letter-spacing:.04em;color:var(--muted);transition:background .25s,color .25s}
+.lgswitch button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(40,30,10,.15),0 4px 10px -6px rgba(40,30,10,.35)}
+h1 b{font-weight:inherit}
+h1 small b{font-weight:inherit}
+.nflnote{padding:12px 14px;border-radius:12px;background:var(--accent-soft);font-size:14px}
+@media (max-width:640px){.lgswitch button{padding:7px 10px;font-size:12.5px}.status .upd{display:none}.status{flex-wrap:nowrap;white-space:nowrap}}
 /* Numbers and bets in the bold sans: the serif's old-style digits drop below the line in scores and spreads. */
 .ptext,.pcard .sc,.stat b,.tile b,.score .side b,.conf,.rk{font-family:var(--body);font-variant-numeric:lining-nums tabular-nums;letter-spacing:-.02em}
 .ptext{font-weight:800;font-size:30px}
@@ -509,9 +517,10 @@ html.fx #sheet[open]::backdrop{animation:fadeIn .3s ease both}
         <svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent)"/></linearGradient></defs>
           <path d="M20 2 35 8v12c0 9-6.5 15.5-15 18C11.5 35.5 5 29 5 20V8z" fill="none" stroke="url(#lg)" stroke-width="2"/>
           <g class="ball"><ellipse cx="20" cy="20" rx="9" ry="5.6" transform="rotate(-35 20 20)" fill="url(#lg)"/><path d="M16.5 22.5l7-5M18 20.2l1.2 1.2M19.6 19l1.2 1.2M21.2 17.8l1.2 1.2" stroke="var(--paper)" stroke-width="1.1" stroke-linecap="round"/></g></svg>
-        <h1>CFB <span>Power</span> Rankings<small>The power index · every FBS team</small></h1>
+        <h1><b class="lg-name">CFB</b> <span>Power</span> Rankings<small>The power index · every <b class="lg-word">FBS</b> team</small></h1>
       </a>
       <div class="hright">
+        <div class="lgswitch" role="group" aria-label="League"><button type="button" data-league="cfb" aria-pressed="true">CFB</button><button type="button" data-league="nfl" aria-pressed="false">NFL</button></div>
         <div class="status" id="status"><i class="dot"></i> Loading…</div>
         <button class="theme" id="theme" type="button" aria-label="Switch between night and day themes" >☀</button>
       </div>
@@ -536,7 +545,7 @@ html.fx #sheet[open]::backdrop{animation:fadeIn .3s ease both}
         <svg class="hero-art" viewBox="0 0 600 300" aria-hidden="true"><rect x="20" y="20" width="560" height="260" rx="6" pathLength="1" style="--d:0"/><line x1="70" y1="20" x2="70" y2="280" pathLength="1" style="--d:2"/><line x1="116" y1="20" x2="116" y2="280" pathLength="1" style="--d:3"/><line x1="162" y1="20" x2="162" y2="280" pathLength="1" style="--d:4"/><line x1="208" y1="20" x2="208" y2="280" pathLength="1" style="--d:5"/><line x1="254" y1="20" x2="254" y2="280" pathLength="1" style="--d:6"/><line x1="300" y1="20" x2="300" y2="280" pathLength="1" style="--d:7"/><line x1="346" y1="20" x2="346" y2="280" pathLength="1" style="--d:8"/><line x1="392" y1="20" x2="392" y2="280" pathLength="1" style="--d:9"/><line x1="438" y1="20" x2="438" y2="280" pathLength="1" style="--d:10"/><line x1="484" y1="20" x2="484" y2="280" pathLength="1" style="--d:11"/><line x1="530" y1="20" x2="530" y2="280" pathLength="1" style="--d:12"/><line x1="93" y1="110" x2="93" y2="120" pathLength="1" style="--d:6"/><line x1="93" y1="180" x2="93" y2="190" pathLength="1" style="--d:6"/><line x1="139" y1="110" x2="139" y2="120" pathLength="1" style="--d:7"/><line x1="139" y1="180" x2="139" y2="190" pathLength="1" style="--d:7"/><line x1="185" y1="110" x2="185" y2="120" pathLength="1" style="--d:8"/><line x1="185" y1="180" x2="185" y2="190" pathLength="1" style="--d:8"/><line x1="231" y1="110" x2="231" y2="120" pathLength="1" style="--d:9"/><line x1="231" y1="180" x2="231" y2="190" pathLength="1" style="--d:9"/><line x1="277" y1="110" x2="277" y2="120" pathLength="1" style="--d:10"/><line x1="277" y1="180" x2="277" y2="190" pathLength="1" style="--d:10"/><line x1="323" y1="110" x2="323" y2="120" pathLength="1" style="--d:11"/><line x1="323" y1="180" x2="323" y2="190" pathLength="1" style="--d:11"/><line x1="369" y1="110" x2="369" y2="120" pathLength="1" style="--d:12"/><line x1="369" y1="180" x2="369" y2="190" pathLength="1" style="--d:12"/><line x1="415" y1="110" x2="415" y2="120" pathLength="1" style="--d:13"/><line x1="415" y1="180" x2="415" y2="190" pathLength="1" style="--d:13"/><line x1="461" y1="110" x2="461" y2="120" pathLength="1" style="--d:14"/><line x1="461" y1="180" x2="461" y2="190" pathLength="1" style="--d:14"/><line x1="507" y1="110" x2="507" y2="120" pathLength="1" style="--d:15"/><line x1="507" y1="180" x2="507" y2="190" pathLength="1" style="--d:15"/><text x="116" y="66" text-anchor="middle" style="--d:3">10</text><text x="116" y="246" text-anchor="middle" style="--d:3">10</text><text x="162" y="66" text-anchor="middle" style="--d:4">20</text><text x="162" y="246" text-anchor="middle" style="--d:4">20</text><text x="208" y="66" text-anchor="middle" style="--d:5">30</text><text x="208" y="246" text-anchor="middle" style="--d:5">30</text><text x="254" y="66" text-anchor="middle" style="--d:6">40</text><text x="254" y="246" text-anchor="middle" style="--d:6">40</text><text x="300" y="66" text-anchor="middle" style="--d:7">50</text><text x="300" y="246" text-anchor="middle" style="--d:7">50</text><text x="346" y="66" text-anchor="middle" style="--d:8">40</text><text x="346" y="246" text-anchor="middle" style="--d:8">40</text><text x="392" y="66" text-anchor="middle" style="--d:9">30</text><text x="392" y="246" text-anchor="middle" style="--d:9">30</text><text x="438" y="66" text-anchor="middle" style="--d:10">20</text><text x="438" y="246" text-anchor="middle" style="--d:10">20</text><text x="484" y="66" text-anchor="middle" style="--d:11">10</text><text x="484" y="246" text-anchor="middle" style="--d:11">10</text><path d="M45 150 h-25 M555 150 h25" pathLength="1" style="--d:14"/></svg>
         <div class="eyebrow" id="heroEye">College football · power index</div>
         <h2 class="mega"><span class="w"><span style="--d:0">Who's</span></span> <span class="w"><span style="--d:1"><em>really</em></span></span><br><span class="w"><span style="--d:2">the</span></span> <span class="w"><span style="--d:3">best?</span></span></h2>
-        <p class="lede">Every FBS team rated by how it plays, then moved up or down by who it has beaten. Tap any team to open its season.</p>
+        <p class="lede">Every <span class="lg-word">FBS</span> team rated by how it plays, then moved up or down by who it has beaten. Tap any team to open its season.</p>
         <div class="podium" id="podium"></div>
         <div class="statstrip" id="statstrip"></div>
         <div class="ticker" id="tickerWrap" hidden><div class="track" id="ticker"></div></div>
@@ -552,7 +561,7 @@ html.fx #sheet[open]::backdrop{animation:fadeIn .3s ease both}
         <table class="top">
           <thead><tr>
             <th>Rank</th><th>Team</th><th class="num" title="Power rating plus résumé points">Score</th>
-            <th class="num" title="Power rating rank: expected margin vs. an average FBS team on a neutral field">Power</th>
+            <th class="num" title="Power rating rank: expected margin vs. an average team on a neutral field">Power</th>
             <th class="num" title="Résumé points from wins and losses by quadrant">Résumé</th><th class="num" title="Schedule strength rank">SOS</th><th title="Record vs. Quadrant 1 opponents">Q1</th><th title="Record vs. Quadrant 2 opponents">Q2</th><th title="Record vs. Quadrant 3 opponents">Q3</th><th title="Record vs. Quadrant 4 opponents, including FCS">Q4</th><th class="hide-sm">Best win</th><th class="hide-sm">Worst loss</th>
           </tr></thead>
           <tbody id="t25"></tbody>
@@ -632,6 +641,7 @@ html.fx #sheet[open]::backdrop{animation:fadeIn .3s ease both}
   <!-- METHOD -->
   <section id="v-method" class="view" hidden>
     <div class="panel method">
+      <div id="nflNote" class="nflnote" hidden><b>NFL:</b> the same method with settings tuned on 2016–25 NFL games: last season carries over at 50% (90% in college), margins are capped at 21 points, résumé tiers are the top 8 / 9–16 / 17–24 / the rest, the résumé counts 0.3× (NFL ratings sit much closer together), and the efficiency model uses EPA per play from nflverse. Data: nflverse (games, lines, team and player stats, injury reports) and ESPN logos.</div>
       <h3>How the rankings are built</h3>
       <p>The rankings answer one question: who are the best teams? Each team's score is its power rating plus its résumé points, so how well a team plays sets the base and who it has beaten moves it up or down.</p>
       <ol>
@@ -696,6 +706,67 @@ function sampleSeason(){
   return games;
 }
 
+/* ---------------- leagues ----------------
+   CFB and NFL share every model and page; LEAGUES holds what differs (keep in sync with LEAGUE_SETTINGS in
+   scripts/cfb_sor.py and the coefficients in scripts/track_picks.py). NFL settings: research/nfl_tune.py (model) and
+   research/nfl_conf.py (confidence), both tested on seasons they weren't fit on. */
+const LEAGUES = {
+  cfb:{name:"CFB", dir:"data/", topN:25, word:"FBS", topLabel:"Top 25", quad:[25,50,80], resumeW:1.0, keep:.9, lam:2, cap:45, eff:.25,
+    bench:25, benchOpts:[[12,"#12 team (playoff bar)"],[25,"#25 team (ranked bar)"],[40,"#40 team (bowl-plus bar)"]],
+    conf:[0.08102, 0.018616, 0.047526, -0.059625, 0.063655], tconf:[-0.0018, 0.0605, 0.0039, 0.3163, 0.0626, 0.0974], pace:67.2, tmid:55,
+    topRec:[["2022",38,33],["2023",33,39],["2024",44,27],["2025",40,33],["2026",23,16]], totRec:[["2022",31,35],["2023",32,36],["2024",50,19],["2025",41,29],["2026",15,19]],
+    effName:"play-by-play efficiency model (points added per play, adjusted for opponents)",
+    spreadNote:"Scores run about 48–56%, which is all the data can honestly separate; games scored 54–56% covered 55% in 2025–26.",
+    totalNote:"almost all of that is 2024; three of five seasons were below 50%. The spread score was steadier (54.6%, four of five seasons above 50%). Our side of the total with no filter went 47–52% by season.",
+    sheetSpread:"spread picks covered 54.6%", sheetTotal:"totals picks hit 55.0%, but unevenly (44–72% by season)",
+    lineNote:"Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse.",
+    qbNote:"QB values are calibrated on 2022–25, where teams whose starting QB missed a game fell short by about 1.25× this raw gap."},
+  nfl:{name:"NFL", dir:"data/nfl/", topN:32, word:"NFL", topLabel:"Rankings", quad:[8,16,24], resumeW:0.3, keep:.5, lam:8, cap:21, eff:0,
+    bench:12, benchOpts:[[7,"#7 team (division-winner bar)"],[12,"#12 team (playoff bar)"],[16,"#16 team (league average)"]],
+    conf:[-0.0037, 0.0217, 0.2282, 0.1098, 0.0618], tconf:[-0.0085, -0.1109, -0.0118, 0.2351, -0.1735, -0.0458], pace:60.8, tmid:45,
+    topRec:[["2016",12,13],["2017",12,12],["2018",11,13],["2019",15,9],["2020",14,11],["2021",17,9],["2022",14,12],["2023",9,17],["2024",12,14],["2025",18,9],["2026",7,2]],
+    totRec:[["2016",11,13],["2017",8,16],["2018",11,13],["2019",8,16],["2020",15,9],["2021",15,10],["2022",14,12],["2023",10,16],["2024",15,11],["2025",15,12],["2026",2,7]],
+    effName:"EPA efficiency model (expected points added per play, adjusted for opponents)",
+    spreadNote:"Scores run about 47–55%. Season to season it is uneven (35–67% for the top 10%), so treat it as a slight lean at best.",
+    totalNote:"so NFL totals showed no edge at all: our side of the total won about 47% and the top 10% under 50%. Scores are shown for completeness; few reach 50%.",
+    sheetSpread:"NFL spread picks covered 53.0% (2016–25), unevenly by season", sheetTotal:"NFL totals picks hit 48.8%: no edge in testing",
+    lineNote:"Over 2016–25 the closing line picked 66.5% of winners against our model's 63.7%, and missed by 9.8 points on average against our 10.2.",
+    qbNote:"NFL values use expected points added per play; the QB share was calibrated on college games and hasn't been tested on NFL games."}
+};
+let LEAGUE = "cfb", LG = LEAGUES.cfb;
+const SK = k => LEAGUE === "cfb" ? k : `${k}.${LEAGUE}`;   // per-league storage keys
+function applyLeague(){
+  LG = LEAGUES[LEAGUE];
+  QUAD_CUTS = LG.quad; RESUME_WEIGHT = LG.resumeW; PRIOR_KEEP = LG.keep; PRIOR_LAM = LG.lam; PRIOR_CAP = LG.cap; EFF_WEIGHT = LG.eff;
+  CONF_COEF = LG.conf; TCONF_COEF = LG.tconf; PACE_AVG = LG.pace; TOTAL_MID = LG.tmid; TOPCONF_RECORD = LG.topRec; TOTCONF_RECORD = LG.totRec;
+  document.documentElement.dataset.league = LEAGUE;
+  document.title = `${LG.name} Power Rankings`;
+  document.querySelectorAll(".lg-name").forEach(e => e.textContent = LG.name);
+  document.querySelectorAll(".lg-word").forEach(e => e.textContent = LG.word);
+  document.querySelectorAll("[data-league]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.league === LEAGUE)));
+  $('nav a[data-view="top25"]').textContent = LG.topLabel;
+  for(const id of ["#showall", "#rshowall"]){ const sel = $(id); sel.options[0].text = "Top 25"; sel.options[1].text = `All ${LG.word}`; sel.closest(".ctrl").hidden = LG.topN >= 32; if(LG.topN >= 32) sel.value = "all"; }
+  SHOWALL = LG.topN >= 32 || store.get(SK("sor.showall")) === "all"; $("#showall").value = SHOWALL ? "all" : "25";
+  $("#bench").innerHTML = LG.benchOpts.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+  BENCH = +(store.get(SK("sor.bench")) || LG.bench); if(!LG.benchOpts.some(o => o[0] === BENCH)) BENCH = LG.bench; $("#bench").value = String(BENCH);
+  $("#nflNote").hidden = LEAGUE !== "nfl";
+}
+// Switching leagues reloads everything from the league's data folder; each league keeps its own picks and settings.
+async function setLeague(l){
+  if(!LEAGUES[l] || l === LEAGUE) return;
+  LEAGUE = l; store.set("sor.league", l);
+  const go = async () => {
+    applyLeague();
+    TRACKER = null; INJURIES = {}; INJ_UPDATED = null; RESEARCH = null; PREV = []; PRIOR = null; PLAYERS = []; PVAL = {}; OUT = {}; LINES = []; TEAMS = {};
+    MKEY = ""; Object.keys(FLIPPED).forEach(k => delete FLIPPED[k]);
+    $("#ma").value = store.get(SK("sor.ma")) || ""; $("#mb").value = store.get(SK("sor.mb")) || ""; $("#q").value = "";
+    await loadData();
+    const t = store.get(SK("sor.team")); if(t && RESULT.byTeam[t]){ $("#q").value = t; renderTeam(t); } else renderTeam("");
+  };
+  document.startViewTransition && !REDUCED ? document.startViewTransition(go) : go();
+}
+document.addEventListener("click", e => { const b = e.target.closest?.("[data-league]"); if(b) setLeague(b.dataset.league); });
+
 /* ---------------- algorithm ---------------- */
 // Power rating = the Matchup model's rating (predictor(): last season as a starting point, passing/rushing
 // efficiency): its neutral-field margin against an average FBS team. Ranking score = power rating + RESUME_WEIGHT *
@@ -704,8 +775,9 @@ function sampleSeason(){
 // Q1 wins earn the most, and a loss costs LOSS_WEIGHT of what the mirror-image win earns.
 // Quadrants by the opponent's power rank at any venue: Q1 = top 25, Q2 = 26-50, Q3 = 51-80, Q4 = the rest and FCS.
 // Power rank (not overall rank) keeps résumés from feeding back into opponents' ranks.
-const QUAD_CUTS = [25, 50, 80];
-const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85, RESUME_WEIGHT = 1.0;
+let QUAD_CUTS = [25, 50, 80];
+const WIN_PTS = {Q1:4, Q2:2, Q3:1, Q4:0.5}, LOSS_PTS = {Q1:0.5, Q2:1, Q3:2, Q4:4}, LOSS_WEIGHT = 0.85;
+let RESUME_WEIGHT = 1.0;
 function erf(x){const t=1/(1+.3275911*Math.abs(x)),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);return x>=0?y:-y}
 
 // Results-only ranking (Colley Matrix): each team's rating is solved from wins, losses and its opponents'
@@ -744,7 +816,8 @@ const PRED_CAP = 35, PRED_RIDGE = 1, PTS_RIDGE = 2, PRED_SD_INFLATE = 1.4;
 // league average + offense + opposing defense (+ home), weighted by attempts, so a defense is judged against
 // what its opponents gained on everyone else. Points per YPA/YPC come from a regression on this season's games,
 // and the efficiency margin gets EFF_WEIGHT of the final margin (backtest: 66% winners vs 65% without).
-const EFF_RIDGE = 50, EFF_WEIGHT = 0.25, EFF_MIN_GAMES = 50;
+const EFF_RIDGE = 50, EFF_MIN_GAMES = 50;
+let EFF_WEIGHT = 0.25;
 function adjOD(games, val, ridge){  // val(g, side) -> [y, weight] or null; side 0 = home offense
   const nm = (t,f) => f ? t : FCS;
   const teams = [...new Set(games.flatMap(g => [nm(g.home,g.hf), nm(g.away,g.af)]))].sort();
@@ -799,7 +872,7 @@ function efficiency(games){
 // season's ratings are pulled toward it (ridge PRIOR_LAM) instead of toward average. Tuned on 2022-25 with each
 // season seeded by the one before: weeks 1-4 went from 67.9% winners / 15.0-pt margin miss to 73.4% / 13.6,
 // later weeks from 69.9% / 12.67 to 70.8% / 12.45. Teams new to FBS start at last season's FCS level.
-const PRIOR_KEEP = 0.9, PRIOR_LAM = 2, PRIOR_CAP = 45;
+let PRIOR_KEEP = 0.9, PRIOR_LAM = 2, PRIOR_CAP = 45;
 function seasonPrior(prev){
   if(!prev || prev.length < 100) return null;
   const R = predictor(prev, null, PRIOR_CAP).T, r = {};
@@ -1010,7 +1083,7 @@ function renderHero(){
   $("#podium").innerHTML = card(top[1], 2) + card(top[0], 1) + card(top[2], 3);
   const unbeaten = rows.filter(r => r.l === 0 && r.w > 0).length;
   const open = (TRACKER?.games||[]).filter(g => !g.results && g.conf != null);
-  const stats = [[RESULT.nGames, "Games rated"], [RESULT.hfa.toFixed(1), "Home-field edge (pts)"], [unbeaten, "Unbeaten FBS teams"],
+  const stats = [[RESULT.nGames, "Games rated"], [RESULT.hfa.toFixed(1), "Home-field edge (pts)"], [unbeaten, `Unbeaten ${LG.word} teams`],
                  [open.filter(g => g.top_conf).length, "Top-confidence picks this week"]];
   $("#statstrip").innerHTML = stats.map(([v,l],i) => `<div class="stat" style="--i:${i}"><b data-count="${v}">${v}</b><span>${l}</span></div>`).join("");
   const items = open.slice().sort((x,y) => (x.start||"").localeCompare(y.start||"")).map(g => {
@@ -1133,9 +1206,9 @@ const cheerIO = "IntersectionObserver" in window ? new IntersectionObserver(es =
 // update is seen, rows start at their old spots and slide to the new ones, and ▲/▼ show the change.
 function rankMoves(){
   if(SOURCE.kind !== "live") return {moves:{}, fresh:false};
-  let st = {}; try{ st = JSON.parse(store.get("sor.ranks") || "{}"); }catch(e){}
+  let st = {}; try{ st = JSON.parse(store.get(SK("sor.ranks")) || "{}"); }catch(e){}
   const cur = Object.fromEntries(RESULT.rows.map(r => [r.team, r.rank])); let fresh = false;
-  if(st.cur?.updated !== SOURCE.updated){ if(st.cur) st.prev = st.cur; st.cur = {updated:SOURCE.updated, ranks:cur}; store.set("sor.ranks", JSON.stringify(st)); fresh = !!st.prev; }
+  if(st.cur?.updated !== SOURCE.updated){ if(st.cur) st.prev = st.cur; st.cur = {updated:SOURCE.updated, ranks:cur}; store.set(SK("sor.ranks"), JSON.stringify(st)); fresh = !!st.prev; }
   const prev = st.prev?.ranks || {}, moves = {};
   RESULT.rows.forEach(r => { if(prev[r.team] != null) moves[r.team] = prev[r.team] - r.rank; });
   return {moves, fresh};
@@ -1155,8 +1228,8 @@ function rankMoves(){
 
 // ---------------- game sheet: why the confidence is what it is, and the matchup ----------------
 // Same models as scripts/track_picks.py (CONF_COEF from research/conf_score.py, TCONF_COEF from research/conf_total.py).
-const CONF_COEF = [0.08102, 0.018616, 0.047526, -0.059625, 0.063655];          // const, bad, dis, gap, both
-const TCONF_COEF = [-0.0018, 0.0605, 0.0039, 0.3163, 0.0626, 0.0974], PACE_AVG = 67.2;  // const, gap, last, form, pace, high
+let CONF_COEF = [0.08102, 0.018616, 0.047526, -0.059625, 0.063655];          // const, bad, dis, gap, both
+let TCONF_COEF = [-0.0018, 0.0605, 0.0039, 0.3163, 0.0626, 0.0974], PACE_AVG = 67.2, TOTAL_MID = 55;  // const, gap, last, form, pace, high
 const sigm = z => 1/(1+Math.exp(-z));
 // Each factor's effect = the score with everything minus the score without that factor, in percentage points.
 function factorPts(coef, x){ const z = coef[0] + x.reduce((s,v,i) => s + coef[i+1]*v, 0);
@@ -1169,22 +1242,22 @@ function explainSpread(t){
   const f = factorPts(CONF_COEF, [bad, dis, gap, both]);
   const rows = [
     ["Last game against the spread", f.pts[0], `${esc(pick)} ${coverStr(t.pick_last_ats)}; ${esc(opp)} ${coverStr(t.opp_last_ats)}. ${bad > 0 ? `${esc(pick)} is coming off the worse result, and the market tends to overreact to a bad week, so its line may be a little too low.` : bad < 0 ? `${esc(pick)} is coming off the better result, which the market has probably already priced in.` : "No difference to work with."}`],
-    ["Play-by-play efficiency model", f.pts[1], pm == null ? "No efficiency rating for this game." : `This separate model (points added per play, adjusted for opponents) has ${byStr(t.home, t.away, pm)}, ${dis > 0 ? `on the other side of the line from our pick. In past seasons our picks covered more often when the two models disagreed like this.` : `on the same side as our pick, which past seasons showed adds little.`}`],
-    ["How far we are from the line", f.pts[2], `We have ${byStr(t.home, t.away, t.ours)} against a line of ${byStr(t.home, t.away, t.line)}, ${(Math.abs(t.ours - t.line)).toFixed(1)} points apart. Our biggest disagreements with the line have covered least often, so a larger gap lowers the score.`],
+    ["Play-by-play efficiency model", f.pts[1], pm == null ? "No efficiency rating for this game." : `This separate ${LG.effName} has ${byStr(t.home, t.away, pm)}, ${dis > 0 ? `on the other side of the line from our pick. In past seasons our picks covered more often when the two models disagreed like this.` : `on the same side as our pick, which past seasons showed adds little.`}`],
+    ["How far we are from the line", f.pts[2], `We have ${byStr(t.home, t.away, t.ours)} against a line of ${byStr(t.home, t.away, t.line)}, ${(Math.abs(t.ours - t.line)).toFixed(1)} points apart. ${CONF_COEF[3] < 0 ? "Our biggest disagreements with the line have covered least often, so a larger gap lowers the score." : "In testing, larger disagreements covered slightly more often, so a larger gap raises the score a little."}`],
     ["Both signals together", f.pts[3], both ? "The pick did worse last game and the efficiency model disagrees: the combination that held up best on past seasons." : "Not both at once, so no extra boost."]];
   return {f, rows, pick, label:`${pick} ${signed(side > 0 ? -t.line : t.line)}`};
 }
 function explainTotal(t){
   const over = t.ours_total > t.total, s = over ? 1 : -1, F = t.tfeat;
   if(!F) return null;
-  const gap = Math.abs(t.ours_total - t.total)/7, last = -s*(F.last_h + F.last_a)/14, form = -s*(F.form_h + F.form_a - 1), pace = s*(F.pace - PACE_AVG)/10, high = -s*(t.total - 55)/10;
+  const gap = Math.abs(t.ours_total - t.total)/7, last = -s*(F.last_h + F.last_a)/14, form = -s*(F.form_h + F.form_a - 1), pace = s*(F.pace - PACE_AVG)/10, high = -s*(t.total - TOTAL_MID)/10;
   const f = factorPts(TCONF_COEF, [gap, last, form, pace, high]), ou = v => v > 0 ? `over by ${v.toFixed(1)}` : v < 0 ? `under by ${(-v).toFixed(1)}` : "had no total";
   const side = over ? "over" : "under", pct = v => Math.round(v*100);
   const rows = [
-    ["Over/under record this season", f.pts[2], `${esc(t.home)} games have gone over about ${pct(F.form_h)}% of the time and ${esc(t.away)} games ${pct(F.form_a)}% (shrunk toward 50% for small samples). Totals tend to overcorrect for teams that keep going one way, so ${form > 0 ? `this backs the ${side}` : `this works against the ${side}`}.`],
-    ["Size of the total", f.pts[4], `The total is ${t.total.toFixed(1)}. In past seasons high totals leaned under and low ones leaned over; ${high > 0 ? `that backs the ${side}` : `that works against the ${side}`}.`],
-    ["Pace", f.pts[3], `The two teams average ${F.pace.toFixed(1)} plays a game (${F.pace >= PACE_AVG ? "faster" : "slower"} than the ${PACE_AVG} average), which ${pace > 0 ? "supports" : "works against"} the ${side}.`],
-    ["How far we are from the total", f.pts[0], `We expect ${t.ours_total} points against ${t.total.toFixed(1)}, ${Math.abs(t.ours_total - t.total).toFixed(1)} apart.`],
+    ["Over/under record this season", f.pts[2], `${esc(t.home)} games have gone over about ${pct(F.form_h)}% of the time and ${esc(t.away)} games ${pct(F.form_a)}% (shrunk toward 50% for small samples). ${TCONF_COEF[3] > 0 ? "Totals tend to overcorrect for teams that keep going one way" : "Teams' over/under streaks have tended to continue"}, so ${f.pts[2] >= 0 ? `this backs the ${side}` : `this works against the ${side}`}.`],
+    ["Size of the total", f.pts[4], `The total is ${t.total.toFixed(1)} (${t.total >= TOTAL_MID ? "high" : "low"} for this league). In past seasons ${TCONF_COEF[5] > 0 ? "high totals leaned under and low ones over" : "high totals leaned over and low ones under"}; ${f.pts[4] >= 0 ? `that backs the ${side}` : `that works against the ${side}`}.`],
+    ["Pace", f.pts[3], `The two teams average ${F.pace.toFixed(1)} plays a game (${F.pace >= PACE_AVG ? "faster" : "slower"} than the ${PACE_AVG} average), which ${f.pts[3] >= 0 ? "has backed" : "has worked against"} the ${side} in past seasons.`],
+    ["How far we are from the total", f.pts[0], `We expect ${t.ours_total} points against ${t.total.toFixed(1)}, ${Math.abs(t.ours_total - t.total).toFixed(1)} apart. ${TCONF_COEF[1] >= 0 ? "Bigger gaps have hit slightly more often." : "Bigger gaps from the total have hit less often in testing."}`],
     ["Last game", f.pts[1], `${esc(t.home)}'s last game went ${ou(F.last_h)}; ${esc(t.away)}'s went ${ou(F.last_a)}.`]];
   return {f, rows, label:`${over ? "Over" : "Under"} ${t.total.toFixed(1)}`};
 }
@@ -1212,7 +1285,7 @@ function openSheet(kind, key){
     ${conf != null && ex ? `<div class="pbet${(kind === "total" ? t.ttop_conf : t.top_conf) ? " hotbet" : ""}"><div><span class="pkind">${kind === "spread" ? "Spread" : "Over/under"}</span><b class="ptext">${ex.label}</b></div>
       <div class="pconf"><div class="ringwrap"><div class="ring" style="--v:${(conf*100).toFixed(1)}"></div><b>${(conf*100).toFixed(1)}%</b></div><span>chance to hit</span></div></div>` : ""}
     ${ex ? `<h3>Why ${(conf*100).toFixed(1)}%</h3>${base}<div class="why">${whyRows}</div>
-      <p class="note" style="margin:0">Confidence scores run from about 48% to 56%. On seasons the model wasn't trained on, the top 10% of ${kind === "total" ? "totals picks hit 55.0%, but unevenly (44–72% by season)" : "spread picks covered 54.6%"}. A pick is never a sure thing.</p>`
+      <p class="note" style="margin:0">Confidence scores run from about 48% to 56%. On seasons the model wasn't trained on, the top 10% of ${kind === "total" ? LG.sheetTotal : LG.sheetSpread}. A pick is never a sure thing.</p>`
       : `<p class="note" style="margin:0">No confidence score for this game yet: scores are saved once a game is within 7 days of kickoff.</p>`}
     <h3>Our prediction</h3>
     <div class="sh-score"><div class="${hw ? "" : "w"}"><b>${pr.sb}</b><span>${esc(away)}</span><small>${Math.round((1-pr.pa)*100)}% to win</small></div><em>${neutral ? "vs" : "at"}</em><div class="${hw ? "w" : ""}"><b>${pr.sa}</b><span>${esc(home)}</span><small>${Math.round(pr.pa*100)}% to win</small></div></div>
@@ -1247,8 +1320,8 @@ $("#sheet").addEventListener("cancel", e => { e.preventDefault(); closeSheet(); 
 $("#sheet").addEventListener("close", () => document.documentElement.classList.remove("sheet-open"));
 
 function renderTop(){
-  const rows = SHOWALL ? RESULT.rows : RESULT.rows.slice(0,25);
-  $("#t25title").textContent = SHOWALL ? "All FBS Power Rankings" : "Top 25 Power Rankings";
+  const rows = SHOWALL ? RESULT.rows : RESULT.rows.slice(0, LG.topN);
+  $("#t25title").textContent = LG.topN >= 32 ? `${LG.name} Power Rankings` : SHOWALL ? `All ${LG.word} Power Rankings` : "Top 25 Power Rankings";
   const {moves, fresh} = rankMoves();
   const mv = t => { const d = moves[t]; return !d ? "" : `<span class="mv ${d > 0 ? "up" : "down"}" title="${d > 0 ? "Up" : "Down"} ${Math.abs(d)} since the last update">${d > 0 ? "▲" : "▼"}${Math.abs(d)}</span>`; };
   $("#t25").innerHTML = rows.map(r => `<tr class="click${fresh && moves[r.team] ? (moves[r.team] > 0 ? " moved-up" : " moved-down") : ""}" data-team="${esc(r.team)}" tabindex="0">
@@ -1264,12 +1337,12 @@ function renderTop(){
     [...$("#t25").rows].forEach((tr, i) => { const d = moves[tr.dataset.team]; if(!d) return;
       tr.animate([{transform:`translateY(${d*h}px)`, zIndex:2}, {transform:"none", zIndex:2}], {duration:1100, delay:500 + Math.min(i,25)*25, easing:"cubic-bezier(.3,1.2,.4,1)", fill:"backwards"}); }); }
   renderHero();
-  $("#hfaNote").innerHTML = `Score = power rating + résumé (résumé points per game, scaled to the average ${RESULT.rows[0]?.avgGames.toFixed(1) ?? ""}-game schedule). Power is the Matchup model's rating: how a team would fare against an average FBS team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
+  $("#hfaNote").innerHTML = `Score = power rating + résumé (résumé points per game, scaled to the average ${RESULT.rows[0]?.avgGames.toFixed(1) ?? ""}-game schedule). Power is the Matchup model's rating: how a team would fare against an average ${LG.word} team on a neutral field; résumé rewards wins (Q1 most) slightly more than it penalizes losses. Opponent ranks and quadrants use power rank. Measured home-field edge: <b>${RESULT.hfa.toFixed(1)} pts</b>. ${RESULT.nGames} games. Tap a team for its full schedule.`;
 }
 
 function renderResults(){
-  const all = $("#rshowall").value==="all", rows = all ? RONLY : RONLY.slice(0,25);
-  $("#rtitle").textContent = all ? "Results-Only Rankings, All FBS" : "Results-Only Top 25";
+  const all = $("#rshowall").value==="all" || LG.topN >= 32, rows = all ? RONLY : RONLY.slice(0, LG.topN);
+  $("#rtitle").textContent = LG.topN >= 32 ? `Results-Only ${LG.name} Rankings` : all ? `Results-Only Rankings, All ${LG.word}` : "Results-Only Top 25";
   $("#rt").innerHTML = rows.map(r => `<tr class="click" data-team="${esc(r.team)}" tabindex="0">
     <td class="rk medal">${r.rank}</td>
     <td>${mono(r.team)}<span class="tm">${esc(r.team)}</span><span class="rec">${r.w}-${r.l}</span></td>
@@ -1300,10 +1373,10 @@ function renderMatchup(force){
   MKEY = key;
   $("#mv").options[1].text = ok(a) ? `${a} at home` : "Team 1 at home";
   $("#mv").options[2].text = ok(b) ? `${b} at home` : "Team 2 at home";
-  $("#mnote").innerHTML = `Margins come from a point-margin rating of every game this season${PRIOR?" that starts from each team's rating at the end of last season (90% of it)":""}${PRED.eff?`, blended (${Math.round(EFF_WEIGHT*100)}%) with each side's expected passing and rushing efficiency`:""}; the score total comes from each team's points scored and allowed, adjusted for opponents.` +
+  $("#mnote").innerHTML = `Margins come from a point-margin rating of every game this season${PRIOR?" that starts from each team's rating at the end of last season (${Math.round(PRIOR_KEEP*100)}% of it)":""}${PRED.eff?`, blended (${Math.round(EFF_WEIGHT*100)}%) with each side's expected passing and rushing efficiency`:""}; the score total comes from each team's points scored and allowed, adjusted for opponents.` +
     (BT ? ` Tested on ${BT.n} past games using only the games before each one, it picked the winner ${Math.round(BT.hit*100)}% of the time and missed the margin by ${BT.mae.toFixed(1)} points on average (${Math.round(BT.close*100)}% of those games were decided by one score).` : "");
-  if(!ok(a) || !ok(b) || a===b){ $("#mout").innerHTML = `<div class="panel empty">${a&&b&&a===b?"Pick two different teams.":"Pick two FBS teams to see who would win and the predicted score."}</div>`; return; }
-  store.set("sor.ma", a); store.set("sor.mb", b);
+  if(!ok(a) || !ok(b) || a===b){ $("#mout").innerHTML = `<div class="panel empty">${a&&b&&a===b?"Pick two different teams.":`Pick two ${LG.word} teams to see who would win and the predicted score.`}</div>`; return; }
+  store.set(SK("sor.ma"), a); store.set(SK("sor.mb"), b);
   const outVal = modelOut;
   const v = $("#mv").value, p = predict(PRED, a, b, v, outVal(a), outVal(b)), winA = p.pa >= .5, w = winA ? a : b, wp = winA ? p.pa : 1-p.pa;
   const ra = RESULT.byTeam[a], rb = RESULT.byTeam[b];
@@ -1336,7 +1409,7 @@ function renderMatchup(force){
   const inj = PLAYERS.length ? `<details id="injbox" class="panel" style="padding:12px 16px"${INJOPEN?" open":""}>
       <summary><b>Injuries</b> <span class="sub">${outSet(a).size+outSet(b).size} marked out${INJ_UPDATED ? ` · report updated ${new Date(INJ_UPDATED).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})}` : ""}</span></summary>
       <div class="injgrid">${injList(a)}${injList(b)}</div>
-      <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him: his points added per play this season versus his backup's, times his plays per game. QB values are calibrated on 2022–25, where teams whose starting QB missed a game fell short by about 1.25× this raw gap. Other positions are halved because passing credit is shared between passer and receiver, and are untested. Offensive players only: there is no free per-player data for defenders or linemen.</p>
+      <p class="note" style="margin:10px 0 0">Number = estimated points per game the team loses without him: his points added per play this season versus his backup's, times his plays per game. ${LG.qbNote} Other positions are halved because passing credit is shared between passer and receiver, and are untested. Offensive players only: there is no free per-player data for defenders or linemen.</p>
     </details>` : "";
   const ln = LINES.find(l => l.hp==null && ((l.home===a && l.away===b) || (l.home===b && l.away===a)));
   let mkt = "";
@@ -1346,7 +1419,7 @@ function renderMatchup(force){
     mkt = `<div class="panel" style="padding:14px 16px;border-color:var(--accent)">
       <b>Best prediction: the betting line.</b> ${esc(fav)} by ${(Math.round(Math.abs(mA)*2)/2).toFixed(1)}, wins about ${Math.round(fp*100)}%
       <span class="sub">(week ${ln.week}${ln.start ? `, ${gameDay(ln.start)}` : ""}, ${esc(where)}; line ${lineStr(ln.home, ln.away, -ln.spread)}${lineOut(a)||lineOut(b) ? ", adjusted for your changes to the injury report" : ""})</span>
-      <p class="sub" style="margin:6px 0 0">Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse. The score above is our model's, for comparison and for games without a line. Injuries on the public report are assumed to be in the line already; only your changes to the report move it.</p></div>`;
+      <p class="sub" style="margin:6px 0 0">${LG.lineNote} The score above is our model's, for comparison and for games without a line. Injuries on the public report are assumed to be in the line already; only your changes to the report move it.</p></div>`;
   }
   const met = GAMES.filter(g => (g.home===a&&g.away===b)||(g.home===b&&g.away===a));
   const side = (t, s, r, win) => `<div class="side${win?" win":""}">${mono(t)}<b data-flip="${s}" data-key="m${t===a?"a":"b"}" aria-label="${s}">${s}</b><span>${esc(t)}</span><span class="sub">#${r.rank} · ${r.w}-${r.l}</span></div>`;
@@ -1358,7 +1431,7 @@ function renderMatchup(force){
       <div style="padding:0 16px 18px;display:grid;gap:8px">
         <div class="pbar" role="img" aria-label="${esc(a)} ${Math.round(p.pa*100)}%, ${esc(b)} ${Math.round((1-p.pa)*100)}%"><i style="width:${p.pa*100}%;background:var(${winA?"--accent":"--muted"})"></i><i style="width:${(1-p.pa)*100}%;background:var(${winA?"--muted":"--accent"})"></i></div>
         <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px"><span>${esc(a)} ${Math.round(p.pa*100)}%</span><span>${esc(b)} ${Math.round((1-p.pa)*100)}%</span></div>
-        <p style="margin:6px 0 0"><b>${esc(w)}</b> wins ${Math.round(wp*100)}% of the time by about <b>${Math.max(1,Math.round(Math.abs(p.margin)))}</b> point${Math.round(Math.abs(p.margin))===1?"":"s"}${v==="N"?" on a neutral field":` with ${esc(v==="A"?a:b)} at home`}.</p>
+        <p style="margin:6px 0 0"><b>${esc(w)}</b> wins ${Math.round(wp*100)}% of the time by about <b>${Math.max(1,Math.round(Math.abs(p.margin)))}</b> point${Math.max(1,Math.round(Math.abs(p.margin)))===1?"":"s"}${v==="N"?" on a neutral field":` with ${esc(v==="A"?a:b)} at home`}.</p>
         ${met.map(g=>`<p class="sub" style="margin:0">Already played, week ${g.week}: ${esc(g.away)} ${g.ap} ${g.neutral?"vs.":"at"} ${esc(g.home)} ${g.hp}${g.neutral?" (neutral site)":""}.</p>`).join("")}
       </div>
     </div>${mkt}${inj}${eff}`;
@@ -1380,7 +1453,7 @@ const MKT_SD = 15.2;
 // far the play-efficiency model sits on the other side of the line, and how far we are from the line (bigger gaps
 // cover less). Each week the top 10% of scores are Top confidence and the top 5% Top 5%. Held out (trained on other
 // seasons), the top 10% went: 2022 38-33, 2023 33-39, 2024 44-27, 2025 40-33, 2026 23-16.
-const TOPCONF_RECORD = [["2022", 38, 33], ["2023", 33, 39], ["2024", 44, 27], ["2025", 40, 33], ["2026", 23, 16]];
+let TOPCONF_RECORD = [["2022", 38, 33], ["2023", 33, 39], ["2024", 44, 27], ["2025", 40, 33], ["2026", 23, 16]];
 function trackedGame(a, b){
   const t = (TRACKER?.games||[]).find(g => (g.home===a && g.away===b) || (g.home===b && g.away===a));
   if(!t || t.line==null || t.conf==null) return null;
@@ -1391,7 +1464,7 @@ function trackedGame(a, b){
 // we are from the total, both teams' over/under results so far (fading them), pace and the size of the total. Each
 // week's top 10% / 5% are flagged. Held out (trained on other seasons) the top 10% went as below, far less steady
 // than the spread score.
-const TOTCONF_RECORD = [["2022", 31, 35], ["2023", 32, 36], ["2024", 50, 19], ["2025", 41, 29], ["2026", 15, 19]];
+let TOTCONF_RECORD = [["2022", 31, 35], ["2023", 32, 36], ["2024", 50, 19], ["2025", 41, 29], ["2026", 15, 19]];
 function trackedTotal(a, b){
   const t = (TRACKER?.games||[]).find(g => (g.home===a && g.away===b) || (g.home===b && g.away===a));
   if(!t || t.total==null || t.tconf==null) return null;
@@ -1477,7 +1550,7 @@ function renderLines(){
       <tr><td><b>Top 5% confidence</b></td><td class="num">${rec("top5")}</td><td class="num">—</td><td class="num">—</td></tr>
       <tr><td>Favorite when the line is 3 or 7</td><td class="num">${rec("fav37")}</td><td class="num">—</td><td class="num">—</td></tr>
     </tbody></table></div>
-    <p class="note"><b>How confidence works:</b> every game with a line gets its own score, the chance our pick covers. It rises when our pick did worse against the spread last game than its opponent (the market may have overreacted), and when our separate play-by-play efficiency model sits on the other side of the line from us. It falls as our disagreement with the line grows, because our biggest disagreements have covered least often. Each week the top 10% of scores are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Scores run about 48–56%, which is all the data can honestly separate; games scored 54–56% covered 55% in 2025–26. Top 10% on seasons the model wasn't trained on: ${TOPCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${(() => { const w = TOPCONF_RECORD.reduce((s,r)=>s+r[1],0), l = TOPCONF_RECORD.reduce((s,r)=>s+r[2],0); return `${w}–${l} (${(100*w/(w+l)).toFixed(1)}%)`; })()}. This week: ${TG.filter(g => !g.results && g.top_conf).sort((x,y)=>y.conf-x.conf).map(g => `<b>${esc(g.ours>g.line?g.home:g.away)}</b> ${(g.conf*100).toFixed(1)}%${g.top5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>
+    <p class="note"><b>How confidence works:</b> every game with a line gets its own score, the chance our pick covers. It rises when our pick did worse against the spread last game than its opponent (the market may have overreacted), and when our separate play-by-play efficiency model sits on the other side of the line from us. It falls as our disagreement with the line grows, because our biggest disagreements have covered least often. Each week the top 10% of scores are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. ${LG.spreadNote} Top 10% on seasons the model wasn't trained on: ${TOPCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${(() => { const w = TOPCONF_RECORD.reduce((s,r)=>s+r[1],0), l = TOPCONF_RECORD.reduce((s,r)=>s+r[2],0); return `${w}–${l} (${(100*w/(w+l)).toFixed(1)}%)`; })()}. This week: ${TG.filter(g => !g.results && g.top_conf).sort((x,y)=>y.conf-x.conf).map(g => `<b>${esc(g.ours>g.line?g.home:g.away)}</b> ${(g.conf*100).toFixed(1)}%${g.top5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>
     <p class="note">Predictions are saved before kickoff by each data update (with players listed Out), frozen at kickoff and graded after the final${firstSaved ? `; tracking since ${new Date(firstSaved).toLocaleDateString([], {month:"short", day:"numeric"})}` : ""}. ${graded.length} graded, ${openN} waiting. Unlike the past-season numbers below, nothing here could have been tuned on the results. A few hundred graded games are needed before the percentages mean much; 52.4% is break-even at standard odds.</p>`;
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   const wkName = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: ` : "";
@@ -1505,7 +1578,7 @@ function renderLines(){
         <tr><td><b>Top 5% confidence</b></td><td class="num">${rec("ou_top5")}</td></tr>
       </tbody></table></div>
       <p class="note"><b>How totals confidence works:</b> every game with a total gets a score, the chance our side (over when our total is above the line, under when below) wins. It rises when both teams have mostly gone the other way this season (the market may have overreacted to them), when the total is high and we lean under or low and we lean over, when the two teams' pace agrees with our side, and a little as our gap from the total grows. Each week the top 10% are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Scores run about 42–56%.</p>
-      <p class="note"><b>Be careful with these:</b> on seasons the model wasn't trained on, the top 10% went ${TOTCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${tw}–${tl} (${(100*tw/(tw+tl)).toFixed(1)}%) overall, but almost all of that is 2024; three of five seasons were below 50%. The spread score was steadier (54.6%, four of five seasons above 50%). Our side of the total with no filter went 47–52% by season. This week: ${TG.filter(g => !g.results && g.ttop_conf).sort((x,y)=>y.tconf-x.tconf).map(g => `<b>${g.ours_total > g.total ? "Over" : "Under"} ${g.total.toFixed(1)}</b> ${esc(g.away)}–${esc(g.home)} ${(g.tconf*100).toFixed(1)}%${g.ttop5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>`;
+      <p class="note"><b>Be careful with these:</b> on seasons the model wasn't trained on, the top 10% went ${TOTCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${tw}–${tl} (${(100*tw/(tw+tl)).toFixed(1)}%) overall, ${LG.totalNote} This week: ${TG.filter(g => !g.results && g.ttop_conf).sort((x,y)=>y.tconf-x.tconf).map(g => `<b>${g.ours_total > g.total ? "Over" : "Under"} ${g.total.toFixed(1)}</b> ${esc(g.away)}–${esc(g.home)} ${(g.tconf*100).toFixed(1)}%${g.ttop5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>`;
     bindLineSeg();
     return;
   }
@@ -1591,8 +1664,8 @@ function renderPicks(){
 
 function renderTeam(name){
   const r = RESULT.byTeam[name];
-  if(!r){ $("#teamOut").innerHTML = `<div class="panel empty">${name?`No FBS team named “${esc(name)}” in this data.`:"Search for a team to see its opponents, their rankings, and the strength of each win and loss."}</div>`; return; }
-  store.set("sor.team", name);
+  if(!r){ $("#teamOut").innerHTML = `<div class="panel empty">${name?`No ${LG.word} team named “${esc(name)}” in this data.`:"Search for a team to see its opponents, their rankings, and the strength of each win and loss."}</div>`; return; }
+  store.set(SK("sor.team"), name);
   const bar = v => { const w=Math.abs(v)*50; return `<span class="vbar"><i style="${v>=0?`left:50%;width:${w}%;background:var(--win)`:`right:50%;width:${w}%;background:var(--loss)`}"></i></span>`; };
   const recOf = t => RESULT.recs[t] ? `${RESULT.recs[t][0]}-${RESULT.recs[t][1]}` : "";
   $("#teamOut").innerHTML = `
@@ -1627,7 +1700,7 @@ function renderTeam(name){
 function renderStatus(){
   const cls = SOURCE.kind==="live"?"live":SOURCE.kind==="sample"?"sample":"";
   const when = SOURCE.updated ? ` · updated ${new Date(SOURCE.updated).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}` : "";
-  $("#status").innerHTML = `<i class="dot ${cls}"></i> ${esc(SOURCE.label)}${when}`;
+  $("#status").innerHTML = `<i class="dot ${cls}"></i> ${esc(SOURCE.label)}<span class="upd">${when}</span>`;
 }
 
 function recompute(){
@@ -1639,11 +1712,11 @@ function recompute(){
   UNITS = unitRatings(PRED.eff, RESULT.rows.map(r => r.team));
   renderResults();
   renderLines();
-  if(!$("#ma").value){ $("#ma").value = store.get("sor.ma") || RESULT.rows[0]?.team || ""; $("#mb").value = store.get("sor.mb") || RESULT.rows[1]?.team || ""; }
+  if(!$("#ma").value){ $("#ma").value = store.get(SK("sor.ma")) || RESULT.rows[0]?.team || ""; $("#mb").value = store.get(SK("sor.mb")) || RESULT.rows[1]?.team || ""; }
   renderMatchup(true);
   $("#teamlist").innerHTML = RESULT.rows.map(r=>`<option value="${esc(r.team)}">`).join("");
   renderStatus(); renderTop();
-  const cur = $("#q").value || store.get("sor.team") || "";
+  const cur = $("#q").value || store.get(SK("sor.team")) || "";
   if(!RESULT.byTeam[cur] && RESULT.rows[0]) $("#q").value = RESULT.rows[0].team; else $("#q").value = cur;
   renderTeam($("#q").value);
 }
@@ -1669,7 +1742,7 @@ document.addEventListener("click", e => { const tr = e.target.closest("tr.click"
 document.addEventListener("keydown", e => { if(e.key==="Enter"){ const tr = e.target.closest?.("tr.click"); if(tr) openTeam(tr.dataset.team); }});
 $("#q").addEventListener("input", e => { if(RESULT.byTeam[e.target.value]) renderTeam(e.target.value); });
 $("#q").addEventListener("change", e => renderTeam(e.target.value));
-$("#bench").addEventListener("change", e => { BENCH = +e.target.value; store.set("sor.bench", BENCH); recompute(); });
+$("#bench").addEventListener("change", e => { BENCH = +e.target.value; store.set(SK("sor.bench"), BENCH); recompute(); });
 $("#showall").addEventListener("change", e => { SHOWALL = e.target.value==="all"; renderTop(); });
 $("#rshowall").addEventListener("change", renderResults);
 ["#ma","#mb"].forEach(id => { $(id).addEventListener("input", () => renderMatchup()); $(id).addEventListener("change", () => renderMatchup()); });
@@ -1712,48 +1785,48 @@ $("#csv").addEventListener("change", async e => {
 
 async function loadData(){
   try{
-    const res = await fetch("data/games.json", {cache:"no-store"});
+    const res = await fetch(`${LG.dir}games.json`, {cache:"no-store"});
     if(!res.ok) return;
     const d = await res.json();
     if(!d.games || !d.games.length) return;
     GAMES = d.games.map(a => unpack(a[0], a.slice(1)));
     // Results counted differently from the official score (data/overrides.json); the official score is kept on the game.
     try{
-      const or = await fetch("data/overrides.json", {cache:"no-store"});
+      const or = await fetch(`${LG.dir}overrides.json`, {cache:"no-store"});
       if(or.ok){ const o = await or.json();
         if(o.season === d.season) (o.games||[]).forEach(x => { const g = GAMES.find(g => g.week===x.week && g.home===x.home && g.away===x.away);
           if(g){ g.official = [g.hp, g.ap]; g.hp = x.home_pts; g.ap = x.away_pts; g.note = x.note || ""; } }); }
     }catch(e){}
-    SOURCE = {kind:"live", label:`${d.season} season`, updated:d.updated};
+    SOURCE = {kind:"live", label:`${d.season} ${LG.name} season`, updated:d.updated};
     try{
-      const lr = await fetch("data/lines.json", {cache:"no-store"});
+      const lr = await fetch(`${LG.dir}lines.json`, {cache:"no-store"});
       if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[], open:r[10] ?? null}));
     }catch(e){ LINES = []; }
     try{
-      const tm = await fetch("data/teams.json", {cache:"no-store"});
+      const tm = await fetch(`${LG.dir}teams.json`, {cache:"no-store"});
       // v2 rows: [school, logo, dark-background logo, color, alt color]; the first version had no dark logo.
       if(tm.ok){ const j = await tm.json(), v2 = j.v === 2;
         TEAMS = Object.fromEntries((j.teams || []).map(r => [r[0], {logo:r[1], dark:v2 ? r[2] : null, color:v2 ? r[3] : r[2]}])); }
     }catch(e){ TEAMS = {}; }
     try{
-      const tr = await fetch("data/tracker.json", {cache:"no-store"});
+      const tr = await fetch(`${LG.dir}tracker.json`, {cache:"no-store"});
       if(tr.ok) TRACKER = await tr.json();
     }catch(e){ TRACKER = null; }
     try{
-      const ir = await fetch("data/injuries.json", {cache:"no-store"});
+      const ir = await fetch(`${LG.dir}injuries.json`, {cache:"no-store"});
       if(ir.ok){ const j = await ir.json(); INJ_UPDATED = j.updated; INJURIES = {};
         (j.injuries||[]).forEach(r => (INJURIES[r[0]] ||= []).push({name:r[1], pos:r[2], status:r[3], body:r[4], start:r[5], updated:r[6], note:r[7]})); }
     }catch(e){ INJURIES = {}; }
     try{
-      const rr = await fetch("data/research.json", {cache:"no-store"});
+      const rr = await fetch(`${LG.dir}research.json`, {cache:"no-store"});
       if(rr.ok) RESEARCH = await rr.json();
     }catch(e){ RESEARCH = null; }
     try{
-      const hr = await fetch(`data/history/${d.season-1}.json`, {cache:"no-store"});
+      const hr = await fetch(`${LG.dir}history/${d.season-1}.json`, {cache:"no-store"});
       if(hr.ok){ const h = await hr.json(); PREV = (h.games||[]).map(a => unpack(a[0], a.slice(1))).filter(g => g.hf || g.af); PRIOR = seasonPrior(PREV); }
     }catch(e){ PREV = []; PRIOR = null; }
     try{
-      const pr = await fetch("data/players.json", {cache:"no-store"});
+      const pr = await fetch(`${LG.dir}players.json`, {cache:"no-store"});
       if(pr.ok) PLAYERS = ((await pr.json()).players || []).map(r => ({team:r[0], name:r[1], pos:r[2], plays:r[3], ppa:r[4]}));
     }catch(e){ PLAYERS = []; }
     OUT = {};  // marks made against the sample season or before the injury report loaded don't carry over
@@ -1762,7 +1835,8 @@ async function loadData(){
 }
 
 /* ---------------- boot ---------------- */
-BENCH = +(store.get("sor.bench") || 25); $("#bench").value = String(BENCH);
+LEAGUE = (new URLSearchParams(location.search).get("league") || store.get("sor.league") || "cfb").toLowerCase(); if(!LEAGUES[LEAGUE]) LEAGUE = "cfb";
+applyLeague();
 GAMES = sampleSeason(); recompute(); route(); loadData();
 </script>
 
