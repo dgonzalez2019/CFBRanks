@@ -16,6 +16,7 @@ python research/ppa_model.py research $W .               # play-efficiency (PPA)
 python research/ppa_eval.py $W                            # vs opening and closing lines, held-out seasons
 python research/situational.py .                          # rest, travel, last-week and line angles; no ratings
 python research/opening_2026.py $W .                      # pre-registered: does 2025's edge vs opening lines hold in 2026?
+python research/confidence.py $W .                        # what makes a top-10% pick: candidate confidence measures
 python research/summary.py $W .                          # -> data/research.json (shown on the Lines tab)
 ```
 
@@ -33,3 +34,8 @@ situational model 52.0%; spread picks 51.9%; totals 49.7%; score + PPA blend 46.
 scored only an arbitrary third of yes/no angles' games (ties in "strongest third"), which made underdogs at 3 or 7
 look like 56% in 2025-26. Counting every game: underdogs at 3 or 7 went 171-200 (46.1%) in 2025-26 and 50% in
 2022-24; favorites at 3 or 7 went 200-171 (53.9%) in 2025-26, 50% before. Nothing reached 55%.
+
+Confidence (research/confidence.py): top 10% by gap from the opening line went 53% on 2022-24 and 57%/51% on
+2025/2026. Scaling the gap by the model's typical miss, requiring the efficiency model to agree, skipping weeks 1-2
+and spreads of 21+, or requiring the line to move our way did no better on 2025-26 (41-57%). The site uses a fixed
+7.5-point gap (90th percentile of 2022-25): 188-175 (51.8%) over 2022-26.

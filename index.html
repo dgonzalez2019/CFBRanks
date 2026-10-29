@@ -93,6 +93,7 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .show-sm{display:none}
 .injgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:12px}
 .tag{display:inline-block;font:600 10.5px/1 var(--mono);padding:3px 5px;border-radius:4px;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line);vertical-align:1px}
+.tag.top10{color:var(--accent);background:var(--accent-soft);box-shadow:none}
 .tag.out{color:var(--loss);background:var(--loss-soft);box-shadow:none}
 .inj{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
 .lines td:nth-child(2){white-space:normal}
@@ -701,13 +702,18 @@ function renderMatchup(force){
 // model made it worse, so when a game has a line the Matchup tab leads with it. MKT_SD: spread of results
 // around the line (15.2 on 3,174 games; win chances from it matched actual rates within ~2 points).
 const MKT_SD = 15.2;
+// Confidence = how far our line is from the OPENING line. 7.5+ points is the top 10% of games (90th percentile of
+// 2022-25). Its record vs opening lines: 188-175 (51.8%) over 2022-26, 45-59% by season. Scaling by typical miss,
+// requiring the efficiency model to agree, skipping early weeks / big spreads, or waiting for the line to move our
+// way did no better on 2025-26 (research/confidence.py), so the rating stays this simple.
+const CONF_GAP = 7.5;
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 function renderLines(){
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
   const up = LINES.filter(l => l.hp==null && PRED.T[l.home] && PRED.T[l.away]).map(l => {
     const ih = autoModelOut(l.home), ia = autoModelOut(l.away);
     const p = predict(PRED, l.home, l.away, l.neutral?"N":"A", ih, ia), mkt = -l.spread;
-    return {...l, ours:p.margin, mkt, diff:p.margin-mkt, ourTotal:p.sa+p.sb, pHome:p.pa, ih, ia};
+    return {...l, ours:p.margin, mkt, diff:p.margin-mkt, ourTotal:p.sa+p.sb, pHome:p.pa, ih, ia, gapOpen: l.open==null ? null : p.margin + l.open};
   }).sort((x,y) => Math.abs(y.diff)-Math.abs(x.diff));
   const thisWeek = up.length ? Math.min(...up.map(l=>l.week)) : null;
   const day = s => s ? new Date(s).toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"}) : "";
@@ -716,7 +722,7 @@ function renderLines(){
       <tbody>${rows.map(l => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
         return `<tr>
         <td class="rk" style="font-size:17px">${Math.abs(l.diff).toFixed(1)}</td>
-        <td><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
+        <td><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${l.gapOpen!=null && Math.abs(l.gapOpen) >= CONF_GAP ? `<span class="tag top10">Top 10%: ${Math.abs(l.gapOpen).toFixed(1)} pts from opening, ${esc(l.gapOpen>0?l.home:l.away)}</span> ` : ""}${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
           <span class="show-sm" style="font-size:13px;margin-top:4px">Line ${lineStr(l.home, l.away, l.mkt)} · Ours <b>${lineStr(l.home, l.away, l.ours)}</b><br>${esc(fav)} wins ${Math.round(fp*100)}%${l.total!=null?` · Total ${l.total.toFixed(1)} vs ${l.ourTotal}`:""}</span></td>
         <td class="hide-sm">${lineStr(l.home, l.away, l.mkt)}</td><td class="hide-sm"><b>${lineStr(l.home, l.away, l.ours)}</b></td>
         <td class="num hide-sm">${esc(fav)} ${Math.round(fp*100)}%</td>
@@ -759,8 +765,10 @@ function renderLines(){
     <div class="panel scroll"><table><thead><tr><th>Strategy (fixed in advance)</th><th class="num">All</th><th class="num">Edge 3+</th><th class="num">Edge 5+</th></tr></thead><tbody>
       <tr><td>Our side of the line at kickoff</td><td class="num">${rec("model_close")}</td><td class="num">${rec("model_close",3)}</td><td class="num">${rec("model_close",5)}</td></tr>
       <tr><td>Our side of the opening line</td><td class="num">${rec("model_open")}</td><td class="num">${rec("model_open",3)}</td><td class="num">${rec("model_open",5)}</td></tr>
+      <tr><td><b>Top 10% confidence</b> <span class="sub">our side of the opening line when we differ by ${CONF_GAP}+ pts</span></td><td class="num">${rec("model_open", CONF_GAP)}</td><td class="num">—</td><td class="num">—</td></tr>
       <tr><td>Favorite when the line is 3 or 7</td><td class="num">${rec("fav37")}</td><td class="num">—</td><td class="num">—</td></tr>
     </tbody></table></div>
+    <p class="note"><b>What "top 10% confidence" means:</b> games where our line is ${CONF_GAP}+ points from the opening line, the biggest 10% of our disagreements in 2022–25. On past seasons those went 188–175 (51.8%): 45%, 59%, 46%, 57% and 51% in 2022–26. Four refinements (scaling by how much the model usually misses, requiring a second model to agree, skipping early weeks and big spreads, waiting for the line to move our way) did no better on 2025–26, so the rating stays simple. This week: ${TG.filter(g => !g.results && g.open!=null && Math.abs(g.ours-g.open) >= CONF_GAP).map(g => `<b>${esc(g.ours>g.open?g.home:g.away)}</b> vs ${esc(g.ours>g.open?g.away:g.home)} (${Math.abs(g.ours-g.open).toFixed(1)})`).join(", ") || "none"}.</p>
     <p class="note">Predictions are saved before kickoff by each data update (with players listed Out), frozen at kickoff and graded after the final${firstSaved ? `; tracking since ${new Date(firstSaved).toLocaleDateString([], {month:"short", day:"numeric"})}` : ""}. ${graded.length} graded, ${openN} waiting. Unlike the past-season numbers below, nothing here could have been tuned on the results. A few hundred graded games are needed before the percentages mean much; 52.4% is break-even at standard odds.</p>`;
   const now = up.filter(l=>l.week===thisWeek), later = up.filter(l=>l.week!==thisWeek);
   $("#ltitle").textContent = thisWeek ? `Week ${thisWeek > 20 ? "bowl " + (thisWeek-20) : thisWeek}: our lines vs. betting lines` : "Our lines vs. betting lines";
@@ -893,7 +901,7 @@ async function loadData(){
     SOURCE = {kind:"live", label:`${d.season} season`, updated:d.updated};
     try{
       const lr = await fetch("data/lines.json", {cache:"no-store"});
-      if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[]}));
+      if(lr.ok) LINES = ((await lr.json()).games || []).map(r => ({week:r[0], home:r[1], away:r[2], neutral:!!r[3], spread:r[4], total:r[5], hp:r[6], ap:r[7], start:r[8], books:r[9]||[], open:r[10] ?? null}));
     }catch(e){ LINES = []; }
     try{
       const tr = await fetch("data/tracker.json", {cache:"no-store"});
