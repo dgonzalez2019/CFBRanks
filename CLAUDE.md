@@ -3,7 +3,7 @@
 Static site + Python tooling for college football power rankings. Teams are ranked by score = power rating + 0.5 × résumé points; strength of record (SOR) is shown on team pages as a reference.
 
 - **Single page:** `index.html` holds all HTML, CSS and JS. No framework, no build. Keep it that way unless asked.
-- **Data contract:** `data/games.json` = `{season, updated (ISO UTC), games: [[week, home, away, home_pts, away_pts, neutral 0/1, home_fbs 0/1, away_fbs 0/1], ...]}`. Postseason weeks are offset by +20.
+- **Data contract:** `data/games.json` = `{season, updated (ISO UTC), games: [[week, home, away, home_pts, away_pts, neutral 0/1, home_fbs 0/1, away_fbs 0/1], ...]}`. Postseason weeks are offset by +20. Optional 9th element = box score `[home pass yds, home pass att, home rush yds, home rush att, away same four]` (net passing yards; attempts from completionAttempts). `fetch_games.py` keeps stored box scores and only requests `/games/teams` for weeks missing some, to stay inside the free API tier.
 - **Algorithm (keep JS `compute()` and Python `compute()` in sync):**
   1. Ridge least squares on tanh-compressed margins (cap 21, ridge 2) with an estimated home-field term; neutral sites get 0; all non-FBS teams pooled as "FCS (pooled)"; ratings centered on the FBS mean.
   2. Outcome SD calibrated from residuals ×1.05; win prob = normal CDF.
