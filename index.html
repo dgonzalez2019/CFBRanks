@@ -268,6 +268,30 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padd
 .msg{font-size:13px}
 .empty{padding:36px;text-align:center;color:var(--muted)}
 
+/* ---------- game cards (Lines tab) ---------- */
+.gcards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,480px),1fr))}
+.gcard{position:relative;display:grid;gap:14px;padding:16px 16px 12px;border-radius:18px;background:var(--card);border:1px solid var(--line);
+  -webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);box-shadow:var(--shadow);transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;
+  animation:viewIn .6s var(--ease) both;animation-delay:calc(var(--i,0) * 50ms)}
+.gcard:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.gcard.hot{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));background:linear-gradient(160deg,color-mix(in srgb,var(--gold) 12%,var(--card)),var(--card) 55%);box-shadow:var(--shadow),0 0 50px -24px var(--gold)}
+.gcard.hot::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.gtop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.gteams{display:grid;gap:3px;min-width:0}
+.gteam{display:flex;align-items:center;min-width:0}
+.gteam .tm{font:700 20px/1.1 var(--display);text-transform:uppercase;letter-spacing:.02em;overflow-wrap:anywhere}
+.gat{font:600 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-left:37px}
+.gstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.gstats div{display:grid;gap:5px;align-content:start;padding:9px 10px;border-radius:10px;background:color-mix(in srgb,var(--ink) 4%,transparent);border:1px solid var(--line);min-width:0}
+.gstats span{font:600 9.5px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.gstats b{font:600 13px/1.25 var(--mono);overflow-wrap:anywhere}
+.gstats b small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+.gstats .ours{border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:var(--accent-soft)}
+.gstats .ours b{color:var(--accent)}
+.gfoot{display:flex;justify-content:space-between;align-items:flex-end;gap:6px 14px;flex-wrap:wrap;padding-top:10px;border-top:1px dashed var(--line)}
+.gfoot .sub b{color:var(--ink);font-weight:600}
+.gfoot time{margin-left:auto;font:600 12px/1.2 var(--mono);color:var(--accent);white-space:nowrap;text-align:right}
+@media (max-width:640px){.gstats{grid-template-columns:repeat(2,minmax(0,1fr))}.gteam .tm{font-size:18px}.gcard .conf{font-size:18px}}
 @media (max-width:760px){
   .podium{grid-template-columns:1fr 1fr;align-items:stretch}
   .pcard.p1{grid-column:1/-1;order:-1;min-height:220px}
@@ -991,6 +1015,10 @@ const confBadge = c => !c ? "" : `<span class="conf${c.top ? " top" : ""}" title
 // Game date on the Eastern-time calendar: the schedule is set in ET, and games without a kickoff time yet are stored
 // at midnight ET, which would show as the day before in later time zones.
 const gameDay = s => s ? new Date(s).toLocaleDateString([], {weekday:"short", month:"short", day:"numeric", timeZone:"America/New_York"}) : "";
+// Kickoff in Eastern time; midnight ET means the time hasn't been set yet.
+const gameWhen = s => { if(!s) return "Date TBA"; const d = new Date(s), et = {timeZone:"America/New_York"};
+  const t = d.toLocaleTimeString([], {...et, hour:"numeric", minute:"2-digit"}), mid = d.toLocaleTimeString("en-US", {...et, hour12:false, hour:"2-digit", minute:"2-digit"});
+  return `${gameDay(s)} · ${/^(00|24):00$/.test(mid) ? "Time TBA" : t + " ET"}`; };
 const lineStr = (home, away, m) => Math.abs(m) < .25 ? "Pick'em" : `${esc(m>0?home:away)} −${(Math.round(Math.abs(m)*2)/2).toFixed(1)}`;
 function renderLines(){
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
@@ -1001,17 +1029,29 @@ function renderLines(){
   }).map(l => ({...l, conf: trackedGame(l.home, l.away)?.pct ?? null}))
     .sort((x,y) => (y.conf ?? -1)-(x.conf ?? -1) || Math.abs(y.diff)-Math.abs(x.diff));  // most confident first; games without a score after, by difference
   const thisWeek = up.length ? Math.min(...up.map(l=>l.week)) : null;
-  const day = gameDay;
-  const table = rows => `<div class="panel scroll"><table class="top lines">
-      <thead><tr><th>Diff</th><th>Game</th><th class="hide-sm">Betting line</th><th class="hide-sm">Our line</th><th class="num hide-sm">Our win %</th><th class="num hide-sm">Total</th><th class="num hide-sm">Ours</th></tr></thead>
-      <tbody>${rows.map(l => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
-        return `<tr>
-        <td class="rk" style="font-size:17px">${Math.abs(l.diff).toFixed(1)}</td>
-        <td><span style="float:right;margin-left:8px">${confBadge(trackedGame(l.home, l.away))}</span><span class="tm">${esc(l.away)}</span> <span class="sub">${l.neutral?"vs":"at"}</span> <span class="tm">${esc(l.home)}</span><span class="sub" style="display:block">${day(l.start)} · we lean ${esc(lean)}${l.ih>=.5||l.ia>=.5 ? ` · injuries: ${[[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5).map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
-          <span class="show-sm" style="font-size:13px;margin-top:4px;clear:both;padding-top:2px">Line ${lineStr(l.home, l.away, l.mkt)} · Ours <b>${lineStr(l.home, l.away, l.ours)}</b><br>${esc(fav)} wins ${Math.round(fp*100)}%${l.total!=null?` · Total ${l.total.toFixed(1)} vs ${l.ourTotal}`:""}</span></td>
-        <td class="hide-sm">${lineStr(l.home, l.away, l.mkt)}</td><td class="hide-sm"><b>${lineStr(l.home, l.away, l.ours)}</b></td>
-        <td class="num hide-sm">${esc(fav)} ${Math.round(fp*100)}%</td>
-        <td class="num hide-sm">${l.total!=null ? l.total.toFixed(1) : "—"}</td><td class="num hide-sm">${l.ourTotal}</td></tr>`; }).join("")}</tbody></table></div>`;
+  // One card per game: teams and confidence on top, the four numbers in tiles, lean and kickoff along the bottom.
+  const table = rows => `<div class="gcards">${rows.map((l,i) => { const lean = l.diff>0 ? l.home : l.away, fav = l.ours>0 ? l.home : l.away, fp = l.ours>0 ? l.pHome : 1-l.pHome;
+      const c = trackedGame(l.home, l.away), inj = [[l.away,l.ia],[l.home,l.ih]].filter(([,v])=>v>=.5);
+      return `<article class="gcard${c?.top ? " hot" : ""}" style="--i:${Math.min(i,20)}">
+        <div class="gtop">
+          <div class="gteams">
+            <div class="gteam">${mono(l.away)}<span class="tm">${esc(l.away)}</span></div>
+            <div class="gat">${l.neutral ? "vs" : "at"}</div>
+            <div class="gteam">${mono(l.home)}<span class="tm">${esc(l.home)}</span></div>
+          </div>
+          ${confBadge(c)}
+        </div>
+        <div class="gstats">
+          <div><span>Betting line</span><b>${lineStr(l.home, l.away, l.mkt)}</b></div>
+          <div class="ours"><span>Our line</span><b>${lineStr(l.home, l.away, l.ours)}</b></div>
+          <div><span>Win chance</span><b>${esc(fav)} ${Math.round(fp*100)}%</b></div>
+          <div><span>Total</span><b>${l.total!=null ? l.total.toFixed(1) : "—"} <small>ours ${l.ourTotal}</small></b></div>
+        </div>
+        <div class="gfoot">
+          <span class="sub">We lean <b>${esc(lean)}</b> · ${Math.abs(l.diff).toFixed(1)} pts off the line${inj.length ? ` · injuries: ${inj.map(([t,v])=>`${esc(t)} −${v.toFixed(1)}`).join(", ")}` : ""}</span>
+          <time${l.start ? ` datetime="${esc(l.start)}"` : ""}>${gameWhen(l.start)}</time>
+        </div>
+      </article>`; }).join("")}</div>`;
   // Track record: our week-by-week predictions (made only from earlier games) vs. the line and the result.
   const done = LINES.filter(l => l.hp!=null && BT && BT.preds[`${l.week}|${l.home}|${l.away}`]!=null).map(l => ({...l, ours:BT.preds[`${l.week}|${l.home}|${l.away}`], mkt:-l.spread, act:l.hp-l.ap}));
   let record = "";
