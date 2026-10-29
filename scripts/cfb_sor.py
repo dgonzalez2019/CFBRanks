@@ -73,8 +73,8 @@ QUAD_CUTS = (25, 50, 80)
 # (CFB 7.4, NFL 2.0: the balance with the rating that the earlier season-total versions had; NFL ratings are far
 # more bunched, SD 3-4 points vs 10).
 LEAGUE_SETTINGS = {
-    "cfb": dict(PRIOR_KEEP=0.9, PRIOR_LAM=2.0, PRIOR_CAP=45.0, EFF_WEIGHT=0.25, QUAD_CUTS=(25, 50, 80), RESUME_WEIGHT=7.4),
-    "nfl": dict(PRIOR_KEEP=0.5, PRIOR_LAM=8.0, PRIOR_CAP=21.0, EFF_WEIGHT=0.0, QUAD_CUTS=(8, 16, 24), RESUME_WEIGHT=2.0),
+    "cfb": dict(PRIOR_KEEP=0.9, PRIOR_LAM=2.0, PRIOR_CAP=45.0, EFF_WEIGHT=0.25, QUAD_CUTS=(25, 50, 80), RESUME_WEIGHT=7.4, PRIOR_FADE=0, PRIOR_FLOOR=0.0),
+    "nfl": dict(PRIOR_KEEP=0.5, PRIOR_LAM=12.0, PRIOR_CAP=21.0, EFF_WEIGHT=0.0, QUAD_CUTS=(8, 16, 24), RESUME_WEIGHT=2.0, PRIOR_FADE=8, PRIOR_FLOOR=0.2),
 }
 
 
@@ -329,6 +329,15 @@ def efficiency(games):
 PRIOR_KEEP, PRIOR_LAM, PRIOR_CAP = 0.9, 2.0, 45.0
 
 
+PRIOR_FADE, PRIOR_FLOOR = 0, 0.0   # 0 = the prior's pull doesn't fade (CFB); NFL: see LEAGUE_SETTINGS
+
+
+def prior_fade(games, teams):
+    """Share of the prior's pull left after this many games: 1 - games per team / PRIOR_FADE, at least PRIOR_FLOOR."""
+    gpt = 2 * len(games) / max(1, len(teams))
+    return max(PRIOR_FLOOR, 1 - gpt / PRIOR_FADE)
+
+
 def season_prior(prev):
     """End-of-last-season margin ratings, kept at PRIOR_KEEP; teams new to FBS start at the FCS level."""
     prev = [g for g in prev if g["home_fbs"] or g["away_fbs"]]
@@ -345,6 +354,7 @@ def fit_predictor(games, prior=None, cap=None):
     cap = cap or (PRIOR_CAP if prior else PRED_CAP); lam = PRIOR_LAM if prior else PRED_RIDGE
     norm = lambda t, fbs: t if fbs else FCS_POOL
     teams = sorted({norm(g["home"], g["home_fbs"]) for g in games} | {norm(g["away"], g["away_fbs"]) for g in games})
+    if prior and PRIOR_FADE: lam *= prior_fade(games, teams)
     idx = {t: i for i, t in enumerate(teams)}; n = len(teams)
     X = np.zeros((len(games), n + 1)); y = np.zeros(len(games))
     Xp = np.zeros((2 * len(games), 2 * n + 2)); yp = np.zeros(2 * len(games))

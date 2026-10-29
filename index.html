@@ -746,7 +746,7 @@ const LEAGUES = {
     sheetSpread:"spread picks covered 54.6%", sheetTotal:"totals picks hit 55.0%, but unevenly (44–72% by season)",
     lineNote:"Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse.",
     qbNote:"QB values are calibrated on 2022–25, where teams whose starting QB missed a game fell short by about 1.25× this raw gap."},
-  nfl:{name:"NFL", dir:"data/nfl/", topN:32, word:"NFL", topLabel:"Rankings", quad:[8,16,24], resumeW:2.0, keep:.5, lam:8, cap:21, eff:0,
+  nfl:{name:"NFL", dir:"data/nfl/", topN:32, word:"NFL", topLabel:"Rankings", quad:[8,16,24], resumeW:2.0, keep:.5, lam:12, fade:8, floor:.2, cap:21, eff:0,
     bench:12, benchOpts:[[7,"#7 team (division-winner bar)"],[12,"#12 team (playoff bar)"],[16,"#16 team (league average)"]],
     conf:[-0.0037, 0.0217, 0.2282, 0.1098, 0.0618], tconf:[-0.0085, -0.1109, -0.0118, 0.2351, -0.1735, -0.0458], pace:60.8, tmid:45,
     topRec:[["2016",12,13],["2017",12,12],["2018",11,13],["2019",15,9],["2020",14,11],["2021",17,9],["2022",14,12],["2023",9,17],["2024",12,14],["2025",18,9],["2026",7,2]],
@@ -762,7 +762,7 @@ let LEAGUE = "cfb", LG = LEAGUES.cfb;
 const SK = k => LEAGUE === "cfb" ? k : `${k}.${LEAGUE}`;   // per-league storage keys
 function applyLeague(){
   LG = LEAGUES[LEAGUE];
-  QUAD_CUTS = LG.quad; RESUME_WEIGHT = LG.resumeW; PRIOR_KEEP = LG.keep; PRIOR_LAM = LG.lam; PRIOR_CAP = LG.cap; EFF_WEIGHT = LG.eff;
+  QUAD_CUTS = LG.quad; RESUME_WEIGHT = LG.resumeW; PRIOR_KEEP = LG.keep; PRIOR_LAM = LG.lam; PRIOR_FADE = LG.fade || 0; PRIOR_FLOOR = LG.floor || 0; PRIOR_CAP = LG.cap; EFF_WEIGHT = LG.eff;
   CONF_COEF = LG.conf; TCONF_COEF = LG.tconf; PACE_AVG = LG.pace; TOTAL_MID = LG.tmid; TOPCONF_RECORD = LG.topRec; TOTCONF_RECORD = LG.totRec;
   document.documentElement.dataset.league = LEAGUE;
   document.title = `${LG.name} Power Rankings`;
@@ -898,6 +898,10 @@ function efficiency(games){
 // season seeded by the one before: weeks 1-4 went from 67.9% winners / 15.0-pt margin miss to 73.4% / 13.6,
 // later weeks from 69.9% / 12.67 to 70.8% / 12.45. Teams new to FBS start at last season's FCS level.
 let PRIOR_KEEP = 0.9, PRIOR_LAM = 2, PRIOR_CAP = 45;
+// NFL only: last season's pull fades as this season's games pile up, to PRIOR_FLOOR of it after PRIOR_FADE games per
+// team (research/nfl_prior_fade.py: same accuracy as a fixed pull, 10.22 avg miss on 2016-25, so the rankings lean
+// on this season's results without losing anything).
+let PRIOR_FADE = 0, PRIOR_FLOOR = 0;
 function seasonPrior(prev){
   if(!prev || prev.length < 100) return null;
   const R = predictor(prev, null, PRIOR_CAP).T, r = {};
@@ -908,6 +912,7 @@ function predictor(games, prior=null, capOverride=null){
   const nm = (t,f) => f ? t : FCS, cap = capOverride ?? (prior ? PRIOR_CAP : PRED_CAP), lam = prior ? PRIOR_LAM : PRED_RIDGE;
   const teams = [...new Set(games.flatMap(g => [nm(g.home,g.hf), nm(g.away,g.af)]))].sort();
   const idx = Object.fromEntries(teams.map((t,i)=>[t,i])), n = teams.length;
+  const lamP = prior && PRIOR_FADE ? lam * Math.max(PRIOR_FLOOR, 1 - 2*games.length/Math.max(1,n)/PRIOR_FADE) : lam;
   const A = Array.from({length:n+1},()=>new Array(n+1).fill(0)), b = new Array(n+1).fill(0);
   const P = Array.from({length:2*n+2},()=>new Array(2*n+2).fill(0)), c = new Array(2*n+2).fill(0);
   const addRow = (M, v, cols, y) => { cols.forEach(([i,x]) => { cols.forEach(([j,z]) => M[i][j]+=x*z); v[i]+=x*y; }); };
@@ -918,7 +923,7 @@ function predictor(games, prior=null, capOverride=null){
     addRow(P, c, [[a,1],[n+h,1],[2*n,1]], g.ap);
     return [h,a,x,y];
   });
-  teams.forEach((t,i) => { A[i][i] += lam; if(prior) b[i] += lam*(prior.r[t] ?? prior.fcs); });
+  teams.forEach((t,i) => { A[i][i] += lamP; if(prior) b[i] += lamP*(prior.r[t] ?? prior.fcs); });
   A[n][n] += 1e-9;
   for(let i=0;i<2*n;i++) P[i][i]+=PTS_RIDGE;
   const m = solve(A,b), q = solve(P,c);
