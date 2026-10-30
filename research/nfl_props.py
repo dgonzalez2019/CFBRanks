@@ -26,10 +26,14 @@ def season_rows(d, y):
             if f: out.append(dict(f, mk=mk, y=g[col]))
     return out
 
-def fit(R, k=None):
+def fit(R, k=None, count=False):
     X = np.array([r["x"][:k] for r in R]); y = np.array([r["y"] for r in R])
     coef = np.linalg.lstsq(X, y, rcond=None)[0]
     M = dict(coef=[float(c) for c in coef])
+    if count:  # small counts (TDs, interceptions): Poisson around the projection, scale chosen by likelihood
+        M["floor"] = 0.02; p = np.array([pm.project(M, r["x"][:k]) for r in R])
+        ll = lambda s_: np.sum(y * np.log(s_ * p) - s_ * p)
+        M["poisson"] = float(max(np.arange(0.6, 1.41, 0.02), key=ll))
     M["edges"], M["q"] = pm.fit_quantiles([pm.project(M, r["x"][:k]) for r in R], y)
     return M
 
@@ -40,9 +44,10 @@ if __name__ == "__main__":
     res = {}
     for mk in pm.MARKETS:
         tr = [r for y in TRAIN for r in rows[y] if r["mk"] == mk]; te = [r for y in TEST for r in rows[y] if r["mk"] == mk]
-        M = fit(tr)
+        cnt = mk in pm.COUNT_MK
+        M = fit(tr, count=cnt)
         # teammate absences: the same model without the two absence terms, on the same held-out games
-        M4 = fit(tr, 4); p4 = np.array([max(0.5, float(np.dot(M4["coef"], r["x"][:4]))) for r in te])
+        M4 = fit(tr, 4, cnt); p4 = np.array([max(M4.get("floor", .5), float(np.dot(M4["coef"], r["x"][:4]))) for r in te])
         pa = np.array([pm.project(M, r["x"]) for r in te]); ya = np.array([r["y"] for r in te])
         sub = lambda m: f"{np.mean(np.abs(pa[m] - ya[m])):.2f} vs {np.mean(np.abs(p4[m] - ya[m])):.2f} (n={int(m.sum())})"
         vac = np.array([r["vac"] for r in te]); qo = np.array([r["qb_out"] for r in te])
@@ -50,21 +55,22 @@ if __name__ == "__main__":
         pt = np.array([pm.project(M, r["x"]) for r in te]); yt = np.array([r["y"] for r in te]); av = np.array([r["avg"] for r in te])
         cal = defaultdict(lambda: [0.0, 0, 0])
         for p_, y_ in zip(pt, yt):
-            for k in (0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4):
-                L = np.floor(p_ * k) + 0.5; po = pm.p_over(M, p_, L); b = min(9, int(po * 10))
+            for L in ((0.5, 1.5, 2.5) if cnt else [np.floor(p_ * k) + 0.5 for k in (0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4)]):
+                po = pm.p_over(M, p_, L); b = min(9, int(po * 10))
                 cal[b][0] += po; cal[b][1] += y_ > L; cal[b][2] += 1
         # picks at lines near the projection: our side's record by our probability
         side = defaultdict(lambda: [0, 0])
         for p_, y_ in zip(pt, yt):
-            for k in (0.85, 0.95, 1.05, 1.15):
-                L = np.floor(p_ * k) + 0.5; po = pm.p_over(M, p_, L); c = max(po, 1 - po)
+            for L in ((0.5, 1.5) if cnt else [np.floor(p_ * k) + 0.5 for k in (0.85, 0.95, 1.05, 1.15)]):
+                po = pm.p_over(M, p_, L); c = max(po, 1 - po)
                 won = (y_ > L) == (po > 0.5); b = "55-60%" if c < .6 else "60-65%" if c < .65 else "65%+" if c >= .65 else ""
                 if c >= .55: side[b][0] += won; side[b][1] += 1
         print(f"\n== {mk}: train n={len(tr)}, test n={len(te)} | coef {np.round(M['coef'], 3)}")
         print(f"  held-out avg miss: model {np.mean(np.abs(pt - yt)):.2f} vs season average {np.mean(np.abs(av - yt)):.2f}")
         print("  calibration (predicted over % -> actual):", ", ".join(f"{100*c[0]/c[2]:.0f}->{100*c[1]/c[2]:.0f} (n={c[2]})" for _, c in sorted(cal.items()) if c[2] >= 50))
         print("  our side at lines 0.85-1.15x the projection:", ", ".join(f"{k}: {v[0]/v[1]:.1%} (n={v[1]})" for k, v in sorted(side.items())))
-        full = fit([r for y in range(2016, 2026) for r in rows[y] if r["mk"] == mk])
+        full = fit([r for y in range(2016, 2026) for r in rows[y] if r["mk"] == mk], count=cnt)
+        if cnt: print(f"  Poisson scale {M['poisson']:.2f}")
         cal_out = {f"{10*b}-{10*b+10}": [round(c[0] / c[2], 3), round(c[1] / c[2], 3), c[2]] for b, c in sorted(cal.items()) if c[2] >= 50}
         res[mk] = dict(full, test=dict(mae=float(np.mean(np.abs(pt - yt))), mae_avg=float(np.mean(np.abs(av - yt))), n=len(te), calibration=cal_out))
     res["settings"] = dict(DECAY=pm.DECAY, PRIOR_GAMES=pm.PRIOR_GAMES, OPP_SHRINK=pm.OPP_SHRINK, BINS=pm.BINS)

@@ -19,13 +19,26 @@ from collections import defaultdict
 DECAY, PRIOR_GAMES, OPP_SHRINK, BINS, RECENT = 0.85, 3.0, 4.0, 5, 4
 SAME_GROUP = True  # rushing/receiving: only teammates in the player's position group count toward vac; passing: all targets
 NEW_ONLY = True  # history: count only teammates who played the team's previous game (like a fresh injury listing)
-MARKETS = {  # our market -> (stat column, positions, Odds API market key, label)
-    "pass_yds": ("passing_yards", ("QB",), "player_pass_yds", "passing yds"),
-    "rush_yds": ("rushing_yards", ("QB", "RB"), "player_rush_yds", "rushing yds"),
-    "rec_yds": ("receiving_yards", ("WR", "TE", "RB"), "player_reception_yds", "receiving yds"),
-    "receptions": ("receptions", ("WR", "TE", "RB"), "player_receptions", "receptions"),
+MARKETS = {  # our market -> (stat column, positions, Odds API market key, label, kind)
+    # kind "ou" = over/under a line; "yes" = yes/no (anytime touchdown: 1+ rushing or receiving TD)
+    "receptions": ("receptions", ("WR", "TE", "RB"), "player_receptions", "receptions", "ou"),
+    "rec_yds": ("receiving_yards", ("WR", "TE", "RB"), "player_reception_yds", "receiving yds", "ou"),
+    "rush_yds": ("rushing_yards", ("QB", "RB"), "player_rush_yds", "rushing yds", "ou"),
+    "rush_att": ("carries", ("QB", "RB"), "player_rush_attempts", "rush attempts", "ou"),
+    "pass_yds": ("passing_yards", ("QB",), "player_pass_yds", "passing yds", "ou"),
+    "pass_att": ("attempts", ("QB",), "player_pass_attempts", "pass attempts", "ou"),
+    "pass_cmp": ("completions", ("QB",), "player_pass_completions", "completions", "ou"),
+    "pass_tds": ("passing_tds", ("QB",), "player_pass_tds", "passing TDs", "ou"),
+    "ints": ("passing_interceptions", ("QB",), "player_pass_interceptions", "interceptions", "ou"),
+    "anytime_td": ("tds", ("RB", "WR", "TE", "QB"), "player_anytime_td", "anytime TD", "yes"),
 }
-COLS = ("passing_yards", "rushing_yards", "receiving_yards", "receptions", "attempts", "carries", "targets")
+CORE = ("receptions", "rec_yds", "rush_yds", "pass_yds")   # always fetched; the rest as the request budget allows
+PASS_MK = {"pass_yds", "pass_att", "pass_cmp", "pass_tds", "ints"}   # vac counts every missing receiver; no qb_out
+RUSH_MK = {"rush_yds", "rush_att"}                                   # vac counts carries
+COUNT_MK = {"pass_tds", "ints", "anytime_td"}                       # small counts: P from a Poisson, not quantiles
+COLS = ("passing_yards", "rushing_yards", "receiving_yards", "receptions", "attempts", "carries", "targets",
+        "completions", "passing_tds", "passing_interceptions", "rushing_tds", "receiving_tds")
+STAT_COLS = sorted({v[0] for v in MARKETS.values()})
 
 
 def load_rows(text, teams):
@@ -34,8 +47,10 @@ def load_rows(text, teams):
     for r in csv.DictReader(io.StringIO(text)):
         if r.get("season_type") not in ("REG", "POST") or r.get("position") not in ("QB", "RB", "WR", "TE"): continue
         f = lambda k: float(r[k]) if r.get(k) not in (None, "", "NA") else 0.0
-        rows.append(dict(id=r["player_id"], name=r["player_display_name"], pos=r["position"], week=int(r["week"]),
-                         team=teams.get(r["team"]), opp=teams.get(r["opponent_team"]), **{k: f(k) for k in COLS}))
+        g = dict(id=r["player_id"], name=r["player_display_name"], pos=r["position"], week=int(r["week"]),
+                 team=teams.get(r["team"]), opp=teams.get(r["opponent_team"]), **{k: f(k) for k in COLS})
+        g["tds"] = g["rushing_tds"] + g["receiving_tds"]
+        rows.append(g)
     return rows
 
 
@@ -61,7 +76,7 @@ class Season:
         for g in rows:
             if not g["opp"]: continue
             self.dweeks[g["opp"]].add(g["week"])
-            for c in ("passing_yards", "rushing_yards", "receiving_yards", "receptions"):
+            for c in STAT_COLS:
                 self.allowed[(g["opp"], group(g["pos"]), c)].append((g["week"], g[c]))
                 self.league[(group(g["pos"]), c)].append((g["week"], g[c]))
         self.tw = defaultdict(dict)        # (team, week) -> {player id: row}
@@ -102,7 +117,7 @@ class Season:
         """(vac, qb_out, names of the teammates counted). out_ids None = history: teammates with no row in week wk."""
         weeks = [w for w in self.tweeks[team] if w < wk][-RECENT:]
         if not weeks: return 0.0, 0, []
-        col = "carries" if mk == "rush_yds" else "targets"
+        col = "carries" if mk in RUSH_MK else "targets"
         tot = defaultdict(float); att = defaultdict(float); names = {}
         for w in weeks:
             for i, g in self.tw[(team, w)].items(): tot[i] += g[col]; att[i] += g["attempts"]; names[i] = g["name"]
@@ -112,14 +127,14 @@ class Season:
             out_ids = [i for i in tot if i not in self.tw[(team, wk)] and (not NEW_ONLY or i in last)]
         out_ids = [i for i in out_ids if i != pid and i in tot]
         T = sum(tot.values())
-        if SAME_GROUP and mk != "pass_yds":
+        if SAME_GROUP and mk not in PASS_MK:
             me = self.games[pid][0]["pos"] if self.games[pid] else None
             grp_of = {i: group(g["pos"]) for w in weeks for i, g in self.tw[(team, w)].items()}
             same = [i for i in out_ids if me and grp_of.get(i) == group(me)]
         else: same = out_ids
         vac = min(0.8, sum(tot[i] for i in same) / T) if T else 0.0
         qb = max(att, key=att.get) if att and max(att.values()) > 0 else None
-        qb_out = int(mk != "pass_yds" and qb in out_ids)
+        qb_out = int(mk not in PASS_MK and qb in out_ids)
         return vac, qb_out, [names[i] for i in out_ids if (T and tot[i] / T >= 0.03) or i == qb]
 
     def features(self, pid, pos, opp, wk, mk, imp, team=None, out_ids=None):
@@ -150,10 +165,15 @@ def implied_points(lines):
     return out
 
 
-def project(model, x): return max(0.5, float(np.dot(model["coef"], x)))
+def project(model, x): return max(model.get("floor", 0.5), float(np.dot(model["coef"], x)))
 
 
 def p_over(model, proj, line):
+    if model.get("poisson"):  # small counts: Poisson with mean = projection x the fitted scale
+        lam = proj * model["poisson"]; k = int(np.floor(line))
+        cdf, term = 0.0, np.exp(-lam)
+        for i in range(k + 1): cdf += term; term *= lam / (i + 1)
+        return float(1 - cdf)
     i = int(np.searchsorted(model["edges"], proj)); q = np.array(model["q"][i]) * proj
     return float(1 - np.interp(line, q, np.linspace(0, 1, 101), left=0, right=1))
 

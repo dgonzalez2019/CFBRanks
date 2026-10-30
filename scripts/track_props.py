@@ -8,8 +8,10 @@ data/nfl/props.json = {updated, season, test: {market: research test numbers}, p
   team, opp, player, pos, mk, line, over, under, books, proj, base, avg, last3, games, opp_f, imp, vac, qb_out,
   mates_out, inj_adj, p_over, side,
   conf, book_p, top10, top5, actual, won}]}
-conf = our probability that our side wins; book_p = the books' no-vig probability for that side. top10 / top5 mark
-each week's most confident 10% / 5% of props (frozen at kickoff).
+conf = our probability that our side wins; book_p = the books' no-vig probability for that side (anytime TD with only a
+Yes price: its implied probability, vig included). Anytime TD: side "yes" unless we rate No higher than the books and
+No is offered. top10 / top5 mark each week's most confident 10% / 5% within each market (anytime TD: by our edge over
+the books), frozen at kickoff.
 Usage: python scripts/track_props.py"""
 import datetime, json, pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -73,21 +75,30 @@ def main():
             opp = G["away"] if p["team"] == G["home"] else G["home"]
             f = S.features(p["id"], p["pos"], opp, wk, mk, imp.get((wk, p["team"]), 22.5), p["team"], out_ids.get(p["team"], []))
             if not f: props.pop(key, None); continue
+            if mk not in model: continue
+            dp = 2 if mk in pm.COUNT_MK else 1
             M = model[mk]; proj = pm.project(M, f["x"]); po = pm.p_over(M, proj, line)
             inj_adj = M["coef"][4] * f["x"][4] + M["coef"][5] * f["x"][5]  # points of the projection from teammates out
-            side = "over" if po >= 0.5 else "under"; conf = po if side == "over" else 1 - po
-            bo, bu = implied_prob(over), implied_prob(under)
+            if pm.MARKETS[mk][4] == "yes":
+                by = implied_prob(over); bn = implied_prob(under) if under is not None else None
+                byes = by / (by + bn) if bn is not None else by
+                side = "no" if bn is not None and (1 - po) > (1 - byes) and po < byes else "yes"
+                conf = po if side == "yes" else 1 - po; bp = byes if side == "yes" else 1 - byes
+            else:
+                side = "over" if po >= 0.5 else "under"; conf = po if side == "over" else 1 - po
+                bo, bu = implied_prob(over), implied_prob(under); bp = (bo if side == "over" else bu) / (bo + bu)
             props[key] = dict(key=key, week=wk, start=G["start"], home=G["home"], away=G["away"], team=p["team"], opp=opp,
                               player=player, pid=p["id"], pos=p["pos"], mk=mk, line=line, over=over, under=under, books=books,
-                              proj=round(proj, 1), base=round(f["base"], 1), avg=round(f["avg"], 1), last3=round(f["last3"], 1),
-                              games=f["games"], prior=None if f["prior"] is None else round(f["prior"], 1),
+                              proj=round(proj, dp), base=round(f["base"], dp), avg=round(f["avg"], dp), last3=round(f["last3"], dp),
+                              games=f["games"], prior=None if f["prior"] is None else round(f["prior"], dp),
                               opp_f=round(f["opp"], 3), imp=round(f["imp"], 1), vac=round(f["vac"], 3), qb_out=f["qb_out"],
                               mates_out=f["out"], inj_adj=round(inj_adj, 1), p_over=round(po, 4), side=side, conf=round(conf, 4),
-                              book_p=round((bo if side == "over" else bu) / (bo + bu), 4), actual=None, won=None)
+                              book_p=round(bp, 4), actual=None, won=None)
     # weekly top 10% / 5% among props not yet started (frozen ones keep their flags)
-    for wk in {p["week"] for p in props.values()}:
-        live = [p for p in props.values() if p["week"] == wk and datetime.datetime.fromisoformat(p["start"].replace("Z", "+00:00")) > now]
-        allw = sorted((p for p in props.values() if p["week"] == wk), key=lambda p: -p["conf"])
+    for wk, mk in {(p["week"], p["mk"]) for p in props.values()}:
+        rank = (lambda p: p["conf"] - p["book_p"]) if pm.MARKETS[mk][4] == "yes" else (lambda p: p["conf"])
+        live = [p for p in props.values() if p["week"] == wk and p["mk"] == mk and datetime.datetime.fromisoformat(p["start"].replace("Z", "+00:00")) > now]
+        allw = sorted((p for p in props.values() if p["week"] == wk and p["mk"] == mk), key=lambda p: -rank(p))
         n10, n5 = max(1, round(len(allw) * .10)), max(1, round(len(allw) * .05))
         ranked = {p["key"]: i for i, p in enumerate(allw)}
         for p in live: p["top10"] = ranked[p["key"]] < n10; p["top5"] = ranked[p["key"]] < n5
@@ -97,7 +108,7 @@ def main():
         s = stat.get((p.get("pid"), p["week"]))
         if not s: p["void"] = True; continue
         a = s[pm.MARKETS[p["mk"]][0]]; p["actual"] = a
-        p["won"] = None if a == p["line"] else (a > p["line"]) == (p["side"] == "over")
+        p["won"] = None if a == p["line"] else (a > p["line"]) == (p["side"] in ("over", "yes"))
         if a == p["line"]: p["void"] = True
     test = {mk: model[mk].get("test") for mk in pm.MARKETS}
     OUT.write_text(json.dumps({"updated": now.isoformat(timespec="seconds"), "season": season, "remaining": lines_store.get("remaining"),
