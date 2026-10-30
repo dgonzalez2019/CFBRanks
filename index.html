@@ -705,12 +705,12 @@ h1 small b{font-weight:inherit}
 /* ---------------- state ---------------- */
 const FCS = "FCS (pooled)";
 let GAMES = [], SOURCE = {kind:"sample", label:"Sample season (simulated teams)", updated:null};
-let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], ROLES = [], TSTATS = null, TSP = null, PROPS = null, PRMODE = "all", PRVIEW = "up", PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
+let SCHED = [], TEAMS = {}, TRACKER = null, INJURIES = {}, INJ_UPDATED = null, RESEARCH = null, PREV = [], PRIOR = null, PLAYERS = [], ROLES = [], TSTATS = null, TSP = null, PROPS = null, PRMODE = "all", LVIEW = "up", PVAL = {}, OUT = {}, INJOPEN = false, LINES = [], UNITS = null, BT = null, PRED = null, RONLY = [], RESULT = null, BENCH = 25, SHOWALL = false, LMODE = "picks", db = null, canSave = false;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 LMODE = ["spread","total","props"].includes(store.get("sor.lmode")) ? store.get("sor.lmode") : "picks";
-PRMODE = store.get("sor.prmode") || "all"; PRVIEW = store.get("sor.prview") === "res" ? "res" : "up";
+PRMODE = store.get("sor.prmode") || "all"; LVIEW = store.get("sor.lview") === "res" ? "res" : "up";
 
 /* ---------------- sample season (invented schools) ---------------- */
 function sampleSeason(){
@@ -1603,12 +1603,33 @@ const lineSeg = () => `<div class="seg" role="tablist" aria-label="Top picks, sp
   `<button type="button" role="tab" data-lm="${k}" aria-selected="${LMODE===k}">${n}</button>`).join("")}</div>`;
 const bindLineSeg = () => $("#lout").querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { LMODE = b.dataset.lm; store.set("sor.lmode", LMODE);
   document.startViewTransition && !REDUCED ? document.startViewTransition(renderLines) : renderLines(); }));
+// Every Lines view (Top picks, Spreads, Totals, Player props) has the same Upcoming | Results switch (LVIEW, stored as
+// sor.lview): Upcoming = games not yet kicked off; Results = games that have, each pick locked at kickoff and then
+// graded after the final, with the live records.
+const viewBar = (nUp, nRes, extra = "") => `<div class="propbar"><div class="seg sm" role="tablist" aria-label="Upcoming or results">${[["up",`Upcoming<i>${nUp}</i>`],["res",`Results<i>${nRes}</i>`]].map(([k,n]) =>
+  `<button type="button" role="tab" data-lv="${k}" aria-selected="${LVIEW===k}">${n}</button>`).join("")}</div>${extra}</div>`;
+const bindViewBar = render => $("#lout").querySelectorAll("[data-lv]").forEach(b => b.addEventListener("click", () => { LVIEW = b.dataset.lv; store.set("sor.lview", LVIEW);
+  document.startViewTransition && !REDUCED ? document.startViewTransition(render) : render(); }));
+const hasStarted = start => !!start && new Date(start).getTime() <= Date.now();
+const startedGames = () => (TRACKER?.games||[]).filter(g => hasStarted(g.start)).sort((a,b) => b.start.localeCompare(a.start));
+// A finished (or in-progress) tracked game as a pick card: the pick as saved at kickoff, then its result.
+function resultCard(g, kind, i){
+  const spread = kind === "spread", r = g.results?.[spread ? "model_close" : "ou_model"], home = g.ours > g.line;
+  const fin = g.home_pts != null ? ` · final ${g.away_pts}–${g.home_pts}` : "";
+  const why = r === "W" ? `<b class="pos">${spread ? "Covered" : "Hit"}</b>${fin}` : r === "L" ? `<b class="neg">${spread ? "Didn't cover" : "Missed"}</b>${fin}` : r === "P" ? `Push${fin}` : "Locked at kickoff · graded after the final";
+  return pickCard({kind, conf:spread ? g.conf : g.tconf, top:spread ? g.top_conf : g.ttop_conf, top5:spread ? g.top5 : g.ttop5, start:g.start,
+    text:spread ? `${esc(home ? g.home : g.away)} ${signed(home ? -g.line : g.line)}` : `${g.ours_total > g.total ? "Over" : "Under"} ${g.total.toFixed(1)}`,
+    game:gameLine(g.away, g.home, g.neutral, spread ? (home ? g.home : g.away) : null), key:g.key, why}, i);
+}
+const resultList = (gs, kind) => gs.length ? `<div class="picks">${gs.map((g,i) => resultCard(g, kind, i)).join("")}</div>`
+  : `<div class="panel empty">No ${kind === "total" ? "totals" : "spread"} picks from games that have kicked off yet. Picks are saved before kickoff and appear here once the game starts.</div>`;
+
 function renderLines(){
   if(LMODE === "props" && LEAGUE !== "nfl") LMODE = "picks";
   if(LMODE === "picks"){ renderPicks(); return; }
   if(LMODE === "props"){ renderProps(); return; }
   if(!LINES.length){ $("#lout").innerHTML = `<div class="panel empty">No betting lines loaded yet. They arrive with the next data update.</div>`; return; }
-  const up = LINES.filter(l => l.hp==null && PRED.T[l.home] && PRED.T[l.away]).map(l => {
+  const up = LINES.filter(l => l.hp==null && !hasStarted(l.start) && PRED.T[l.home] && PRED.T[l.away]).map(l => {
     const ih = autoModelOut(l.home), ia = autoModelOut(l.away);
     const p = predict(PRED, l.home, l.away, l.neutral?"N":"A", ih, ia), mkt = -l.spread;
     return {...l, ours:p.margin, mkt, diff:p.margin-mkt, ourTotal:p.sa+p.sb, pHome:p.pa, ih, ia};
@@ -1688,10 +1709,8 @@ function renderLines(){
     return `<div class="bar"><h2>Recent results</h2><span class="sub">${w}–${g.length - w} in the last 10 days</span></div><div class="results">${g.map(chip).join("")}</div>`; };
   if(LMODE === "total"){
     const tnow = totalsOf(now), tlater = totalsOf(later), tw = TOTCONF_RECORD.reduce((s,r)=>s+r[1],0), tl = TOTCONF_RECORD.reduce((s,r)=>s+r[2],0);
-    $("#lout").innerHTML = seg + (tnow.length ? ttable(tnow) : `<div class="panel empty">No upcoming games with a betting total.</div>`) +
-      `<p class="note">Betting total = median over/under across sportsbooks. Our total comes from each team's points scored and allowed, adjusted for opponents, minus points for players listed Out. Sorted by totals confidence, highest first.</p>` +
-      (tlater.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${tlater.length} early totals)</span></summary><div style="margin-top:12px">${ttable(tlater)}</div></details>` : "") +
-      recent("total") + `<div class="bar"><h2>Live track record: totals</h2></div>
+    const tres = startedGames().filter(g => g.total != null && g.ours_total != null);
+    const totRecord = `<div class="bar"><h2>Live track record: totals</h2></div>
       <div class="panel scroll"><table><thead><tr><th>Strategy (fixed in advance)</th><th class="num">Record</th></tr></thead><tbody>
         <tr><td>Our side of the total at kickoff</td><td class="num">${rec("ou_model")}</td></tr>
         <tr><td><b>Top confidence</b> <span class="sub">top 10% of each week by totals score</span></td><td class="num">${rec("ou_top")}</td></tr>
@@ -1699,13 +1718,20 @@ function renderLines(){
       </tbody></table></div>
       <p class="note"><b>How totals confidence works:</b> every game with a total gets a score, the chance our side (over when our total is above the line, under when below) wins. It rises when both teams have mostly gone the other way this season (the market may have overreacted to them), when the total is high and we lean under or low and we lean over, when the two teams' pace agrees with our side, and a little as our gap from the total grows. Each week the top 10% are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Scores run about 42–56%.</p>
       <p class="note"><b>Be careful with these:</b> on seasons the model wasn't trained on, the top 10% went ${TOTCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${tw}–${tl} (${(100*tw/(tw+tl)).toFixed(1)}%) overall, ${LG.totalNote} This week: ${TG.filter(g => !g.results && g.ttop_conf).sort((x,y)=>y.tconf-x.tconf).map(g => `<b>${g.ours_total > g.total ? "Over" : "Under"} ${g.total.toFixed(1)}</b> ${esc(g.away)}–${esc(g.home)} ${(g.tconf*100).toFixed(1)}%${g.ttop5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>`;
+    $("#lout").innerHTML = seg + viewBar(tnow.length + tlater.length, tres.length) + (LVIEW === "res" ? recent("total") + resultList(tres, "total") + totRecord :
+      (tnow.length ? ttable(tnow) : `<div class="panel empty">No upcoming games with a betting total. Finished games are under Results.</div>`) +
+      `<p class="note">Betting total = median over/under across sportsbooks. Our total comes from each team's points scored and allowed, adjusted for opponents, minus points for players listed Out. Sorted by totals confidence, highest first.</p>` +
+      (tlater.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${tlater.length} early totals)</span></summary><div style="margin-top:12px">${ttable(tlater)}</div></details>` : ""));
+    bindViewBar(renderLines);
     bindLineSeg();
     return;
   }
-  $("#lout").innerHTML = seg + (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines.</div>`) +
+  const sres = startedGames().filter(g => g.line != null && g.ours != null);
+  $("#lout").innerHTML = seg + viewBar(now.length + later.length, sres.length) + (LVIEW === "res" ? recent("spread") + resultList(sres, "spread") + tracker + record + past :
+    (now.length ? table(now) : `<div class="panel empty">No upcoming games with betting lines. Finished games are under Results.</div>`) +
     `<p class="note">Betting line = median across sportsbooks (${esc([...new Set(now.flatMap(l=>l.books))].join(", ")) || "—"}). Diff = how many points our line differs; "we lean" is the side our model likes more than the market. Sorted by confidence, highest first (games without a confidence score last, by difference). The market is usually right when we disagree: treat big differences as places our model may be missing something (injuries, depth, talent), not as picks.</p>` +
-    (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : "") +
-    recent("spread") + tracker + record + past;
+    (later.length ? `<details class="panel" style="padding:12px 16px"><summary><b>Later weeks</b> <span class="sub">(${later.length} early lines, often from one sportsbook and posted long ago)</span></summary><div style="margin-top:12px">${table(later)}</div></details>` : ""));
+  bindViewBar(renderLines);
   bindLineSeg();
 }
 
@@ -1771,14 +1797,32 @@ function renderPicks(){
   const shown = keep.filter(p => PMODE === "all" || p.kind === PMODE);
   const nS = keep.filter(p => p.kind === "spread").length, nT = keep.length - nS;
   const card = pickCard;
-  const seg = `<div class="seg sm" role="tablist" aria-label="Which picks"><span class="seglabel">Show</span>${[["all",`All<i>${keep.length}</i>`],["spread",`Spreads<i>${nS}</i>`],["total",`Totals<i>${nT}</i>`]].map(([k,n]) =>
-    `<button type="button" role="tab" data-pm="${k}" aria-selected="${PMODE===k}">${n}</button>`).join("")}</div>`;
+  // Results: the same 50%+ picks from games that have kicked off, graded after the final (stars = each market's own flags).
+  const resP = startedGames().flatMap(g => [...(g.conf != null && g.line != null && g.conf >= .5 ? [{g, kind:"spread", conf:g.conf}] : []),
+    ...(g.tconf != null && g.total != null && g.tconf >= .5 ? [{g, kind:"total", conf:g.tconf}] : [])]);
+  const typeSel = n => `<label class="ctrl">Type <select id="pmtype" aria-label="Pick type">${[["all","Spreads and totals",n.all],["spread","Spreads",n.spread],["total","Totals",n.total]].map(([k,t,c]) =>
+    `<option value="${k}"${PMODE===k ? " selected" : ""}>${t} (${c})</option>`).join("")}</select></label>`;
+  const bindType = () => $("#pmtype").addEventListener("change", e => { PMODE = e.target.value; flipRender("#lout .picks", renderPicks); });
+  if(LVIEW === "res"){
+    const shownR = resP.filter(p => PMODE === "all" || p.kind === PMODE);
+    const tally = l => { const w = l.filter(x => x === "W").length, L = l.filter(x => x === "L").length; return L + w ? `${w}–${L} <span class="sub">${Math.round(100*w/(w+L))}%</span>` : "—"; };
+    const gr = (TRACKER?.games||[]).filter(g => g.results);
+    const row = (label, key, test) => `<tr><td>${label}</td><td class="num">${tally(gr.filter(test).map(g => g.results[key]))}</td></tr>`;
+    $("#ltitle").textContent = "Top picks: results";
+    $("#lout").innerHTML = lineSeg() + viewBar(keep.length, resP.length, typeSel({all:resP.length, spread:resP.filter(p => p.kind === "spread").length, total:resP.filter(p => p.kind === "total").length})) +
+      `<div class="panel scroll"><table><thead><tr><th>Live record</th><th class="num">Record</th></tr></thead><tbody>
+        ${row("Spread picks rated 50%+", "model_close", g => g.conf >= .5)}${row("★ Top 10% spreads", "top_conf", g => g.top_conf)}${row("★ Top 5% spreads", "top5", g => g.top5)}
+        ${row("Totals picks rated 50%+", "ou_model", g => g.tconf >= .5)}${row("★ Top 10% totals", "ou_top", g => g.ttop_conf)}${row("★ Top 5% totals", "ou_top5", g => g.ttop5)}
+      </tbody></table></div><p class="note" style="margin:0">Every pick is graded against the line at kickoff; 52.4% is break-even at standard odds.</p>` +
+      (shownR.length ? `<div class="picks">${shownR.map((p,i) => resultCard(p.g, p.kind, i)).join("")}</div>` : `<div class="panel empty">No 50%+ picks from games that have kicked off yet.</div>`);
+    bindType(); bindViewBar(renderPicks); bindLineSeg(); return;
+  }
   $("#ltitle").textContent = "This week's top confidence picks";
-  $("#lout").innerHTML = lineSeg() + seg +
+  $("#lout").innerHTML = lineSeg() + viewBar(keep.length, resP.length, typeSel({all:keep.length, spread:nS, total:nT})) +
     `<p class="note" style="margin:0">This week's spread and total picks rated 50% or higher, before kickoff, most confident first. ★ marks the top of all ${nAll} spread and total picks this week ranked together: <b>${n5}</b> in the top 5% and <b>${n10}</b> in the top 10%.</p>` +
     (shown.length ? `<div class="picks">${shown.map(card).join("")}</div>` : `<div class="panel empty">No upcoming picks at 50% or more yet. Picks appear once a game is within 7 days of kickoff.</div>`) +
     `<p class="note">Confidence is the model's chance the pick beats the betting line (spreads) or total (over/unders). Even the best-rated picks are expected to win only about 55% of the time, and totals scores are much less proven than spread scores. Results are tracked under Spreads and Totals. Not betting advice.</p>`;
-  $("#lout").querySelectorAll("[data-pm]").forEach(b => b.addEventListener("click", () => { PMODE = b.dataset.pm; flipRender("#lout .picks", renderPicks); }));
+  bindType(); bindViewBar(renderPicks);
   bindLineSeg();
 }
 
@@ -1803,19 +1847,16 @@ function renderProps(){
     .sort((a,b) => isYes(a) && isYes(b) ? (b.conf - b.book_p) - (a.conf - a.book_p) : b.conf - a.conf);
   // Results: every prop whose game has kicked off, newest first: locked until graded, then Hit / Missed.
   const done = all.filter(started).sort((a,b) => b.start.localeCompare(a.start) || b.conf - a.conf);
-  const shown = (PRVIEW === "res" ? done : up).filter(ofType);
+  const shown = (LVIEW === "res" ? done : up).filter(ofType);
   const pc = v => Math.round(v*100) + "%";
   const card = (p,i) => pickCard({kind:"prop", kindLabel:isYes(p) ? "Anytime TD" : `${PROP_MK[p.mk][0]} prop`, conf:p.conf, top:p.top10, top5:p.top5, start:p.start,
     text:propLine(p), game:propWho(p), key:p.key, note:p.mates_out?.length ? "teammates out" : "",
     why:!started(p) ? (isYes(p) ? `Books <b>${pc(p.book_p)}</b> · ${amer(p.side === "no" ? p.under : p.over)}` : `Proj <b>${p.proj}</b> · Line ${(+p.line).toFixed(1)} · ${amer(p.side === "over" ? p.over : p.under)}`)
       : p.won === true ? `<b class="pos">Hit</b> · final ${p.actual}` : p.won === false ? `<b class="neg">Missed</b> · final ${p.actual}` : p.void ? "Void (didn't play)" : "Locked at kickoff · graded after the final"}, i);
   const graded = all.filter(p => p.won === true || p.won === false);
-  const pool = PRVIEW === "res" ? done : up, cnt = k => k === "all" ? pool.filter(p => !isYes(p)).length : pool.filter(p => p.mk === k).length;
-  const bar = `<div class="propbar">
-      <div class="seg sm" role="tablist" aria-label="Upcoming or results">${[["up",`Upcoming<i>${up.length}</i>`],["res",`Results<i>${done.length}</i>`]].map(([k,n]) =>
-        `<button type="button" role="tab" data-prv="${k}" aria-selected="${PRVIEW===k}">${n}</button>`).join("")}</div>
-      <label class="ctrl">Type <select id="prtype" aria-label="Prop type">${[["all","All over/unders"], ...Object.entries(PROP_MK).map(([k,v]) => [k, v[0]])].map(([k,n]) =>
-        `<option value="${k}"${PRMODE===k ? " selected" : ""}>${n} (${cnt(k)})</option>`).join("")}</select></label></div>`;
+  const pool = LVIEW === "res" ? done : up, cnt = k => k === "all" ? pool.filter(p => !isYes(p)).length : pool.filter(p => p.mk === k).length;
+  const bar = viewBar(up.length, done.length, `<label class="ctrl">Type <select id="prtype" aria-label="Prop type">${[["all","All over/unders"], ...Object.entries(PROP_MK).map(([k,v]) => [k, v[0]])].map(([k,n]) =>
+        `<option value="${k}"${PRMODE===k ? " selected" : ""}>${n} (${cnt(k)})</option>`).join("")}</select></label>`);
   const recRow = (label, l) => { const w = l.filter(p => p.won).length; return l.length ? `<tr><td>${label}</td><td class="num">${w}–${l.length - w}</td><td class="num">${Math.round(100*w/l.length)}%</td></tr>` : ""; };
   const record = graded.length ? `<div class="panel scroll"><table><thead><tr><th>Live record</th><th class="num">Record</th><th class="num">Hit</th></tr></thead><tbody>
     ${recRow("★ Top 5%", graded.filter(p => p.top5))}${recRow("★ Top 10%", graded.filter(p => p.top10))}${recRow("Rated 60%+", graded.filter(p => p.conf >= .6))}${recRow("All props", graded)}
@@ -1825,8 +1866,8 @@ function renderProps(){
   const T = PROPS?.test || {};
   const tested = Object.entries(PROP_MK).filter(([k]) => T[k]).map(([k,v]) => `${v[0].toLowerCase()} ${T[k].mae.toFixed(["receptions","pass_tds","ints","anytime_td"].includes(k) ? 2 : 1)} vs ${T[k].mae_avg.toFixed(["receptions","pass_tds","ints","anytime_td"].includes(k) ? 2 : 1)}`).join(", ");
   const td = PRMODE === "anytime_td", typeTxt = PRMODE === "all" ? "over/under prop" : `${PROP_MK[PRMODE][1]} prop`;
-  $("#ltitle").textContent = PRVIEW === "res" ? "Player prop results" : "This week's player props";
-  $("#lout").innerHTML = lineSeg() + bar + (PRVIEW === "res"
+  $("#ltitle").textContent = LVIEW === "res" ? "Player prop results" : "This week's player props";
+  $("#lout").innerHTML = lineSeg() + bar + (LVIEW === "res"
     ? record + (shown.length ? `<div class="picks">${shown.map(card).join("")}</div>` : `<div class="panel empty">No ${typeTxt}s from games that have kicked off yet.</div>`)
     : `<p class="note" style="margin:0">${td ? "Each player's chance to score a rushing or receiving touchdown against the books' price, best value first (our chance minus the books'). ★ marks this week's top 5% and 10% by that edge."
         : `Every ${typeTxt} the sportsbooks have posted for games in the next day and a half, with our projection and our chance the side we take wins, most confident first. ★ marks this week's top 5% and 10% of each prop type.${PRMODE === "all" ? " Anytime touchdowns are under their own type." : ""}`}</p>` +
@@ -1834,8 +1875,7 @@ function renderProps(){
         : `<div class="panel empty">No upcoming ${typeTxt}s right now. Lines are pulled about a day and a half before each game, so Sunday's games show up on Saturday${["all","receptions","rec_yds","rush_yds","pass_yds"].includes(PRMODE) ? "" : "; this type is fetched when the free request budget allows"}${PROPS?.updated ? `. Last checked ${new Date(PROPS.updated).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})}` : ""}. Finished games are under Results.</div>`)) +
     `<p class="note">How the projection works: the player's games this season, the latest counting most, plus last season as a starting point; what this opponent allows to his position; his team's expected points from the betting line; and teammates listed Out or Doubtful (their recent share of the targets or carries; passing props count every missing receiver). Tested on 2023–25 games it wasn't fit on, it missed by less than a plain season average (${tested || "see research/nfl_props.py"}), and its chances were well calibrated (a "60%" side hit about 60% at lines near our projection). Sportsbook prop lines aren't available historically for free, so it has <b>not</b> been tested against real prop lines: books are sharper than our projection, so expect real results well below those numbers. The live record under Results is the honest test. Not betting advice.</p>`;
   $("#prtype").addEventListener("change", e => { PRMODE = e.target.value; store.set("sor.prmode", PRMODE); flipRender("#lout .picks", renderProps); });
-  $("#lout").querySelectorAll("[data-prv]").forEach(b => b.addEventListener("click", () => { PRVIEW = b.dataset.prv; store.set("sor.prview", PRVIEW);
-    document.startViewTransition && !REDUCED ? document.startViewTransition(renderProps) : renderProps(); }));
+  bindViewBar(renderProps);
   bindLineSeg();
 }
 function openPropSheet(key){
