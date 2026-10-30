@@ -3,6 +3,8 @@ on:
   schedule:
     - cron: "17 */3 * * 6,0"   # every 3 hours on Saturdays and Sundays (UTC)
     - cron: "17 12 * * 1-5"    # once each weekday morning
+    - cron: "37 4 * * 2,5"     # after Monday and Thursday night NFL games: 11:37 PM ET (EST) Mon/Thu
+    - cron: "7 5 * * 2,5"      # and 12:07 AM ET (EST); both are UTC Tue/Fri
   workflow_dispatch: {}
 permissions:
   contents: write
