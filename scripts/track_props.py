@@ -102,9 +102,12 @@ def main():
         n10, n5 = max(1, round(len(allw) * .10)), max(1, round(len(allw) * .05))
         ranked = {p["key"]: i for i, p in enumerate(allw)}
         for p in live: p["top10"] = ranked[p["key"]] < n10; p["top5"] = ranked[p["key"]] < n5
-    # grading
+    # grading: only once the team's player stats for that week are posted (they lag the final score by hours);
+    # a player with no stats when his teammates have them didn't play: void
+    posted = {(g["team"], g["week"]) for g in cur}
     for p in props.values():
         if p["won"] is not None or p.get("void") or (p["week"], p["home"], p["away"]) not in final: continue
+        if (p["team"], p["week"]) not in posted: continue
         s = stat.get((p.get("pid"), p["week"]))
         if not s: p["void"] = True; continue
         a = s[pm.MARKETS[p["mk"]][0]]; p["actual"] = a
