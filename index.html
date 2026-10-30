@@ -278,6 +278,8 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;backgrou
 @keyframes cardIn{from{opacity:0;translate:0 18px}}
 .pick:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 .pick.hot{border-color:color-mix(in srgb,var(--gold) 45%,var(--line))}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px 10px}
+.ptime{flex:none;margin-top:2px;font:600 12.5px/1.2 var(--body);color:var(--muted);background:color-mix(in srgb,var(--ink) 6%,transparent);padding:5px 9px;border-radius:999px;white-space:nowrap}
 .pgame{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0;font:600 16.5px/1.25 var(--body);color:var(--ink)}
 .pteam{display:inline-flex;align-items:center;color:var(--ink)}
 .pteam .mono{width:28px;height:28px;margin-right:9px}
@@ -1743,12 +1745,12 @@ const shortWhen = s => { if(!s) return "Date TBA"; const d = new Date(s), et = {
   const mid = d.toLocaleTimeString("en-US", {...et, hour12:false, hour:"2-digit", minute:"2-digit"});
   return `${d.toLocaleDateString([], {...et, weekday:"short"})} ${/^(00|24):00$/.test(mid) ? "TBA" : d.toLocaleTimeString([], {...et, hour:"numeric", minute:"2-digit"}) + " ET"}`; };
 const pickCard = (p, i) => `<article class="pick${p.top ? " hot" : ""}" data-k="${p.kind}|${esc(p.key || "")}" role="button" tabindex="0" aria-label="Details for this pick" style="--i:${Math.min(i,20)}">
-    <div class="pgame">${p.game}</div>
+    <div class="phead"><div class="pgame">${p.game}</div><time class="ptime"${p.start ? ` datetime="${esc(p.start)}"` : ""}>${shortWhen(p.start)}</time></div>
     <div class="pbet">
       <div><span class="pkind">${p.kindLabel || (p.kind === "spread" ? "Spread" : "Over/under")}</span><b class="ptext">${p.text}</b></div>
       <div class="pconf">${p.conf != null ? `<div class="ringwrap"><div class="ring" style="--v:${(p.conf*100).toFixed(1)}"></div><b>${(p.conf*100).toFixed(1)}%</b></div>${p.top5 ? `<em>★ Top 5%</em>` : p.top ? `<em>★ Top 10%</em>` : `<span>chance to hit</span>`}` : `<div class="ringwrap"><b class="none">—</b></div><span>no score yet</span>`}</div>
     </div>
-    <p class="pmeta" title="${esc(String(p.why).replace(/<[^>]+>/g, ""))}${p.note ? " · " + esc(p.note.replace(/<[^>]+>/g, "")) : ""}"><span class="pmeta-t"><time${p.start ? ` datetime="${esc(p.start)}"` : ""}>${shortWhen(p.start)}</time> · ${p.why}${p.note ? " · injuries counted" : ""}</span><span class="pmore" aria-hidden="true">Details ›</span></p>
+    <p class="pmeta" title="${esc(String(p.why).replace(/<[^>]+>/g, ""))}${p.note ? " · " + esc(p.note.replace(/<[^>]+>/g, "")) : ""}"><span class="pmeta-t">${p.why}${p.note ? " · injuries counted" : ""}</span><span class="pmore" aria-hidden="true">Details ›</span></p>
   </article>`;
 // "Ours UNLV −23.0 · Line −24.5": the line's team is left out when it's the same favorite as ours.
 const oursVsLine = (home, away, ours, line) => { const same = Math.abs(line) >= .25 && Math.abs(ours) >= .25 && (ours > 0) === (line > 0);
@@ -1957,8 +1959,8 @@ function upcomingFor(team){
       pred = `${p.sa}–${p.sb}`; win = `<span class="${p.pa >= .5 ? "pos" : "neg"}">${Math.round(p.pa*100)}%</span>`; }
     const orank = RESULT.byTeam[opp]?.rank;
     return `<tr ${RESULT.byTeam[opp] ? `class="click" data-team="${esc(opp)}" tabindex="0"` : ""}>
-      <td class="num">${g.week}</td><td class="sub hide-sm">${g.start ? gameDay(g.start) : "TBA"}</td>
-      <td><span class="sub">${g.neutral ? "vs (N)" : home ? "vs" : "@"}</span> ${orank ? `<span class="sub">#${orank}</span> ` : ""}<span class="tm">${esc(opp)}</span> <span class="sub hide-sm">${RESULT.byTeam[opp] ? `${RESULT.byTeam[opp].w}-${RESULT.byTeam[opp].l}` : ""}</span><span class="sub show-sm">${g.start ? gameDay(g.start) : "TBA"}</span></td>
+      <td class="num">${g.week}</td><td class="sub hide-sm">${g.start ? gameWhen(g.start) : "TBA"}</td>
+      <td><span class="sub">${g.neutral ? "vs (N)" : home ? "vs" : "@"}</span> ${orank ? `<span class="sub">#${orank}</span> ` : ""}<span class="tm">${esc(opp)}</span> <span class="sub hide-sm">${RESULT.byTeam[opp] ? `${RESULT.byTeam[opp].w}-${RESULT.byTeam[opp].l}` : ""}</span><span class="sub show-sm">${g.start ? gameWhen(g.start) : "TBA"}</span></td>
       <td class="num">${pred}</td><td class="num">${win}</td>
       <td class="num hide-sm">${ln && ln.spread != null ? lineStr(g.home, g.away, -ln.spread) : "—"}</td></tr>`; }).join("");
   return `<div class="bar"><h2>Still to play</h2><span class="sub">${rest.length} game${rest.length === 1 ? "" : "s"}</span></div>
