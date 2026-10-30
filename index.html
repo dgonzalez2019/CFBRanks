@@ -1803,6 +1803,12 @@ function renderProps(){
   const up = all.filter(p => new Date(p.start).getTime() > nowMs)
     .sort((a,b) => isYes(a) && isYes(b) ? (b.conf - b.book_p) - (a.conf - a.book_p) : b.conf - a.conf);
   const shown = up.filter(p => PRMODE === "all" ? !isYes(p) : p.mk === PRMODE);
+  // Props from games that already kicked off (last 4 days) stay listed below, locked, with the result once graded.
+  const recent = all.filter(p => { const t = new Date(p.start).getTime(); return t <= nowMs && t > nowMs - 4*864e5; })
+    .filter(p => PRMODE === "all" ? !isYes(p) : p.mk === PRMODE).sort((a,b) => b.start.localeCompare(a.start) || b.conf - a.conf);
+  const lockedCard = (p,i) => pickCard({kind:"prop", kindLabel:isYes(p) ? "Anytime TD" : `${PROP_MK[p.mk][0]} prop`, conf:p.conf, top:p.top10, top5:p.top5, start:p.start,
+    text:propLine(p), game:propWho(p), key:p.key,
+    why:p.won === true ? `<b class="pos">Hit</b> · final ${p.actual}` : p.won === false ? `<b class="neg">Missed</b> · final ${p.actual}` : p.void ? "Void (didn't play)" : `Locked at kickoff · ${isYes(p) ? `books ${Math.round(p.book_p*100)}%` : `proj ${p.proj}`}`}, i);
   const cnt = k => k === "all" ? up.filter(p => !isYes(p)).length : up.filter(p => p.mk === k).length;
   const seg = `<div class="subtabs" role="tablist" aria-label="Prop type">${[["all","All"], ...Object.entries(PROP_MK).map(([k,v]) => [k, v[0]])].map(([k,n]) =>
     `<button type="button" role="tab" data-prm="${k}" aria-selected="${PRMODE===k}">${n}<i>${cnt(k)}</i></button>`).join("")}</div>`;
@@ -1824,7 +1830,8 @@ function renderProps(){
         text:propLine(p), game:propWho(p), key:p.key,
         why:isYes(p) ? `Books <b>${pc(p.book_p)}</b> · ${amer(p.side === "no" ? p.under : p.over)}` : `Proj <b>${p.proj}</b> · Line ${(+p.line).toFixed(1)} · ${amer(p.side === "over" ? p.over : p.under)}`,
         note:p.mates_out?.length ? "teammates out" : ""}, i)).join("")}</div>`
-      : `<div class="panel empty">No ${PRMODE === "all" ? "player" : PROP_MK[PRMODE][1]} props posted yet. They appear about a day and a half before each game${PRMODE === "all" || ["receptions","rec_yds","rush_yds","pass_yds"].includes(PRMODE) ? "" : "; this type is fetched when the free request budget allows"}${PROPS?.updated ? ` (last checked ${new Date(PROPS.updated).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})})` : ""}.</div>`) +
+      : `<div class="panel empty">No upcoming ${PRMODE === "all" ? "player" : PROP_MK[PRMODE][1]} props right now. Lines are pulled about a day and a half before each game, so Sunday's games show up on Saturday${PRMODE === "all" || ["receptions","rec_yds","rush_yds","pass_yds"].includes(PRMODE) ? "" : "; this type is fetched when the free request budget allows"}${PROPS?.updated ? ` (last checked ${new Date(PROPS.updated).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})})` : ""}.</div>`) +
+    (recent.length ? `<div class="bar"><h2>Already kicked off</h2><span class="sub">${recent.length} prop${recent.length === 1 ? "" : "s"} · locked at kickoff, graded after the final</span></div><div class="picks">${recent.map(lockedCard).join("")}</div>` : "") +
     record +
     `<p class="note">How the projection works: the player's games this season, the latest counting most, plus last season as a starting point; what this opponent allows to his position; his team's expected points from the betting line; and teammates listed Out or Doubtful (their recent share of the targets or carries; passing props count every missing receiver). Tested on 2023–25 games it wasn't fit on, it missed by less than a plain season average (${tested || "see research/nfl_props.py"}), and its chances were well calibrated (a "60%" side hit about 60% at lines near our projection). Sportsbook prop lines aren't available historically for free, so it has <b>not</b> been tested against real prop lines: books are sharper than our projection, so expect real results well below those numbers. The live record above is the honest test. Not betting advice.</p>`;
   $("#lout").querySelectorAll("[data-prm]").forEach(b => b.addEventListener("click", () => { PRMODE = b.dataset.prm; store.set("sor.prmode", PRMODE); flipRender("#lout .picks", renderProps); }));
