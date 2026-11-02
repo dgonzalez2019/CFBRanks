@@ -165,18 +165,24 @@ for r in lines:
                  edges=dict(model_close=round(abs(t["ours"] - t["line"]), 2),
                             model_open=round(abs(t["ours"] - t["open"]), 2) if t["open"] is not None else None))
 
-# Each week, the top 10% (and 5%) of games by confidence. Games that have kicked off keep the flag they had.
+# Each week, the top 10% (and 5%) of games by confidence. Games that have kicked off keep the flag they had; the
+# week's remaining slots (its quota minus flags already locked in) go to the best-rated games not yet started. Ranking
+# the whole week instead let a later game hold a slot until earlier games had locked in unflagged and then lose it,
+# leaving the week with no flagged pick (NFL week 8, 2026).
+def flag_week(games, score, f10, f5):
+    games = [g for g in games if g.get(score) is not None]
+    started = lambda g: "results" in g or (when(g["start"]) and when(g["start"]) <= now and f10 in g)
+    n10 = max(1, round(len(games) * TOP_SHARE)); n5 = max(1, round(len(games) * TOP5_SHARE))
+    locked = [g for g in games if started(g)]
+    left10 = max(0, n10 - sum(bool(g.get(f10)) for g in locked)); left5 = max(0, n5 - sum(bool(g.get(f5)) for g in locked))
+    for i, g in enumerate(sorted((g for g in games if not started(g)), key=lambda g: -g[score])):
+        g[f10] = i < left10; g[f5] = i < left5
+
+
 for wk in {g["week"] for g in track.values()}:
-    wg = [g for g in track.values() if g["week"] == wk and g.get("conf") is not None]
-    ranked = sorted(wg, key=lambda g: -g["conf"]); n10 = max(1, round(len(wg) * TOP_SHARE)); n5 = max(1, round(len(wg) * TOP5_SHARE))
-    for i, g in enumerate(ranked):
-        if "results" in g or (when(g["start"]) and when(g["start"]) <= now and "top_conf" in g): continue
-        g["top_conf"] = i < n10; g["top5"] = i < n5
-    wt = [g for g in track.values() if g["week"] == wk and g.get("tconf") is not None]
-    ranked = sorted(wt, key=lambda g: -g["tconf"]); n10 = max(1, round(len(wt) * TOP_SHARE)); n5 = max(1, round(len(wt) * TOP5_SHARE))
-    for i, g in enumerate(ranked):
-        if "results" in g or (when(g["start"]) and when(g["start"]) <= now and "ttop_conf" in g): continue
-        g["ttop_conf"] = i < n10; g["ttop5"] = i < n5
+    wg = [g for g in track.values() if g["week"] == wk]
+    flag_week(wg, "conf", "top_conf", "top5")
+    flag_week(wg, "tconf", "ttop_conf", "ttop5")
 
 ordered = sorted(track.values(), key=lambda g: (g["start"] or "", g["key"]))
 OUT.write_text(json.dumps({"updated": stamp, "model": "Matchup model with last-season prior, passing/rushing efficiency "

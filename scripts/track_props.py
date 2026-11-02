@@ -97,11 +97,13 @@ def main():
     # weekly top 10% / 5% among props not yet started (frozen ones keep their flags)
     for wk, mk in {(p["week"], p["mk"]) for p in props.values()}:
         rank = (lambda p: p["conf"] - p["book_p"]) if pm.MARKETS[mk][4] == "yes" else (lambda p: p["conf"])
-        live = [p for p in props.values() if p["week"] == wk and p["mk"] == mk and datetime.datetime.fromisoformat(p["start"].replace("Z", "+00:00")) > now]
-        allw = sorted((p for p in props.values() if p["week"] == wk and p["mk"] == mk), key=lambda p: -rank(p))
+        # the week's quota; slots not used by props already locked at kickoff go to the best props not yet started
+        allw = [p for p in props.values() if p["week"] == wk and p["mk"] == mk]
+        live = sorted((p for p in allw if datetime.datetime.fromisoformat(p["start"].replace("Z", "+00:00")) > now), key=lambda p: -rank(p))
+        locked = [p for p in allw if p not in live]
         n10, n5 = max(1, round(len(allw) * .10)), max(1, round(len(allw) * .05))
-        ranked = {p["key"]: i for i, p in enumerate(allw)}
-        for p in live: p["top10"] = ranked[p["key"]] < n10; p["top5"] = ranked[p["key"]] < n5
+        left10 = max(0, n10 - sum(bool(p.get("top10")) for p in locked)); left5 = max(0, n5 - sum(bool(p.get("top5")) for p in locked))
+        for i, p in enumerate(live): p["top10"] = i < left10; p["top5"] = i < left5
     # grading: only once the team's player stats for that week are posted (they lag the final score by hours);
     # a player with no stats when his teammates have them didn't play: void
     posted = {(g["team"], g["week"]) for g in cur}
