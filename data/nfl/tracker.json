@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-03T12:44:38+00:00",
+ "updated": "2026-11-03T15:26:02+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -697,18 +697,18 @@
    "start": "2026-11-06T01:15:00.000Z",
    "first_saved": "2026-10-30T03:43:09+00:00",
    "ours": -9.29,
-   "line": -8.5,
+   "line": -9.5,
    "open": null,
    "inj_home": 0.6,
    "inj_away": 0.26,
    "ppa_margin": -7.48,
-   "pick_last_ats": 25.0,
-   "opp_last_ats": -23.0,
-   "conf": 0.4918,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "pick_last_ats": -23.0,
+   "opp_last_ats": 25.0,
+   "conf": 0.5021,
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 42.5,
    "ours_total": 43,
-   "tconf": 0.5103,
+   "tconf": 0.5056,
    "tfeat": {
     "last_h": -8.5,
     "last_a": 3.5,
@@ -718,8 +718,26 @@
    },
    "top_conf": false,
    "top5": false,
-   "ttop_conf": true,
-   "ttop5": false
+   "ttop_conf": false,
+   "ttop5": false,
+   "tconf_model": 0.5103,
+   "tside": 1,
+   "tens": {
+    "form": 0.5081,
+    "gap": 0.4969,
+    "high": 0.4999,
+    "last": 0.5015,
+    "pace": 0.5167,
+    "composite": 0.5103
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Atlanta Falcons|Cincinnati Bengals",
@@ -738,10 +756,10 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -13.5,
    "conf": 0.5124,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 52.5,
    "ours_total": 50,
-   "tconf": 0.4786,
+   "tconf": 0.5035,
    "tfeat": {
     "last_h": -26.5,
     "last_a": 33.5,
@@ -752,7 +770,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4786,
+   "tside": 1,
+   "tens": {
+    "form": 0.4759,
+    "gap": 0.5153,
+    "high": 0.5002,
+    "last": 0.4979,
+    "pace": 0.5102,
+    "composite": 0.5214
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Carolina Panthers|Denver Broncos",
@@ -763,18 +799,18 @@
    "start": "2026-11-08T18:00:00.000Z",
    "first_saved": "2026-11-02T07:45:36+00:00",
    "ours": -3.83,
-   "line": -3.0,
+   "line": -2.5,
    "open": null,
    "inj_home": 0.86,
    "inj_away": 0.6,
    "ppa_margin": -2.2,
    "pick_last_ats": 2.5,
    "opp_last_ats": -4.5,
-   "conf": 0.5061,
-   "saved_at": "2026-11-03T12:44:38+00:00",
-   "total": 43.5,
+   "conf": 0.504,
+   "saved_at": "2026-11-03T15:26:02+00:00",
+   "total": 44.5,
    "ours_total": 49,
-   "tconf": 0.491,
+   "tconf": 0.5009,
    "tfeat": {
     "last_h": -1.5,
     "last_a": 10.5,
@@ -785,7 +821,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4961,
+   "tside": -1,
+   "tens": {
+    "form": 0.5225,
+    "gap": 0.4724,
+    "high": 0.5,
+    "last": 0.4974,
+    "pace": 0.5062,
+    "composite": 0.4961
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Indianapolis Colts|Dallas Cowboys",
@@ -804,10 +858,10 @@
    "pick_last_ats": -25.0,
    "opp_last_ats": -10.0,
    "conf": 0.462,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 51.5,
    "ours_total": 56,
-   "tconf": 0.4659,
+   "tconf": 0.5193,
    "tfeat": {
     "last_h": 3.5,
     "last_a": 8.5,
@@ -817,8 +871,26 @@
    },
    "top_conf": false,
    "top5": false,
-   "ttop_conf": false,
-   "ttop5": false
+   "ttop_conf": true,
+   "ttop5": true,
+   "tconf_model": 0.4659,
+   "tside": -1,
+   "tens": {
+    "form": 0.4566,
+    "gap": 0.4724,
+    "high": 0.5002,
+    "last": 0.4965,
+    "pace": 0.4927,
+    "composite": 0.4659
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Kansas City Chiefs|New York Jets",
@@ -837,10 +909,10 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -2.5,
    "conf": 0.4962,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 46.5,
    "ours_total": 43,
-   "tconf": 0.4579,
+   "tconf": 0.5128,
    "tfeat": {
     "last_h": 10.5,
     "last_a": 24.5,
@@ -851,7 +923,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4579,
+   "tside": 1,
+   "tens": {
+    "form": 0.5081,
+    "gap": 0.5214,
+    "high": 0.5,
+    "last": 0.4897,
+    "pace": 0.5154,
+    "composite": 0.5421
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Miami Dolphins|Detroit Lions",
@@ -870,10 +960,10 @@
    "pick_last_ats": 1.0,
    "opp_last_ats": 2.0,
    "conf": 0.5395,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 50.5,
    "ours_total": 49,
-   "tconf": 0.4935,
+   "tconf": 0.5008,
    "tfeat": {
     "last_h": 1.5,
     "last_a": -12.5,
@@ -884,7 +974,25 @@
    "top_conf": true,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4935,
+   "tside": -1,
+   "tens": {
+    "form": 0.4678,
+    "gap": 0.5092,
+    "high": 0.5002,
+    "last": 0.5032,
+    "pace": 0.5083,
+    "composite": 0.5065
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|New Orleans Saints|Cleveland Browns",
@@ -903,10 +1011,10 @@
    "pick_last_ats": -17.5,
    "opp_last_ats": -3.0,
    "conf": 0.496,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 43.5,
    "ours_total": 47,
-   "tconf": 0.4781,
+   "tconf": 0.5067,
    "tfeat": {
     "last_h": -17.5,
     "last_a": -5.5,
@@ -917,7 +1025,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4781,
+   "tside": -1,
+   "tens": {
+    "form": 0.4919,
+    "gap": 0.4786,
+    "high": 0.5,
+    "last": 0.5068,
+    "pace": 0.5043,
+    "composite": 0.4781
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Philadelphia Eagles|New York Giants",
@@ -936,10 +1062,10 @@
    "pick_last_ats": 16.0,
    "opp_last_ats": -11.0,
    "conf": 0.5098,
-   "saved_at": "2026-11-03T12:44:38+00:00",
-   "total": 40.5,
+   "saved_at": "2026-11-03T15:26:02+00:00",
+   "total": 39.5,
    "ours_total": 40,
-   "tconf": 0.5075,
+   "tconf": 0.5069,
    "tfeat": {
     "last_h": -3.5,
     "last_a": 5.5,
@@ -950,7 +1076,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4831,
+   "tside": -1,
+   "tens": {
+    "form": 0.4759,
+    "gap": 0.4969,
+    "high": 0.4998,
+    "last": 0.4994,
+    "pace": 0.5032,
+    "composite": 0.4831
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Washington Commanders|Los Angeles Rams",
@@ -961,18 +1105,18 @@
    "start": "2026-11-08T18:00:00.000Z",
    "first_saved": "2026-11-02T07:45:36+00:00",
    "ours": -6.82,
-   "line": -6.0,
+   "line": -5.5,
    "open": null,
    "inj_home": 0.47,
    "inj_away": 0.0,
    "ppa_margin": -6.14,
    "pick_last_ats": 8.5,
    "opp_last_ats": 11.0,
-   "conf": 0.5021,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "conf": 0.5,
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 47.5,
    "ours_total": 46,
-   "tconf": 0.5036,
+   "tconf": 0.501,
    "tfeat": {
     "last_h": -3.5,
     "last_a": -13.5,
@@ -983,7 +1127,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.5036,
+   "tside": -1,
+   "tens": {
+    "form": 0.4919,
+    "gap": 0.5092,
+    "high": 0.5001,
+    "last": 0.505,
+    "pace": 0.4914,
+    "composite": 0.4964
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Los Angeles Chargers|Houston Texans",
@@ -1002,10 +1164,10 @@
    "pick_last_ats": -16.0,
    "opp_last_ats": -8.5,
    "conf": 0.5421,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 40.5,
    "ours_total": 37,
-   "tconf": 0.4688,
+   "tconf": 0.5162,
    "tfeat": {
     "last_h": -13.5,
     "last_a": 5.5,
@@ -1016,7 +1178,25 @@
    "top_conf": true,
    "top5": true,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4688,
+   "tside": 1,
+   "tens": {
+    "form": 0.5322,
+    "gap": 0.5214,
+    "high": 0.4999,
+    "last": 0.5023,
+    "pace": 0.51,
+    "composite": 0.5312
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|San Francisco 49ers|Las Vegas Raiders",
@@ -1035,10 +1215,10 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": -11.5,
    "conf": 0.5136,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 51.5,
    "ours_total": 56,
-   "tconf": 0.488,
+   "tconf": 0.5105,
    "tfeat": {
     "last_h": -0.5,
     "last_a": 24.5,
@@ -1049,7 +1229,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.488,
+   "tside": -1,
+   "tens": {
+    "form": 0.4791,
+    "gap": 0.4724,
+    "high": 0.5002,
+    "last": 0.493,
+    "pace": 0.5043,
+    "composite": 0.488
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|New England Patriots|Green Bay Packers",
@@ -1060,18 +1258,18 @@
    "start": "2026-11-08T21:25:00.000Z",
    "first_saved": "2026-11-02T07:45:36+00:00",
    "ours": 4.48,
-   "line": 3.0,
+   "line": 2.5,
    "open": null,
    "inj_home": 0.0,
    "inj_away": 1.04,
    "ppa_margin": 2.83,
    "pick_last_ats": -2.0,
    "opp_last_ats": 4.5,
-   "conf": 0.5242,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "conf": 0.5067,
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 46.5,
    "ours_total": 38,
-   "tconf": 0.4538,
+   "tconf": 0.5193,
    "tfeat": {
     "last_h": 1.5,
     "last_a": -1.5,
@@ -1081,8 +1279,26 @@
    },
    "top_conf": false,
    "top5": false,
-   "ttop_conf": false,
-   "ttop5": false
+   "ttop_conf": true,
+   "ttop5": false,
+   "tconf_model": 0.4538,
+   "tside": 1,
+   "tens": {
+    "form": 0.5145,
+    "gap": 0.5519,
+    "high": 0.5,
+    "last": 0.5,
+    "pace": 0.5032,
+    "composite": 0.5462
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Seattle Seahawks|Arizona Cardinals",
@@ -1093,18 +1309,18 @@
    "start": "2026-11-08T21:25:00.000Z",
    "first_saved": "2026-11-02T07:45:36+00:00",
    "ours": 9.69,
-   "line": 11.5,
+   "line": 10.5,
    "open": null,
    "inj_home": 0.39,
    "inj_away": 0.45,
    "ppa_margin": 8.14,
    "pick_last_ats": 10.0,
    "opp_last_ats": -20.0,
-   "conf": 0.4672,
-   "saved_at": "2026-11-03T12:44:38+00:00",
-   "total": 44.5,
+   "conf": 0.4714,
+   "saved_at": "2026-11-03T15:26:02+00:00",
+   "total": 43.5,
    "ours_total": 48,
-   "tconf": 0.467,
+   "tconf": 0.5165,
    "tfeat": {
     "last_h": 4.5,
     "last_a": 8.5,
@@ -1115,7 +1331,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.4619,
+   "tside": -1,
+   "tens": {
+    "form": 0.4855,
+    "gap": 0.4724,
+    "high": 0.5,
+    "last": 0.4962,
+    "pace": 0.4852,
+    "composite": 0.4619
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Chicago Bears|Tampa Bay Buccaneers",
@@ -1134,10 +1368,10 @@
    "pick_last_ats": 13.5,
    "opp_last_ats": 20.0,
    "conf": 0.4861,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 46.5,
    "ours_total": 45,
-   "tconf": 0.5104,
+   "tconf": 0.502,
    "tfeat": {
     "last_h": 4.5,
     "last_a": -26.5,
@@ -1147,8 +1381,26 @@
    },
    "top_conf": false,
    "top5": false,
-   "ttop_conf": true,
-   "ttop5": true
+   "ttop_conf": false,
+   "ttop5": false,
+   "tconf_model": 0.5104,
+   "tside": -1,
+   "tens": {
+    "form": 0.5,
+    "gap": 0.5092,
+    "high": 0.5,
+    "last": 0.5065,
+    "pace": 0.4828,
+    "composite": 0.4896
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   },
   {
    "key": "9|Minnesota Vikings|Buffalo Bills",
@@ -1167,10 +1419,10 @@
    "pick_last_ats": -1.0,
    "opp_last_ats": 23.0,
    "conf": 0.5065,
-   "saved_at": "2026-11-03T12:44:38+00:00",
+   "saved_at": "2026-11-03T15:26:02+00:00",
    "total": 45.5,
    "ours_total": 47,
-   "tconf": 0.5061,
+   "tconf": 0.5053,
    "tfeat": {
     "last_h": -12.5,
     "last_a": -8.5,
@@ -1181,7 +1433,25 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "tconf_model": 0.5061,
+   "tside": 1,
+   "tens": {
+    "form": 0.5161,
+    "gap": 0.4908,
+    "high": 0.5,
+    "last": 0.5062,
+    "pace": 0.5128,
+    "composite": 0.5061
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   }
   }
  ]
 }
