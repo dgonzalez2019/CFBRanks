@@ -67,6 +67,36 @@ def total_confidence(ours, line, last_sum, form_sum, pace):
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 D = ROOT / "data" / ("nfl" if LEAGUE == "nfl" else "")
+
+# Totals confidence = an ensemble (research/ensemble.py): six one-signal models of whether the game goes over (our
+# predicted total vs the line, both teams' last game and season over rates, pace, size of the total, and the
+# multi-signal score above as one more member), averaged with weights from each model's log loss on every earlier
+# game, research seasons plus every game graded here since (w ~ exp(-eta * (loss - best loss)); eta from research).
+# Held out it beat the multi-signal score alone: NFL top 10% 118-89 (57.0%) vs 113-94, CFB 95-84 (53.1%) vs 88-91.
+try: ENS = json.loads((ROOT / "research" / f"ensemble_{LEAGUE}.json").read_text())["total"]["live"]
+except (OSError, ValueError, KeyError): ENS = None
+
+
+def ensemble_probs(ours_t, total, last_sum, form_sum, pace, comp_over):
+    """Each totals model's chance the game goes over."""
+    x = dict(gap=ours_t - total, last=last_sum, form=form_sum - 1, pace=pace - ENS["pace_avg"], high=total - ENS["mid"])
+    p = {n: 1 / (1 + math.exp(-e["b"] * x[n] / e["sd"])) for n, e in ENS["experts"].items()}
+    p["composite"] = comp_over
+    return p
+
+
+def ensemble_weights(track):
+    """Weights from research losses plus every graded tracked game that stored its models' chances."""
+    L = dict(ENS["loss"])
+    for g in track.values():
+        if not g.get("tens") or "results" not in g or g.get("total") is None: continue
+        pts = g["home_pts"] + g["away_pts"]
+        if pts == g["total"]: continue
+        y = 1.0 if pts > g["total"] else 0.0
+        for n, q in g["tens"].items():
+            q = min(max(q, 1e-6), 1 - 1e-6); L[n] = L.get(n, 0.0) - (y * math.log(q) + (1 - y) * math.log(1 - q))
+    lo = min(L.values()); w = {n: math.exp(-ENS["eta"] * (v - lo)) for n, v in L.items()}; s = sum(w.values())
+    return {n: v / s for n, v in w.items()}
 OUT = D / "tracker.json"
 WINDOW_DAYS = 7
 now = datetime.datetime.now(datetime.timezone.utc)
@@ -116,6 +146,7 @@ def ou_form(team, week):
 
 try: track = {g["key"]: g for g in json.loads(OUT.read_text())["games"]}
 except (OSError, ValueError, KeyError): track = {}
+EW = ensemble_weights(track) if ENS else None
 
 
 def grade(margin, line):
@@ -142,8 +173,14 @@ for r in lines:
         ours_t = pr["sa"] + pr["sb"]
         if total is not None and ours_t != total:
             (lh, fh, ph), (la_, fa, pa_) = ou_form(home, wk), ou_form(away, wk)
-            t.update(total=total, ours_total=ours_t, tconf=round(total_confidence(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2), 4),
+            tc = total_confidence(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2)
+            t.update(total=total, ours_total=ours_t, tconf=round(tc, 4),
                      tfeat=dict(last_h=round(lh, 1), last_a=round(la_, 1), form_h=round(fh, 3), form_a=round(fa, 3), pace=round((ph + pa_) / 2, 1)))
+            if ENS:   # the ensemble decides the side and the confidence; the multi-signal score is kept as tconf_model
+                ps = ensemble_probs(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2, tc if ours_t > total else 1 - tc)
+                pe = sum(EW.get(n, 0.0) * v for n, v in ps.items())
+                t.update(tconf_model=round(tc, 4), tconf=round(max(pe, 1 - pe), 4), tside=1 if pe >= 0.5 else -1,
+                         tens={n: round(v, 4) for n, v in ps.items()}, tw={n: round(EW.get(n, 0.0), 4) for n in ps})
         else: t.update(total=total, ours_total=ours_t, tconf=None)
     elif hp is not None and t is not None and "results" not in t:
         act = hp - ap
@@ -160,7 +197,10 @@ for r in lines:
         res["top5"] = res["model_close"] if t.get("top5") else None
         tl = t.get("total")
         ou = None if tl is None or t.get("ours_total") in (None, tl) or hp + ap == tl else ("W" if (hp + ap > tl) == (t["ours_total"] > tl) else "L")
-        res["ou_model"] = ou; res["ou_top"] = ou if t.get("ttop_conf") else None; res["ou_top5"] = ou if t.get("ttop5") else None
+        # the flagged totals pick is the ensemble's side when there is one (older games: our model's side)
+        ens = ou if t.get("tside") is None or tl is None or hp + ap == tl else ("W" if (hp + ap > tl) == (t["tside"] > 0) else "L")
+        res["ou_model"] = ou; res["ou_ens"] = ens
+        res["ou_top"] = ens if t.get("ttop_conf") else None; res["ou_top5"] = ens if t.get("ttop5") else None
         t.update(home_pts=hp, away_pts=ap, results=res,
                  edges=dict(model_close=round(abs(t["ours"] - t["line"]), 2),
                             model_open=round(abs(t["ours"] - t["open"]), 2) if t["open"] is not None else None))

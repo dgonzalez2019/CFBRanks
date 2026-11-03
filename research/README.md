@@ -60,3 +60,13 @@ Totals confidence (research/conf_total.py): a logistic model on our side of the 
 last-game and season over/under results faded, pace, size of the total). Held out, the top 10% went 2022 47%, 2023 47%,
 2024 72%, 2025 59%, 2026 44%: 169-138 (55.0%), but most of it is 2024. Letting the model choose over or under itself
 instead of our side did worse (top 10% 49-51%). Last season's points model as an input added nothing and was dropped.
+
+Ensemble (research/ensemble.py): about a dozen one-signal pick models per league (spreads: our margin, efficiency
+model, last game's cover, line movement, rest, travel, form, favorite size, home field, conference/division underdogs,
+last margin, season cover rate, plus the current confidence score; totals: our total vs the line, last game, season
+over rates, pace, size of the total, plus the current totals score), each refit every week on earlier games, averaged
+with weights from each model's log loss on every earlier game (eta chosen on the first scored season(s)).
+Top 10% held out: CFB spreads 2024-26 106-82 (56.4%) vs the current score 104-84 (55.3%); CFB totals 95-84 (53.1%)
+vs 88-91 (49.2%); NFL spreads 2019-26 109-107 (50.5%) vs 113-103 (52.3%); NFL totals 118-89 (57.0%) vs 113-94
+(54.6%). Weighting by record mostly didn't beat an equal average (eta 0 chosen for three of four). The site uses the
+ensemble for totals only.

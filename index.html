@@ -745,22 +745,22 @@ const LEAGUES = {
   cfb:{name:"CFB", dir:"data/", topN:25, word:"FBS", topLabel:"Top 25", quad:[25,50,80], resumeW:7.4, keep:.9, lam:2, cap:45, eff:.25,
     bench:25, benchOpts:[[12,"#12 team (playoff bar)"],[25,"#25 team (ranked bar)"],[40,"#40 team (bowl-plus bar)"]],
     conf:[0.08102, 0.018616, 0.047526, -0.059625, 0.063655], tconf:[-0.0018, 0.0605, 0.0039, 0.3163, 0.0626, 0.0974], pace:67.2, tmid:55,
-    topRec:[["2022",38,33],["2023",33,39],["2024",44,27],["2025",40,33],["2026",23,16]], totRec:[["2022",31,35],["2023",32,36],["2024",50,19],["2025",41,29],["2026",15,19]],
+    topRec:[["2022",38,33],["2023",33,39],["2024",44,27],["2025",40,33],["2026",23,16]], totRec:[["2024",40,30],["2025",37,35],["2026",18,19]],
     effName:"play-by-play efficiency model (points added per play, adjusted for opponents)",
     spreadNote:"Scores run about 48–56%, which is all the data can honestly separate; games scored 54–56% covered 55% in 2025–26.",
-    totalNote:"almost all of that is 2024; three of five seasons were below 50%. The spread score was steadier (54.6%, four of five seasons above 50%). Our side of the total with no filter went 47–52% by season.",
-    sheetSpread:"spread picks covered 54.6%", sheetTotal:"totals picks hit 55.0%, but unevenly (44–72% by season)",
+    totalNote:"against 88–91 (49.2%) for the single score it replaced on the same games. It still swings by season, so treat it with care.",
+    sheetSpread:"spread picks covered 54.6%", sheetTotal:"totals picks hit 53.1% (2024–26), unevenly (49–57% by season)",
     lineNote:"Over 2022–25 the line picked the winner more often than our model in every season (72.6% vs 71.1% overall), and mixing in our model made it worse.",
     qbNote:"QB values are calibrated on 2022–25, where teams whose starting QB missed a game fell short by about 1.25× this raw gap."},
   nfl:{name:"NFL", dir:"data/nfl/", topN:32, word:"NFL", topLabel:"Rankings", quad:[8,16,24], resumeW:2.0, keep:.5, lam:12, fade:8, floor:.2, cap:21, eff:0,
     bench:12, benchOpts:[[7,"#7 team (division-winner bar)"],[12,"#12 team (playoff bar)"],[16,"#16 team (league average)"]],
     conf:[-0.0037, 0.0217, 0.2282, 0.1098, 0.0618], tconf:[-0.0085, -0.1109, -0.0118, 0.2351, -0.1735, -0.0458], pace:60.8, tmid:45,
     topRec:[["2016",12,13],["2017",12,12],["2018",11,13],["2019",15,9],["2020",14,11],["2021",17,9],["2022",14,12],["2023",9,17],["2024",12,14],["2025",18,9],["2026",7,2]],
-    totRec:[["2016",11,13],["2017",8,16],["2018",11,13],["2019",8,16],["2020",15,9],["2021",15,10],["2022",14,12],["2023",10,16],["2024",15,11],["2025",15,12],["2026",2,7]],
+    totRec:[["2019",14,12],["2020",13,11],["2021",19,9],["2022",18,9],["2023",16,13],["2024",15,15],["2025",14,18],["2026",9,2]],
     effName:"EPA efficiency model (expected points added per play, adjusted for opponents)",
     spreadNote:"Scores run about 47–55%. Season to season it is uneven (35–67% for the top 10%), so treat it as a slight lean at best.",
-    totalNote:"so NFL totals showed no edge at all: our side of the total won about 47% and the top 10% under 50%. Scores are shown for completeness; few reach 50%.",
-    sheetSpread:"NFL spread picks covered 53.0% (2016–25), unevenly by season", sheetTotal:"NFL totals picks hit 48.8%: no edge in testing",
+    totalNote:"against 113–94 (54.6%) for the single score it replaced on the same games. Seasons ranged from 44% to 82%, so treat it with care.",
+    sheetSpread:"NFL spread picks covered 53.0% (2016–25), unevenly by season", sheetTotal:"NFL totals picks hit 57.0% (2019–26), unevenly (44–82% by season)",
     lineNote:"Over 2016–25 the closing line picked 66.5% of winners against our model's 63.7%, and missed by 9.8 points on average against our 10.2.",
     qbNote:"NFL values use expected points added per play; the QB share was calibrated on college games and hasn't been tested on NFL games."}
 };
@@ -1306,7 +1306,27 @@ function explainSpread(t){
     ["Both signals together", f.pts[3], both ? "The pick did worse last game and the efficiency model disagrees: the combination that held up best on past seasons." : "Not both at once, so no extra boost."]];
   return {f, rows, pick, label:`${pick} ${signed(side > 0 ? -t.line : t.line)}`};
 }
+// The totals pick's side: the ensemble's when the tracker saved one (tside), else our model's.
+const tOver = t => t.tside != null ? t.tside > 0 : t.ours_total > t.total;
+const ouRes = r => r?.ou_ens ?? r?.ou_model;
+// Ensemble totals (research/ensemble.py, track_picks.py): confidence = weighted average of six models' chances for
+// our side; each model's share = weight x (its chance - 50%), in percentage points, so the shares add up to conf - 50.
+const ENS_TXT = {
+  gap: ["Our predicted total vs. the line", t => `We expect ${t.ours_total} points against ${t.total.toFixed(1)}.`],
+  form: ["Over/under record this season", t => `${esc(t.home)} games have gone over about ${Math.round(t.tfeat.form_h*100)}% of the time and ${esc(t.away)} games ${Math.round(t.tfeat.form_a*100)}% (shrunk toward 50% for small samples).`],
+  high: ["Size of the total", t => `The total is ${t.total.toFixed(1)}, ${t.total >= TOTAL_MID ? "high" : "low"} for this league.`],
+  last: ["Last game", t => { const ou = v => v > 0 ? `over by ${v.toFixed(1)}` : v < 0 ? `under by ${(-v).toFixed(1)}` : "had no total"; return `${esc(t.home)}'s last game went ${ou(t.tfeat.last_h)}; ${esc(t.away)}'s went ${ou(t.tfeat.last_a)}.`; }],
+  pace: ["Pace", t => `The two teams average ${t.tfeat.pace.toFixed(1)} plays a game (${t.tfeat.pace >= PACE_AVG ? "faster" : "slower"} than average).`],
+  composite: ["Our earlier totals score", () => `The single multi-signal score we used before the ensemble (it combines the other signals in one formula).`]};
+function explainEnsemble(t){
+  const over = tOver(t), side = over ? "over" : "under";
+  const rows = Object.entries(t.tens).map(([n, p]) => { const ps = over ? p : 1 - p, w = t.tw?.[n] ?? 0, [label, txt] = ENS_TXT[n] || [n, () => ""];
+    const fade = n === "gap" && ps > .5 && (t.ours_total > t.total) !== over ? " In past seasons the line was right more often when our predicted total disagreed with it like this, so this model leans the other way." : "";
+    return [label, 100 * w * (ps - .5), `${txt(t)}${fade} This model gives the ${side} ${(ps*100).toFixed(1)}% and has ${Math.round(w*100)}% of the say, from its record on every past game.`]; });
+  return {f:{base:.5}, rows, label:`${over ? "Over" : "Under"} ${t.total.toFixed(1)}`, ens:true};
+}
 function explainTotal(t){
+  if(t.tens && t.tfeat) return explainEnsemble(t);
   const over = t.ours_total > t.total, s = over ? 1 : -1, F = t.tfeat;
   if(!F) return null;
   const gap = Math.abs(t.ours_total - t.total)/7, last = -s*(F.last_h + F.last_a)/14, form = -s*(F.form_h + F.form_a - 1), pace = s*(F.pace - PACE_AVG)/10, high = -s*(t.total - TOTAL_MID)/10;
@@ -1345,7 +1365,7 @@ function openSheet(kind, key){
     ${conf != null && ex ? `<div class="pbet${(kind === "total" ? t.ttop_conf : t.top_conf) ? " hotbet" : ""}"><div><span class="pkind">${kind === "spread" ? "Spread" : "Over/under"}</span><b class="ptext">${ex.label}</b></div>
       <div class="pconf"><div class="ringwrap"><div class="ring" style="--v:${(conf*100).toFixed(1)}"></div><b>${(conf*100).toFixed(1)}%</b></div><span>chance to hit</span></div></div>` : ""}
     ${ex ? `<h3>Why ${(conf*100).toFixed(1)}%</h3>${base}<div class="why">${whyRows}</div>
-      <p class="note" style="margin:0">Confidence scores run from about 48% to 56%. On seasons the model wasn't trained on, the top 10% of ${kind === "total" ? LG.sheetTotal : LG.sheetSpread}. A pick is never a sure thing.</p>`
+      <p class="note" style="margin:0">${ex.ens ? "Each row is one model's share of the confidence: its weight times how far its chance is from 50%. The shares add up to the confidence minus 50%." : "Confidence scores run from about 48% to 56%."} On seasons the model wasn't trained on, the top 10% of ${kind === "total" ? LG.sheetTotal : LG.sheetSpread}. A pick is never a sure thing.</p>`
       : `<p class="note" style="margin:0">No confidence score for this game yet: scores are saved once a game is within 7 days of kickoff.</p>`}
     <h3>Our prediction</h3>
     <div class="sh-score"><div class="${hw ? "" : "w"}"><b>${pr.sb}</b><span>${esc(away)}</span><small>${Math.round((1-pr.pa)*100)}% to win</small></div><em>${neutral ? "vs" : "at"}</em><div class="${hw ? "w" : ""}"><b>${pr.sa}</b><span>${esc(home)}</span><small>${Math.round(pr.pa*100)}% to win</small></div></div>
@@ -1588,7 +1608,7 @@ let TOTCONF_RECORD = [["2022", 31, 35], ["2023", 32, 36], ["2024", 50, 19], ["20
 function trackedTotal(a, b){
   const t = (TRACKER?.games||[]).find(g => (g.home===a && g.away===b) || (g.home===b && g.away===a));
   if(!t || t.total==null || t.tconf==null) return null;
-  return {t, over: t.ours_total > t.total, line: t.total, top: !!t.ttop_conf, top5: !!t.ttop5, pct: t.tconf};
+  return {t, over: tOver(t), line: t.total, top: !!t.ttop_conf, top5: !!t.ttop5, pct: t.tconf};
 }
 const totBadge = c => !c ? `<span class="conf none">Confidence —</span>` : `<span class="conf${c.top ? " top" : ""}" title="Chance our side of the total wins. ${c.top ? (c.top5 ? "Top 5% of this week's games." : "Top 10% of this week's games.") : "Not in this week's top 10%."} Totals scores are much less proven than spread scores.">${`<small>${c.top5 ? "Top 5% confidence" : c.top ? "Top confidence" : "Confidence"}</small>`}${(c.pct*100).toFixed(1)}%<small>${c.over ? "Over" : "Under"} ${c.line.toFixed(1)}</small></span>`;
 const confBadge = c => !c ? "" : `<span class="conf${c.top ? " top" : ""}" title="Chance our pick covers: ${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}. ${c.top ? (c.top5 ? "Top 5% of this week's games by confidence." : "Top 10% of this week's games by confidence.") : "Not in this week's top 10%."} Scores run about 48–56%; games scored 54–56% covered 55% on past seasons.">${`<small>${c.top5 ? "Top 5% confidence" : c.top ? "Top confidence" : "Confidence"}</small>`}${(c.pct*100).toFixed(1)}%<small>${esc(c.pick)} ${c.getsPts ? "+" : "−"}${(Math.round(c.pts*2)/2).toFixed(1)}</small></span>`;
@@ -1616,11 +1636,11 @@ const hasStarted = start => !!start && new Date(start).getTime() <= Date.now();
 const startedGames = () => (TRACKER?.games||[]).filter(g => hasStarted(g.start)).sort((a,b) => b.start.localeCompare(a.start));
 // A finished (or in-progress) tracked game as a pick card: the pick as saved at kickoff, then its result.
 function resultCard(g, kind, i){
-  const spread = kind === "spread", r = g.results?.[spread ? "model_close" : "ou_model"], home = g.ours > g.line;
+  const spread = kind === "spread", r = spread ? g.results?.model_close : ouRes(g.results), home = g.ours > g.line;
   const fin = g.home_pts != null ? ` · final ${g.away_pts}–${g.home_pts}` : "";
   const why = r === "W" ? `<b class="pos">${spread ? "Covered" : "Hit"}</b>${fin}` : r === "L" ? `<b class="neg">${spread ? "Didn't cover" : "Missed"}</b>${fin}` : r === "P" ? `Push${fin}` : "Locked at kickoff · graded after the final";
   return pickCard({kind, conf:spread ? g.conf : g.tconf, top:spread ? g.top_conf : g.ttop_conf, top5:spread ? g.top5 : g.ttop5, start:g.start,
-    text:spread ? `${esc(home ? g.home : g.away)} ${signed(home ? -g.line : g.line)}` : `${g.ours_total > g.total ? "Over" : "Under"} ${g.total.toFixed(1)}`,
+    text:spread ? `${esc(home ? g.home : g.away)} ${signed(home ? -g.line : g.line)}` : `${tOver(g) ? "Over" : "Under"} ${g.total.toFixed(1)}`,
     game:gameLine(g.away, g.home, g.neutral, spread ? (home ? g.home : g.away) : null), key:g.key, why}, i);
 }
 const resultList = (gs, kind) => gs.length ? `<div class="picks">${gs.map((g,i) => resultCard(g, kind, i)).join("")}</div>`
@@ -1701,25 +1721,26 @@ function renderLines(){
   const seg = lineSeg();
   // Recent results: picks graded in the last 10 days, newest first; hits get a confetti burst the first time they show.
   const recent = kind => { const cut = Date.now() - 10*864e5;
-    const g = (TRACKER?.games||[]).filter(x => x.results && x.start && new Date(x.start).getTime() > cut && (kind === "total" ? x.results.ou_model : x.results.model_close) in {W:1,L:1})
+    const g = (TRACKER?.games||[]).filter(x => x.results && x.start && new Date(x.start).getTime() > cut && (kind === "total" ? ouRes(x.results) : x.results.model_close) in {W:1,L:1})
       .sort((a,b) => b.start.localeCompare(a.start));
     if(!g.length) return "";
-    const chip = x => { const r = kind === "total" ? x.results.ou_model : x.results.model_close, home = x.ours > x.line;
-      const txt = kind === "total" ? `${x.ours_total > x.total ? "Over" : "Under"} ${x.total.toFixed(1)}` : `${esc(home ? x.home : x.away)} ${signed(home ? -x.line : x.line)}`;
+    const chip = x => { const r = kind === "total" ? ouRes(x.results) : x.results.model_close, home = x.ours > x.line;
+      const txt = kind === "total" ? `${tOver(x) ? "Over" : "Under"} ${x.total.toFixed(1)}` : `${esc(home ? x.home : x.away)} ${signed(home ? -x.line : x.line)}`;
       return `<span class="res ${r === "W" ? "hit" : "miss"}" data-k="${kind}|${esc(x.key)}" data-team="${esc(kind === "total" ? x.home : (home ? x.home : x.away))}"><i>${r === "W" ? "✓" : "✗"}</i>${txt}<span>${x.away_pts}–${x.home_pts}</span></span>`; };
-    const w = g.filter(x => (kind === "total" ? x.results.ou_model : x.results.model_close) === "W").length;
+    const w = g.filter(x => (kind === "total" ? ouRes(x.results) : x.results.model_close) === "W").length;
     return `<div class="bar"><h2>Recent results</h2><span class="sub">${w}–${g.length - w} in the last 10 days</span></div><div class="results">${g.map(chip).join("")}</div>`; };
   if(LMODE === "total"){
     const tnow = totalsOf(now), tlater = totalsOf(later), tw = TOTCONF_RECORD.reduce((s,r)=>s+r[1],0), tl = TOTCONF_RECORD.reduce((s,r)=>s+r[2],0);
     const tres = startedGames().filter(g => g.total != null && g.ours_total != null);
     const totRecord = `<div class="bar"><h2>Live track record: totals</h2></div>
       <div class="panel scroll"><table><thead><tr><th>Strategy (fixed in advance)</th><th class="num">Record</th></tr></thead><tbody>
-        <tr><td>Our side of the total at kickoff</td><td class="num">${rec("ou_model")}</td></tr>
+        <tr><td>Our predicted total's side at kickoff</td><td class="num">${rec("ou_model")}</td></tr>
+        <tr><td>The ensemble's side at kickoff</td><td class="num">${rec("ou_ens")}</td></tr>
         <tr><td><b>Top confidence</b> <span class="sub">top 10% of each week by totals score</span></td><td class="num">${rec("ou_top")}</td></tr>
         <tr><td><b>Top 5% confidence</b></td><td class="num">${rec("ou_top5")}</td></tr>
       </tbody></table></div>
-      <p class="note"><b>How totals confidence works:</b> every game with a total gets a score, the chance our side (over when our total is above the line, under when below) wins. It rises when both teams have mostly gone the other way this season (the market may have overreacted to them), when the total is high and we lean under or low and we lean over, when the two teams' pace agrees with our side, and a little as our gap from the total grows. Each week the top 10% are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Scores run about 42–56%.</p>
-      <p class="note"><b>Be careful with these:</b> on seasons the model wasn't trained on, the top 10% went ${TOTCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${tw}–${tl} (${(100*tw/(tw+tl)).toFixed(1)}%) overall, ${LG.totalNote} This week: ${TG.filter(g => !g.results && g.ttop_conf).sort((x,y)=>y.tconf-x.tconf).map(g => `<b>${g.ours_total > g.total ? "Over" : "Under"} ${g.total.toFixed(1)}</b> ${esc(g.away)}–${esc(g.home)} ${(g.tconf*100).toFixed(1)}%${g.ttop5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>`;
+      <p class="note"><b>How totals confidence works:</b> six separate models each give their chance the game goes over: our predicted total against the line, both teams' over/under record this season, their last games, their pace, the size of the total, and our earlier all-in-one score. The confidence is their weighted average, and the side it favors is the pick (which can differ from our predicted total's side). Each model's weight comes from its record on every past game, updated every week as games are graded, so models that keep doing better get more of the say${LEAGUE === "nfl" ? " (in NFL testing an equal split did best, so they currently share it evenly)" : ""}. Each week the top 10% are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Tap a game to see each model's share.</p>
+      <p class="note"><b>Be careful with these:</b> on seasons the model wasn't trained on, the top 10% went ${TOTCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${tw}–${tl} (${(100*tw/(tw+tl)).toFixed(1)}%) overall, ${LG.totalNote} This week: ${TG.filter(g => !g.results && g.ttop_conf).sort((x,y)=>y.tconf-x.tconf).map(g => `<b>${tOver(g) ? "Over" : "Under"} ${g.total.toFixed(1)}</b> ${esc(g.away)}–${esc(g.home)} ${(g.tconf*100).toFixed(1)}%${g.ttop5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>`;
     $("#lout").innerHTML = seg + viewBar(tnow.length + tlater.length, tres.length) + (LVIEW === "res" ? recent("total") + resultList(tres, "total") + totRecord :
       (tnow.length ? ttable(tnow) : `<div class="panel empty">No upcoming games with a betting total. Finished games are under Results.</div>`) +
       `<p class="note">Betting total = median over/under across sportsbooks. Our total comes from each team's points scored and allowed, adjusted for opponents, minus points for players listed Out. Sorted by totals confidence, highest first.</p>` +
@@ -1784,7 +1805,7 @@ function renderPicks(){
         key:g.key, why:oursVsLine(g.home, g.away, g.ours, g.line)});
     }
     if(g.tconf != null && g.total != null){
-      const over = g.ours_total > g.total;
+      const over = tOver(g);
       picks.push({g, start:g.start, kind:"total", conf:g.tconf, top:g.ttop_conf, top5:g.ttop5, text:`${over ? "Over" : "Under"} ${g.total.toFixed(1)}`,
         game:gameLine(g.away, g.home, g.neutral, null),
         key:g.key, why:`Ours <b>${g.ours_total}</b> · Line ${g.total.toFixed(1)}`});
@@ -1809,12 +1830,12 @@ function renderPicks(){
     const shownR = resP.filter(p => PMODE === "all" || p.kind === PMODE);
     const tally = l => { const w = l.filter(x => x === "W").length, L = l.filter(x => x === "L").length; return L + w ? `${w}–${L} <span class="sub">${Math.round(100*w/(w+L))}%</span>` : "—"; };
     const gr = (TRACKER?.games||[]).filter(g => g.results);
-    const row = (label, key, test) => `<tr><td>${label}</td><td class="num">${tally(gr.filter(test).map(g => g.results[key]))}</td></tr>`;
+    const row = (label, key, test) => `<tr><td>${label}</td><td class="num">${tally(gr.filter(test).map(g => key === "ou_ens" ? ouRes(g.results) : g.results[key]))}</td></tr>`;
     $("#ltitle").textContent = "Top picks: results";
     $("#lout").innerHTML = lineSeg() + viewBar(keep.length, resP.length, typeSel({all:resP.length, spread:resP.filter(p => p.kind === "spread").length, total:resP.filter(p => p.kind === "total").length})) +
       `<div class="panel scroll"><table><thead><tr><th>Live record</th><th class="num">Record</th></tr></thead><tbody>
         ${row("Spread picks rated 50%+", "model_close", g => g.conf >= .5)}${row("★ Top 10% spreads", "top_conf", g => g.top_conf)}${row("★ Top 5% spreads", "top5", g => g.top5)}
-        ${row("Totals picks rated 50%+", "ou_model", g => g.tconf >= .5)}${row("★ Top 10% totals", "ou_top", g => g.ttop_conf)}${row("★ Top 5% totals", "ou_top5", g => g.ttop5)}
+        ${row("Totals picks rated 50%+", "ou_ens", g => g.tconf >= .5)}${row("★ Top 10% totals", "ou_top", g => g.ttop_conf)}${row("★ Top 5% totals", "ou_top5", g => g.ttop5)}
       </tbody></table></div><p class="note" style="margin:0">Every pick is graded against the line at kickoff; 52.4% is break-even at standard odds.</p>` +
       (shownR.length ? `<div class="picks">${shownR.map((p,i) => resultCard(p.g, p.kind, i)).join("")}</div>` : `<div class="panel empty">No 50%+ picks from games that have kicked off yet.</div>`);
     bindType(); bindViewBar(renderPicks); bindLineSeg(); return;
