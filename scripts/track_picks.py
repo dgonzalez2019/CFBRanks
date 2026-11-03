@@ -75,6 +75,10 @@ D = ROOT / "data" / ("nfl" if LEAGUE == "nfl" else "")
 # Held out it beat the multi-signal score alone: NFL top 10% 118-89 (57.0%) vs 113-94, CFB 95-84 (53.1%) vs 88-91.
 try: ENS = json.loads((ROOT / "research" / f"ensemble_{LEAGUE}.json").read_text())["total"]["live"]
 except (OSError, ValueError, KeyError): ENS = None
+# The spread models from the same research, shown per game on the site ("what each model picked"); the spread
+# confidence stays the multi-signal score above, since the ensemble didn't beat it on spreads.
+try: SENS = json.loads((ROOT / "research" / f"ensemble_{LEAGUE}.json").read_text())["spread"]["live"]
+except (OSError, ValueError, KeyError): SENS = None
 
 
 def ensemble_probs(ours_t, total, last_sum, form_sum, pace, comp_over):
@@ -144,6 +148,37 @@ def ou_form(team, week):
     plays = [g["box"][4 * s + 1] + g["box"][4 * s + 3] for g in prev if g.get("box") for s in (0 if g["home"] == team else 1,)]
     return (ou[-1] if ou else 0.0), (sum(v > 0 for v in ou) + 1) / (len(ou) + 2), (sum(plays) / len(plays) if plays else PACE_AVG)
 
+start_of = {(r[0], r[1], r[2]): r[8] for r in lines if r[8]}
+
+
+def spread_form(team, week, start):
+    """(last game's margin, season cover rate shrunk by 1/2 games, rest days) for the spread models."""
+    prev = sorted((g for g in games if g["week"] < week and team in (g["home"], g["away"])), key=lambda g: g["week"])
+    margin = 0.0; covers = []
+    for g in prev:
+        hp, ap = g["hp"], g["ap"]; mg = hp - ap if team == g["home"] else ap - hp; margin = mg
+        sp = line_of.get((g["week"], g["home"], g["away"]))
+        if sp is not None:
+            ohp, oap = g.get("official") or (hp, ap); c = (ohp - oap) + sp
+            covers.append((c if team == g["home"] else -c) > 0)
+    rest = SENS["rest_default"]
+    if prev and start:
+        d0 = start_of.get((prev[-1]["week"], prev[-1]["home"], prev[-1]["away"]))
+        if d0: rest = min((when(start) - when(d0)).days, 21)
+    return margin, (sum(covers) + 1) / (len(covers) + 2), rest
+
+
+def spread_probs(home, away, wk, start, line, ours, pm, opening, neutral, conf):
+    """Each spread model's chance the home team covers."""
+    mh, ch, rh = spread_form(home, wk, start); ma, ca, ra = spread_form(away, wk, start)
+    x = dict(model=ours - line, eff=(pm - line) if pm is not None else 0.0, last_ats=(last_ats(home, wk) or 0.0) - (last_ats(away, wk) or 0.0),
+             move=(line - opening) if opening is not None else 0.0, rest=rh - ra, fav=line, home=0.0 if neutral else 1.0,
+             last_margin=mh - ma, cover_form=ch - ca)
+    p = {n: 1 / (1 + math.exp(-e["b"] * x[n] / e["sd"])) for n, e in SENS["experts"].items()}
+    if conf is not None: p["composite"] = conf if ours > line else 1 - conf
+    return p
+
+
 try: track = {g["key"]: g for g in json.loads(OUT.read_text())["games"]}
 except (OSError, ValueError, KeyError): track = {}
 EW = ensemble_weights(track) if ENS else None
@@ -170,6 +205,7 @@ for r in lines:
                  inj_home=round(ih, 2), inj_away=round(ia, 2), ppa_margin=round(pm, 2),
                  pick_last_ats=None if la is None else round(la, 1), opp_last_ats=None if lo is None else round(lo, 1),
                  conf=None if conf is None else round(conf, 4), saved_at=stamp)
+        if SENS: t["sens"] = {n: round(v, 4) for n, v in spread_probs(home, away, wk, start, line, ours, pm, t["open"], neutral, conf).items()}
         ours_t = pr["sa"] + pr["sb"]
         if total is not None and ours_t != total:
             (lh, fh, ph), (la_, fa, pa_) = ou_form(home, wk), ou_form(away, wk)

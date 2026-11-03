@@ -261,6 +261,15 @@ if __name__ == "__main__":
         last = base[-1]["w"]
         print("final weights:", ", ".join(f"{n} {w:.2f}" for n, w in sorted(last.items(), key=lambda kv: -kv[1])))
         out[market] = dict(eta=best, test=res_t, by_season=by, final_weights=last, experts=names)
+        if market == "spread":  # shown per game on the site (not used for the spread confidence): final fits
+            ys = np.array([r["y"] for r in rows]); live = {}
+            Xe = np.array([[r["effraw"], 1] for r in rows]); A, B = np.linalg.lstsq(Xe, np.array([r["act"] for r in rows]), rcond=None)[0]
+            for r in rows: r["x"]["eff"] = A * r["effraw"] + B - r["mkt"]
+            for n in ("model", "eff", "last_ats", "move", "rest", "fav", "home", "last_margin", "cover_form"):
+                if n not in rows[0]["x"]: continue
+                xp = np.array([r["x"][n] for r in rows], float); sd = float(xp.std() or 1.0)
+                live[n] = dict(b=float(logit_fit((xp / sd)[:, None], ys, 5.0)[0]), sd=sd)
+            out[market]["live"] = dict(experts=live, rest_default=14 if LEAGUE == "cfb" else 7)
         if market == "total":   # live version for scripts/track_picks.py: final fits on every game, running losses
             L = {}; weights_run(scored, best, L); y = np.array([r["y"] for r in rows]); live = {}
             for n in names:

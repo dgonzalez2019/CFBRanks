@@ -472,6 +472,8 @@ html.sheet-open{overflow:hidden}
 #sheetBody h3{font:650 21px/1.15 var(--display);margin:4px 0 0}
 .sh-game{display:grid;gap:6px;padding-right:44px}
 .sh-game .pgame{font-size:18px}
+.sh-models td:nth-child(n+2),.sh-models th:nth-child(n+2){white-space:nowrap}
+.sh-models tr.agree td:nth-child(2){color:var(--accent);font-weight:600}
 .sh-when{font-size:13.5px;color:var(--muted)}
 .sh-sum{font-size:15px;line-height:1.5}
 .why{display:grid;gap:10px}
@@ -1318,6 +1320,27 @@ const ENS_TXT = {
   last: ["Last game", t => { const ou = v => v > 0 ? `over by ${v.toFixed(1)}` : v < 0 ? `under by ${(-v).toFixed(1)}` : "had no total"; return `${esc(t.home)}'s last game went ${ou(t.tfeat.last_h)}; ${esc(t.away)}'s went ${ou(t.tfeat.last_a)}.`; }],
   pace: ["Pace", t => `The two teams average ${t.tfeat.pace.toFixed(1)} plays a game (${t.tfeat.pace >= PACE_AVG ? "faster" : "slower"} than average).`],
   composite: ["Our earlier totals score", () => `The single multi-signal score we used before the ensemble (it combines the other signals in one formula).`]};
+// "What each model picked": each model's side and its own chance for that side (totals also show each model's weight
+// in the ensemble; spreads show the models for reference, since the spread confidence is the current score).
+const SPREAD_MODELS = {model:"Our margin vs. the line", eff:"Efficiency model vs. the line", last_ats:"Last game vs. the spread",
+  move:"Line movement", rest:"Rest days", fav:"Favorite or underdog", home:"Home field", last_margin:"Last game's margin",
+  cover_form:"Season cover rate", composite:"Current confidence score"};
+function modelsTable(t, kind){
+  const P = kind === "total" ? t?.tens : t?.sens; if(!P) return "";
+  const tot = kind === "total", ourHome = t.ours > t.line, ourOver = tOver(t);
+  const rows = Object.entries(P).map(([n, p]) => {
+    const yes = p >= .5, c = Math.max(p, 1 - p);
+    const pick = tot ? `${yes ? "Over" : "Under"} ${t.total.toFixed(1)}` : `${esc(yes ? t.home : t.away)} ${signed(yes ? -t.line : t.line)}`;
+    const agrees = tot ? yes === ourOver : yes === ourHome;
+    return {n, label: tot ? (ENS_TXT[n]?.[0] || n) : (SPREAD_MODELS[n] || n), pick, c, agrees, w: tot ? (t.tw?.[n] ?? 0) : null};
+  }).sort((a,b) => (b.w ?? 0) - (a.w ?? 0) || b.c - a.c);
+  const n = rows.filter(r => r.agrees).length;
+  return `<h3>What each model picked</h3>
+    <p class="sh-sum" style="margin:0"><b>${n} of ${rows.length}</b> models pick the same side as ${tot ? "the ensemble" : "our pick"}.</p>
+    <table class="sh-units sh-models"><thead><tr><th>Model</th><th>Pick</th><th>Confidence</th>${tot ? "<th>Weight</th>" : ""}</tr></thead><tbody>
+    ${rows.map(r => `<tr${r.agrees ? ` class="agree"` : ""}><td>${r.label}</td><td>${r.pick}</td><td>${(r.c*100).toFixed(1)}%</td>${tot ? `<td>${Math.round(r.w*100)}%</td>` : ""}</tr>`).join("")}</tbody></table>
+    <p class="note" style="margin:0">${tot ? "The confidence above is the weighted average of these models: weights come from each model's record on every past game and update weekly." : "Each model uses one signal and was fit on past seasons; most sit close to 50% on their own. These are shown for reference: in testing, averaging them didn't beat the current confidence score on spreads, so the confidence above is that score."}</p>`;
+}
 function explainEnsemble(t){
   const over = tOver(t), side = over ? "over" : "under";
   const rows = Object.entries(t.tens).map(([n, p]) => { const ps = over ? p : 1 - p, w = t.tw?.[n] ?? 0, [label, txt] = ENS_TXT[n] || [n, () => ""];
@@ -1367,6 +1390,7 @@ function openSheet(kind, key){
     ${ex ? `<h3>Why ${(conf*100).toFixed(1)}%</h3>${base}<div class="why">${whyRows}</div>
       <p class="note" style="margin:0">${ex.ens ? "Each row is one model's share of the confidence: its weight times how far its chance is from 50%. The shares add up to the confidence minus 50%." : "Confidence scores run from about 48% to 56%."} On seasons the model wasn't trained on, the top 10% of ${kind === "total" ? LG.sheetTotal : LG.sheetSpread}. A pick is never a sure thing.</p>`
       : `<p class="note" style="margin:0">No confidence score for this game yet: scores are saved once a game is within 7 days of kickoff.</p>`}
+    ${modelsTable(t, kind)}
     <h3>Our prediction</h3>
     <div class="sh-score"><div class="${hw ? "" : "w"}"><b>${pr.sb}</b><span>${esc(away)}</span><small>${Math.round((1-pr.pa)*100)}% to win</small></div><em>${neutral ? "vs" : "at"}</em><div class="${hw ? "w" : ""}"><b>${pr.sa}</b><span>${esc(home)}</span><small>${Math.round(pr.pa*100)}% to win</small></div></div>
     <div class="sh-grid">
