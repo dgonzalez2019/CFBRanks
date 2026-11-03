@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-03T15:25:58+00:00",
+ "updated": "2026-11-03T15:29:18+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -2567,7 +2567,7 @@
    "pick_last_ats": -12.0,
    "opp_last_ats": -7.5,
    "conf": 0.5078,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 51.5,
    "ours_total": 54,
    "tconf": 0.5058,
@@ -2599,6 +2599,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4963,
+    "eff": 0.4958,
+    "last_ats": 0.5023,
+    "move": 0.4954,
+    "rest": 0.5,
+    "fav": 0.509,
+    "home": 0.5013,
+    "last_margin": 0.5029,
+    "cover_form": 0.5094,
+    "composite": 0.5078
    }
   },
   {
@@ -2618,7 +2630,7 @@
    "pick_last_ats": -2.5,
    "opp_last_ats": 4.0,
    "conf": 0.5044,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 44.0,
    "ours_total": 45,
    "tconf": 0.5202,
@@ -2650,6 +2662,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4976,
+    "eff": 0.4873,
+    "last_ats": 0.5033,
+    "move": 0.4974,
+    "rest": 0.5,
+    "fav": 0.4964,
+    "home": 0.5013,
+    "last_margin": 0.5009,
+    "cover_form": 0.5,
+    "composite": 0.5044
    }
   },
   {
@@ -2669,7 +2693,7 @@
    "pick_last_ats": -6.2,
    "opp_last_ats": 2.5,
    "conf": 0.5081,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 49.5,
    "ours_total": 50,
    "tconf": 0.5119,
@@ -2701,6 +2725,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4959,
+    "eff": 0.4957,
+    "last_ats": 0.5045,
+    "move": 0.498,
+    "rest": 0.5018,
+    "fav": 0.4981,
+    "home": 0.5013,
+    "last_margin": 0.5054,
+    "cover_form": 0.5094,
+    "composite": 0.5081
    }
   },
   {
@@ -2720,7 +2756,7 @@
    "pick_last_ats": 28.5,
    "opp_last_ats": 4.5,
    "conf": 0.4946,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 52.5,
    "ours_total": 59,
    "tconf": 0.5043,
@@ -2752,6 +2788,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4971,
+    "eff": 0.4894,
+    "last_ats": 0.4877,
+    "move": 0.5013,
+    "rest": 0.4877,
+    "fav": 0.5157,
+    "home": 0.5013,
+    "last_margin": 0.4979,
+    "cover_form": 0.5129,
+    "composite": 0.4946
    }
   },
   {
@@ -2771,7 +2819,7 @@
    "pick_last_ats": 2.5,
    "opp_last_ats": 7.5,
    "conf": 0.5374,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 44.25,
    "ours_total": 36,
    "tconf": 0.5287,
@@ -2803,6 +2851,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5024,
+    "eff": 0.4931,
+    "last_ats": 0.4974,
+    "move": 0.4993,
+    "rest": 0.5,
+    "fav": 0.4992,
+    "home": 0.5,
+    "last_margin": 0.5005,
+    "cover_form": 0.5043,
+    "composite": 0.4626
    }
   },
   {
@@ -2822,7 +2882,7 @@
    "pick_last_ats": 20.0,
    "opp_last_ats": 8.5,
    "conf": 0.5204,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 72.5,
    "ours_total": 71,
    "tconf": 0.5445,
@@ -2854,6 +2914,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5002,
+    "eff": 0.4952,
+    "last_ats": 0.5059,
+    "move": 0.4993,
+    "rest": 0.4912,
+    "fav": 0.5044,
+    "home": 0.5013,
+    "last_margin": 0.5045,
+    "cover_form": 0.5,
+    "composite": 0.4796
    }
   },
   {
@@ -2873,7 +2945,7 @@
    "pick_last_ats": 10.5,
    "opp_last_ats": -20.5,
    "conf": 0.5017,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 58.25,
    "ours_total": 61,
    "tconf": 0.5095,
@@ -2905,6 +2977,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4986,
+    "eff": 0.4952,
+    "last_ats": 0.4841,
+    "move": 0.5013,
+    "rest": 0.4965,
+    "fav": 0.509,
+    "home": 0.5013,
+    "last_margin": 0.4974,
+    "cover_form": 0.5129,
+    "composite": 0.5017
    }
   },
   {
@@ -2924,7 +3008,7 @@
    "pick_last_ats": -12.0,
    "opp_last_ats": 7.0,
    "conf": 0.5153,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 55.5,
    "ours_total": 58,
    "tconf": 0.5011,
@@ -2956,6 +3040,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4974,
+    "eff": 0.4954,
+    "last_ats": 0.5097,
+    "move": 0.498,
+    "rest": 0.4877,
+    "fav": 0.4963,
+    "home": 0.5013,
+    "last_margin": 0.5011,
+    "cover_form": 0.5283,
+    "composite": 0.5153
    }
   },
   {
@@ -2975,7 +3071,7 @@
    "pick_last_ats": 12.5,
    "opp_last_ats": 3.8,
    "conf": 0.514,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 39.5,
    "ours_total": 43,
    "tconf": 0.5385,
@@ -3007,6 +3103,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5018,
+    "eff": 0.4984,
+    "last_ats": 0.5045,
+    "move": 0.504,
+    "rest": 0.5,
+    "fav": 0.4989,
+    "home": 0.5013,
+    "last_margin": 0.5018,
+    "cover_form": 0.5,
+    "composite": 0.486
    }
   },
   {
@@ -3026,7 +3134,7 @@
    "pick_last_ats": 0.2,
    "opp_last_ats": -14.8,
    "conf": 0.5139,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 50.25,
    "ours_total": 51,
    "tconf": 0.5103,
@@ -3058,6 +3166,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4967,
+    "eff": 0.5084,
+    "last_ats": 0.4923,
+    "move": 0.502,
+    "rest": 0.5,
+    "fav": 0.5028,
+    "home": 0.5013,
+    "last_margin": 0.4985,
+    "cover_form": 0.5188,
+    "composite": 0.5139
    }
   },
   {
@@ -3077,7 +3197,7 @@
    "pick_last_ats": -10.2,
    "opp_last_ats": -4.5,
    "conf": 0.5135,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 38.5,
    "ours_total": 46,
    "tconf": 0.5389,
@@ -3109,6 +3229,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5007,
+    "eff": 0.5074,
+    "last_ats": 0.4971,
+    "move": 0.504,
+    "rest": 0.5,
+    "fav": 0.5059,
+    "home": 0.5013,
+    "last_margin": 0.5048,
+    "cover_form": 0.5094,
+    "composite": 0.4865
    }
   },
   {
@@ -3128,7 +3260,7 @@
    "pick_last_ats": -0.2,
    "opp_last_ats": -4.0,
    "conf": 0.5125,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 43.5,
    "ours_total": 38,
    "tconf": 0.5298,
@@ -3160,6 +3292,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5001,
+    "eff": 0.5068,
+    "last_ats": 0.5019,
+    "move": 0.498,
+    "rest": 0.5,
+    "fav": 0.4946,
+    "home": 0.5013,
+    "last_margin": 0.5021,
+    "cover_form": 0.5,
+    "composite": 0.4875
    }
   },
   {
@@ -3179,7 +3323,7 @@
    "pick_last_ats": 30.0,
    "opp_last_ats": 11.8,
    "conf": 0.5091,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 50.5,
    "ours_total": 50,
    "tconf": 0.5113,
@@ -3211,6 +3355,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4988,
+    "eff": 0.4979,
+    "last_ats": 0.4906,
+    "move": 0.5013,
+    "rest": 0.5018,
+    "fav": 0.4938,
+    "home": 0.5013,
+    "last_margin": 0.4955,
+    "cover_form": 0.4717,
+    "composite": 0.5091
    }
   },
   {
@@ -3230,7 +3386,7 @@
    "pick_last_ats": -1.5,
    "opp_last_ats": -16.8,
    "conf": 0.5236,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 62.25,
    "ours_total": 60,
    "tconf": 0.5208,
@@ -3262,6 +3418,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4995,
+    "eff": 0.5106,
+    "last_ats": 0.4922,
+    "move": 0.5013,
+    "rest": 0.5105,
+    "fav": 0.493,
+    "home": 0.5013,
+    "last_margin": 0.4976,
+    "cover_form": 0.5094,
+    "composite": 0.5236
    }
   },
   {
@@ -3281,7 +3449,7 @@
    "pick_last_ats": -1.5,
    "opp_last_ats": -9.2,
    "conf": 0.5154,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 39.75,
    "ours_total": 38,
    "tconf": 0.5396,
@@ -3313,6 +3481,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5025,
+    "eff": 0.4949,
+    "last_ats": 0.504,
+    "move": 0.4967,
+    "rest": 0.4877,
+    "fav": 0.4916,
+    "home": 0.5013,
+    "last_margin": 0.4962,
+    "cover_form": 0.5094,
+    "composite": 0.4846
    }
   },
   {
@@ -3332,7 +3512,7 @@
    "pick_last_ats": 4.5,
    "opp_last_ats": 13.5,
    "conf": 0.5114,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 39.5,
    "ours_total": 44,
    "tconf": 0.5367,
@@ -3364,6 +3544,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5018,
+    "eff": 0.5074,
+    "last_ats": 0.4954,
+    "move": 0.5026,
+    "rest": 0.5,
+    "fav": 0.5034,
+    "home": 0.5013,
+    "last_margin": 0.5051,
+    "cover_form": 0.5188,
+    "composite": 0.4886
    }
   },
   {
@@ -3383,7 +3575,7 @@
    "pick_last_ats": 27.5,
    "opp_last_ats": -4.0,
    "conf": 0.5075,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 45.5,
    "ours_total": 44,
    "tconf": 0.5204,
@@ -3415,6 +3607,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5008,
+    "eff": 0.5001,
+    "last_ats": 0.5162,
+    "move": 0.5,
+    "rest": 0.5,
+    "fav": 0.4984,
+    "home": 0.5013,
+    "last_margin": 0.5057,
+    "cover_form": 0.5,
+    "composite": 0.4925
    }
   },
   {
@@ -3434,7 +3638,7 @@
    "pick_last_ats": 4.0,
    "opp_last_ats": 14.8,
    "conf": 0.5137,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 44.5,
    "ours_total": 47,
    "tconf": 0.5243,
@@ -3466,6 +3670,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5026,
+    "eff": 0.5033,
+    "last_ats": 0.4945,
+    "move": 0.5007,
+    "rest": 0.4982,
+    "fav": 0.4984,
+    "home": 0.5013,
+    "last_margin": 0.5011,
+    "cover_form": 0.5094,
+    "composite": 0.4863
    }
   },
   {
@@ -3485,7 +3701,7 @@
    "pick_last_ats": -38.0,
    "opp_last_ats": -17.5,
    "conf": 0.5217,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 51.5,
    "ours_total": 51,
    "tconf": 0.511,
@@ -3517,6 +3733,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4985,
+    "eff": 0.4987,
+    "last_ats": 0.5105,
+    "move": 0.4987,
+    "rest": 0.5018,
+    "fav": 0.5044,
+    "home": 0.5013,
+    "last_margin": 0.505,
+    "cover_form": 0.4812,
+    "composite": 0.5217
    }
   },
   {
@@ -3536,7 +3764,7 @@
    "pick_last_ats": -0.0,
    "opp_last_ats": -11.8,
    "conf": 0.496,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 61.75,
    "ours_total": 65,
    "tconf": 0.5197,
@@ -3568,6 +3796,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4968,
+    "eff": 0.4874,
+    "last_ats": 0.494,
+    "move": 0.5013,
+    "rest": 0.5018,
+    "fav": 0.5028,
+    "home": 0.5013,
+    "last_margin": 0.5002,
+    "cover_form": 0.5283,
+    "composite": 0.496
    }
   },
   {
@@ -3587,7 +3827,7 @@
    "pick_last_ats": 13.8,
    "opp_last_ats": 8.0,
    "conf": 0.512,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 43.5,
    "ours_total": 44,
    "tconf": 0.5282,
@@ -3619,6 +3859,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.499,
+    "eff": 0.4961,
+    "last_ats": 0.4971,
+    "move": 0.5013,
+    "rest": 0.5,
+    "fav": 0.5017,
+    "home": 0.5013,
+    "last_margin": 0.5006,
+    "cover_form": 0.4906,
+    "composite": 0.512
    }
   },
   {
@@ -3638,7 +3890,7 @@
    "pick_last_ats": 12.0,
    "opp_last_ats": 17.5,
    "conf": 0.5124,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 50.25,
    "ours_total": 46,
    "tconf": 0.5084,
@@ -3670,6 +3922,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4968,
+    "eff": 0.4989,
+    "last_ats": 0.5028,
+    "move": 0.4974,
+    "rest": 0.5018,
+    "fav": 0.5016,
+    "home": 0.5013,
+    "last_margin": 0.5014,
+    "cover_form": 0.4812,
+    "composite": 0.5124
    }
   },
   {
@@ -3689,7 +3953,7 @@
    "pick_last_ats": -1.2,
    "opp_last_ats": -1.5,
    "conf": 0.5021,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 49.75,
    "ours_total": 45,
    "tconf": 0.5112,
@@ -3721,6 +3985,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4965,
+    "eff": 0.4909,
+    "last_ats": 0.4999,
+    "move": 0.5013,
+    "rest": 0.4877,
+    "fav": 0.5009,
+    "home": 0.5013,
+    "last_margin": 0.4985,
+    "cover_form": 0.5094,
+    "composite": 0.5021
    }
   },
   {
@@ -3740,7 +4016,7 @@
    "pick_last_ats": -8.2,
    "opp_last_ats": 10.8,
    "conf": 0.5064,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 54.75,
    "ours_total": 55,
    "tconf": 0.5005,
@@ -3772,6 +4048,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4952,
+    "eff": 0.4924,
+    "last_ats": 0.5097,
+    "move": 0.502,
+    "rest": 0.5,
+    "fav": 0.5044,
+    "home": 0.5013,
+    "last_margin": 0.5009,
+    "cover_form": 0.5,
+    "composite": 0.5064
    }
   },
   {
@@ -3791,7 +4079,7 @@
    "pick_last_ats": 16.8,
    "opp_last_ats": -10.0,
    "conf": 0.5006,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 48.75,
    "ours_total": 52,
    "tconf": 0.5117,
@@ -3823,6 +4111,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4977,
+    "eff": 0.4951,
+    "last_ats": 0.4863,
+    "move": 0.5033,
+    "rest": 0.5,
+    "fav": 0.4967,
+    "home": 0.5013,
+    "last_margin": 0.4974,
+    "cover_form": 0.4906,
+    "composite": 0.5006
    }
   },
   {
@@ -3842,7 +4142,7 @@
    "pick_last_ats": 38.0,
    "opp_last_ats": 11.5,
    "conf": 0.5121,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 51.5,
    "ours_total": 51,
    "tconf": 0.5075,
@@ -3874,6 +4174,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5002,
+    "eff": 0.4988,
+    "last_ats": 0.5136,
+    "move": 0.5013,
+    "rest": 0.5,
+    "fav": 0.5028,
+    "home": 0.5013,
+    "last_margin": 0.5036,
+    "cover_form": 0.5283,
+    "composite": 0.4879
    }
   },
   {
@@ -3893,7 +4205,7 @@
    "pick_last_ats": -4.0,
    "opp_last_ats": -0.2,
    "conf": 0.5368,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 57.0,
    "ours_total": 63,
    "tconf": 0.5111,
@@ -3925,6 +4237,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4994,
+    "eff": 0.5014,
+    "last_ats": 0.5019,
+    "move": 0.4993,
+    "rest": 0.4982,
+    "fav": 0.496,
+    "home": 0.5013,
+    "last_margin": 0.5017,
+    "cover_form": 0.5,
+    "composite": 0.5368
    }
   },
   {
@@ -3944,7 +4268,7 @@
    "pick_last_ats": -27.5,
    "opp_last_ats": 9.2,
    "conf": 0.5495,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 45.75,
    "ours_total": 52,
    "tconf": 0.5182,
@@ -3976,6 +4300,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4998,
+    "eff": 0.502,
+    "last_ats": 0.5188,
+    "move": 0.5013,
+    "rest": 0.5,
+    "fav": 0.4893,
+    "home": 0.5013,
+    "last_margin": 0.5035,
+    "cover_form": 0.5,
+    "composite": 0.5495
    }
   },
   {
@@ -3995,7 +4331,7 @@
    "pick_last_ats": -18.8,
    "opp_last_ats": -13.8,
    "conf": 0.5043,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 52.5,
    "ours_total": 46,
    "tconf": 0.5088,
@@ -4027,6 +4363,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4973,
+    "eff": 0.4887,
+    "last_ats": 0.5026,
+    "move": 0.4974,
+    "rest": 0.5018,
+    "fav": 0.4935,
+    "home": 0.5013,
+    "last_margin": 0.5009,
+    "cover_form": 0.5094,
+    "composite": 0.5043
    }
   },
   {
@@ -4046,7 +4394,7 @@
    "pick_last_ats": 14.8,
    "opp_last_ats": -10.2,
    "conf": 0.5174,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 43.75,
    "ours_total": 42,
    "tconf": 0.5249,
@@ -4078,6 +4426,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4993,
+    "eff": 0.5081,
+    "last_ats": 0.4872,
+    "move": 0.5,
+    "rest": 0.5,
+    "fav": 0.4956,
+    "home": 0.5013,
+    "last_margin": 0.4964,
+    "cover_form": 0.47,
+    "composite": 0.5174
    }
   },
   {
@@ -4097,7 +4457,7 @@
    "pick_last_ats": -14.8,
    "opp_last_ats": -10.0,
    "conf": 0.5058,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 55.5,
    "ours_total": 56,
    "tconf": 0.5028,
@@ -4129,6 +4489,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5022,
+    "eff": 0.511,
+    "last_ats": 0.4976,
+    "move": 0.5046,
+    "rest": 0.4982,
+    "fav": 0.4967,
+    "home": 0.5013,
+    "last_margin": 0.5008,
+    "cover_form": 0.5,
+    "composite": 0.4942
    }
   },
   {
@@ -4148,7 +4520,7 @@
    "pick_last_ats": 8.5,
    "opp_last_ats": -10.5,
    "conf": 0.5041,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 53.25,
    "ours_total": 55,
    "tconf": 0.502,
@@ -4180,6 +4552,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4968,
+    "eff": 0.4988,
+    "last_ats": 0.4903,
+    "move": 0.5,
+    "rest": 0.5105,
+    "fav": 0.491,
+    "home": 0.5013,
+    "last_margin": 0.497,
+    "cover_form": 0.4812,
+    "composite": 0.5041
    }
   },
   {
@@ -4199,7 +4583,7 @@
    "pick_last_ats": 14.8,
    "opp_last_ats": 16.5,
    "conf": 0.497,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 55.5,
    "ours_total": 51,
    "tconf": 0.5023,
@@ -4231,6 +4615,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4946,
+    "eff": 0.4901,
+    "last_ats": 0.5009,
+    "move": 0.5007,
+    "rest": 0.4982,
+    "fav": 0.5014,
+    "home": 0.5013,
+    "last_margin": 0.4997,
+    "cover_form": 0.5,
+    "composite": 0.497
    }
   },
   {
@@ -4250,7 +4646,7 @@
    "pick_last_ats": 2.2,
    "opp_last_ats": 20.5,
    "conf": 0.5145,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 51.25,
    "ours_total": 54,
    "tconf": 0.5063,
@@ -4282,6 +4678,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5004,
+    "eff": 0.5117,
+    "last_ats": 0.4906,
+    "move": 0.5,
+    "rest": 0.486,
+    "fav": 0.4956,
+    "home": 0.5013,
+    "last_margin": 0.4958,
+    "cover_form": 0.5,
+    "composite": 0.4855
    }
   },
   {
@@ -4301,7 +4709,7 @@
    "pick_last_ats": 10.0,
    "opp_last_ats": 10.2,
    "conf": 0.53,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 54.75,
    "ours_total": 46,
    "tconf": 0.5022,
@@ -4333,6 +4741,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4975,
+    "eff": 0.5007,
+    "last_ats": 0.5001,
+    "move": 0.5033,
+    "rest": 0.4982,
+    "fav": 0.4935,
+    "home": 0.5013,
+    "last_margin": 0.4995,
+    "cover_form": 0.4624,
+    "composite": 0.53
    }
   },
   {
@@ -4352,7 +4772,7 @@
    "pick_last_ats": -2.2,
    "opp_last_ats": 14.0,
    "conf": 0.5171,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 52.5,
    "ours_total": 61,
    "tconf": 0.5002,
@@ -4384,6 +4804,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5018,
+    "eff": 0.5041,
+    "last_ats": 0.4917,
+    "move": 0.502,
+    "rest": 0.5,
+    "fav": 0.4966,
+    "home": 0.5013,
+    "last_margin": 0.4985,
+    "cover_form": 0.5,
+    "composite": 0.4829
    }
   },
   {
@@ -4403,7 +4835,7 @@
    "pick_last_ats": -14.8,
    "opp_last_ats": -16.5,
    "conf": 0.5105,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 53.25,
    "ours_total": 55,
    "tconf": 0.5037,
@@ -4435,6 +4867,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4997,
+    "eff": 0.4909,
+    "last_ats": 0.4991,
+    "move": 0.5,
+    "rest": 0.4982,
+    "fav": 0.4992,
+    "home": 0.5013,
+    "last_margin": 0.5003,
+    "cover_form": 0.4906,
+    "composite": 0.5105
    }
   },
   {
@@ -4454,7 +4898,7 @@
    "pick_last_ats": 8.5,
    "opp_last_ats": -3.8,
    "conf": 0.5185,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 54.5,
    "ours_total": 49,
    "tconf": 0.5011,
@@ -4486,6 +4930,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4986,
+    "eff": 0.5067,
+    "last_ats": 0.4937,
+    "move": 0.5,
+    "rest": 0.5,
+    "fav": 0.4953,
+    "home": 0.5013,
+    "last_margin": 0.5021,
+    "cover_form": 0.5094,
+    "composite": 0.5185
    }
   },
   {
@@ -4505,7 +4961,7 @@
    "pick_last_ats": 4.0,
    "opp_last_ats": -18.2,
    "conf": 0.5189,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 46.5,
    "ours_total": 42,
    "tconf": 0.5165,
@@ -4537,6 +4993,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5006,
+    "eff": 0.4916,
+    "last_ats": 0.5114,
+    "move": 0.5007,
+    "rest": 0.4982,
+    "fav": 0.4956,
+    "home": 0.5013,
+    "last_margin": 0.503,
+    "cover_form": 0.4812,
+    "composite": 0.4811
    }
   },
   {
@@ -4556,7 +5024,7 @@
    "pick_last_ats": -12.5,
    "opp_last_ats": 1.2,
    "conf": 0.5172,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 47.5,
    "ours_total": 53,
    "tconf": 0.5196,
@@ -4588,6 +5056,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4978,
+    "eff": 0.4984,
+    "last_ats": 0.5071,
+    "move": 0.4987,
+    "rest": 0.5,
+    "fav": 0.4938,
+    "home": 0.5013,
+    "last_margin": 0.502,
+    "cover_form": 0.5094,
+    "composite": 0.5172
    }
   },
   {
@@ -4607,7 +5087,7 @@
    "pick_last_ats": 0.2,
    "opp_last_ats": -30.0,
    "conf": 0.4932,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 48.5,
    "ours_total": 56,
    "tconf": 0.5106,
@@ -4639,6 +5119,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4977,
+    "eff": 0.4883,
+    "last_ats": 0.4845,
+    "move": 0.5,
+    "rest": 0.5,
+    "fav": 0.4983,
+    "home": 0.5013,
+    "last_margin": 0.4961,
+    "cover_form": 0.5188,
+    "composite": 0.4932
    }
   },
   {
@@ -4658,7 +5150,7 @@
    "pick_last_ats": -25.2,
    "opp_last_ats": 15.8,
    "conf": 0.5301,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 49.75,
    "ours_total": 44,
    "tconf": 0.513,
@@ -4690,6 +5182,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.499,
+    "eff": 0.4988,
+    "last_ats": 0.521,
+    "move": 0.5013,
+    "rest": 0.4947,
+    "fav": 0.497,
+    "home": 0.5013,
+    "last_margin": 0.5091,
+    "cover_form": 0.5094,
+    "composite": 0.5301
    }
   },
   {
@@ -4709,7 +5213,7 @@
    "pick_last_ats": -8.5,
    "opp_last_ats": 7.5,
    "conf": 0.5009,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 64.25,
    "ours_total": 68,
    "tconf": 0.5251,
@@ -4741,6 +5245,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4974,
+    "eff": 0.4808,
+    "last_ats": 0.5082,
+    "move": 0.5,
+    "rest": 0.4895,
+    "fav": 0.4896,
+    "home": 0.5013,
+    "last_margin": 0.4986,
+    "cover_form": 0.4906,
+    "composite": 0.5009
    }
   },
   {
@@ -4760,7 +5276,7 @@
    "pick_last_ats": 10.2,
    "opp_last_ats": 14.8,
    "conf": 0.4976,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 51.75,
    "ours_total": 48,
    "tconf": 0.5125,
@@ -4792,6 +5308,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4965,
+    "eff": 0.484,
+    "last_ats": 0.5023,
+    "move": 0.498,
+    "rest": 0.5018,
+    "fav": 0.4938,
+    "home": 0.5013,
+    "last_margin": 0.4997,
+    "cover_form": 0.4769,
+    "composite": 0.4976
    }
   },
   {
@@ -4811,7 +5339,7 @@
    "pick_last_ats": 8.8,
    "opp_last_ats": 20.5,
    "conf": 0.5119,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 47.5,
    "ours_total": 49,
    "tconf": 0.5196,
@@ -4843,6 +5371,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5008,
+    "eff": 0.511,
+    "last_ats": 0.494,
+    "move": 0.504,
+    "rest": 0.5018,
+    "fav": 0.5028,
+    "home": 0.5013,
+    "last_margin": 0.5018,
+    "cover_form": 0.5376,
+    "composite": 0.4881
    }
   },
   {
@@ -4862,7 +5402,7 @@
    "pick_last_ats": -7.0,
    "opp_last_ats": -8.0,
    "conf": 0.5251,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 48.5,
    "ours_total": 40,
    "tconf": 0.514,
@@ -4894,6 +5434,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5009,
+    "eff": 0.4916,
+    "last_ats": 0.5005,
+    "move": 0.4993,
+    "rest": 0.4877,
+    "fav": 0.4981,
+    "home": 0.5013,
+    "last_margin": 0.5017,
+    "cover_form": 0.4906,
+    "composite": 0.4749
    }
   },
   {
@@ -4913,7 +5465,7 @@
    "pick_last_ats": -15.5,
    "opp_last_ats": -8.8,
    "conf": 0.5115,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 57.5,
    "ours_total": 61,
    "tconf": 0.5054,
@@ -4945,6 +5497,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4984,
+    "eff": 0.4928,
+    "last_ats": 0.5035,
+    "move": 0.5026,
+    "rest": 0.5123,
+    "fav": 0.4947,
+    "home": 0.5013,
+    "last_margin": 0.4983,
+    "cover_form": 0.4906,
+    "composite": 0.5115
    }
   },
   {
@@ -4964,7 +5528,7 @@
    "pick_last_ats": -8.5,
    "opp_last_ats": -9.5,
    "conf": 0.51,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 68.5,
    "ours_total": 79,
    "tconf": 0.5376,
@@ -4996,6 +5560,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4979,
+    "eff": 0.4956,
+    "last_ats": 0.4995,
+    "move": 0.504,
+    "rest": 0.5018,
+    "fav": 0.5109,
+    "home": 0.5013,
+    "last_margin": 0.5027,
+    "cover_form": 0.5,
+    "composite": 0.51
    }
   },
   {
@@ -5015,7 +5591,7 @@
    "pick_last_ats": -0.5,
    "opp_last_ats": 7.0,
    "conf": 0.536,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 50.5,
    "ours_total": 51,
    "tconf": 0.5114,
@@ -5047,6 +5623,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4987,
+    "eff": 0.5009,
+    "last_ats": 0.5038,
+    "move": 0.5007,
+    "rest": 0.5018,
+    "fav": 0.496,
+    "home": 0.5013,
+    "last_margin": 0.503,
+    "cover_form": 0.5283,
+    "composite": 0.536
    }
   },
   {
@@ -5066,7 +5654,7 @@
    "pick_last_ats": -15.8,
    "opp_last_ats": 21.0,
    "conf": 0.5284,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 48.25,
    "ours_total": 43,
    "tconf": 0.5146,
@@ -5098,6 +5686,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5,
+    "eff": 0.5044,
+    "last_ats": 0.4812,
+    "move": 0.504,
+    "rest": 0.4982,
+    "fav": 0.4896,
+    "home": 0.5013,
+    "last_margin": 0.4932,
+    "cover_form": 0.4906,
+    "composite": 0.4716
    }
   },
   {
@@ -5117,7 +5717,7 @@
    "pick_last_ats": 10.0,
    "opp_last_ats": 0.0,
    "conf": 0.5084,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 49.25,
    "ours_total": 55,
    "tconf": 0.5106,
@@ -5149,6 +5749,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4968,
+    "eff": 0.5002,
+    "last_ats": 0.4949,
+    "move": 0.498,
+    "rest": 0.5,
+    "fav": 0.498,
+    "home": 0.5013,
+    "last_margin": 0.5015,
+    "cover_form": 0.4812,
+    "composite": 0.5084
    }
   },
   {
@@ -5168,7 +5780,7 @@
    "pick_last_ats": -21.0,
    "opp_last_ats": 8.2,
    "conf": 0.5131,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 45.75,
    "ours_total": 57,
    "tconf": 0.5164,
@@ -5200,6 +5812,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4967,
+    "eff": 0.4916,
+    "last_ats": 0.515,
+    "move": 0.4954,
+    "rest": 0.5,
+    "fav": 0.4981,
+    "home": 0.5013,
+    "last_margin": 0.5054,
+    "cover_form": 0.5188,
+    "composite": 0.5131
    }
   },
   {
@@ -5219,7 +5843,7 @@
    "pick_last_ats": 5.2,
    "opp_last_ats": -14.5,
    "conf": 0.516,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 61.25,
    "ours_total": 65,
    "tconf": 0.5203,
@@ -5251,6 +5875,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5,
+    "eff": 0.4974,
+    "last_ats": 0.5101,
+    "move": 0.4987,
+    "rest": 0.5,
+    "fav": 0.509,
+    "home": 0.5013,
+    "last_margin": 0.5077,
+    "cover_form": 0.5376,
+    "composite": 0.484
    }
   },
   {
@@ -5270,7 +5906,7 @@
    "pick_last_ats": -10.8,
    "opp_last_ats": -8.5,
    "conf": 0.5436,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 57.5,
    "ours_total": 66,
    "tconf": 0.5122,
@@ -5302,6 +5938,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.501,
+    "eff": 0.4896,
+    "last_ats": 0.4988,
+    "move": 0.4987,
+    "rest": 0.5,
+    "fav": 0.4966,
+    "home": 0.5013,
+    "last_margin": 0.4971,
+    "cover_form": 0.5094,
+    "composite": 0.4564
    }
   },
   {
@@ -5321,7 +5969,7 @@
    "pick_last_ats": 18.8,
    "opp_last_ats": 7.2,
    "conf": 0.5052,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 56.5,
    "ours_total": 63,
    "tconf": 0.5083,
@@ -5353,6 +6001,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4969,
+    "eff": 0.497,
+    "last_ats": 0.4941,
+    "move": 0.5013,
+    "rest": 0.5,
+    "fav": 0.5022,
+    "home": 0.5013,
+    "last_margin": 0.4983,
+    "cover_form": 0.5188,
+    "composite": 0.5052
    }
   },
   {
@@ -5372,7 +6032,7 @@
    "pick_last_ats": -7.2,
    "opp_last_ats": -20.5,
    "conf": 0.5197,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 45.0,
    "ours_total": 53,
    "tconf": 0.5232,
@@ -5404,6 +6064,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4994,
+    "eff": 0.506,
+    "last_ats": 0.4932,
+    "move": 0.5026,
+    "rest": 0.5,
+    "fav": 0.4961,
+    "home": 0.5013,
+    "last_margin": 0.5003,
+    "cover_form": 0.4906,
+    "composite": 0.5197
    }
   },
   {
@@ -5423,7 +6095,7 @@
    "pick_last_ats": -21.0,
    "opp_last_ats": 25.2,
    "conf": 0.5235,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 46.0,
    "ours_total": 45,
    "tconf": 0.5228,
@@ -5455,6 +6127,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4967,
+    "eff": 0.4967,
+    "last_ats": 0.5237,
+    "move": 0.4947,
+    "rest": 0.5053,
+    "fav": 0.5104,
+    "home": 0.5013,
+    "last_margin": 0.5095,
+    "cover_form": 0.5188,
+    "composite": 0.5235
    }
   },
   {
@@ -5474,7 +6158,7 @@
    "pick_last_ats": 14.0,
    "opp_last_ats": 4.0,
    "conf": 0.516,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 65.0,
    "ours_total": 67,
    "tconf": 0.5301,
@@ -5506,6 +6190,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.501,
+    "eff": 0.4981,
+    "last_ats": 0.5051,
+    "move": 0.4987,
+    "rest": 0.4877,
+    "fav": 0.4896,
+    "home": 0.5013,
+    "last_margin": 0.4994,
+    "cover_form": 0.5,
+    "composite": 0.484
    }
   },
   {
@@ -5525,7 +6221,7 @@
    "pick_last_ats": -0.2,
    "opp_last_ats": 32.0,
    "conf": 0.5165,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 48.5,
    "ours_total": 49,
    "tconf": 0.5191,
@@ -5557,6 +6253,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.496,
+    "eff": 0.4963,
+    "last_ats": 0.5165,
+    "move": 0.5026,
+    "rest": 0.4877,
+    "fav": 0.5059,
+    "home": 0.5013,
+    "last_margin": 0.5089,
+    "cover_form": 0.5283,
+    "composite": 0.5165
    }
   },
   {
@@ -5576,7 +6284,7 @@
    "pick_last_ats": 22.0,
    "opp_last_ats": 8.5,
    "conf": 0.5199,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 42.25,
    "ours_total": 35,
    "tconf": 0.5308,
@@ -5608,6 +6316,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5004,
+    "eff": 0.4943,
+    "last_ats": 0.5069,
+    "move": 0.5007,
+    "rest": 0.5018,
+    "fav": 0.5016,
+    "home": 0.5013,
+    "last_margin": 0.4998,
+    "cover_form": 0.5094,
+    "composite": 0.4801
    }
   },
   {
@@ -5627,7 +6347,7 @@
    "pick_last_ats": 9.5,
    "opp_last_ats": -22.0,
    "conf": 0.4941,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 72.0,
    "ours_total": 71,
    "tconf": 0.5451,
@@ -5659,6 +6379,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.5023,
+    "eff": 0.5102,
+    "last_ats": 0.5162,
+    "move": 0.4974,
+    "rest": 0.5,
+    "fav": 0.496,
+    "home": 0.5013,
+    "last_margin": 0.5023,
+    "cover_form": 0.4812,
+    "composite": 0.5059
    }
   },
   {
@@ -5678,7 +6410,7 @@
    "pick_last_ats": -14.8,
    "opp_last_ats": 21.0,
    "conf": 0.5139,
-   "saved_at": "2026-11-03T15:25:58+00:00",
+   "saved_at": "2026-11-03T15:29:18+00:00",
    "total": 48.5,
    "ours_total": 38,
    "tconf": 0.5208,
@@ -5710,6 +6442,18 @@
     "last": 0.0038,
     "pace": 0.0063,
     "composite": 0.0007
+   },
+   "sens": {
+    "model": 0.4967,
+    "eff": 0.4899,
+    "last_ats": 0.5183,
+    "move": 0.4954,
+    "rest": 0.486,
+    "fav": 0.4963,
+    "home": 0.5013,
+    "last_margin": 0.5011,
+    "cover_form": 0.5,
+    "composite": 0.5139
    }
   }
  ]

@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-03T15:26:02+00:00",
+ "updated": "2026-11-03T15:29:21+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -705,7 +705,7 @@
    "pick_last_ats": -23.0,
    "opp_last_ats": 25.0,
    "conf": 0.5021,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 42.5,
    "ours_total": 43,
    "tconf": 0.5056,
@@ -737,6 +737,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.4996,
+    "eff": 0.4879,
+    "last_ats": 0.5302,
+    "rest": 0.5,
+    "fav": 0.5118,
+    "home": 0.4934,
+    "last_margin": 0.4993,
+    "cover_form": 0.528,
+    "composite": 0.5021
    }
   },
   {
@@ -756,7 +767,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -13.5,
    "conf": 0.5124,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 52.5,
    "ours_total": 50,
    "tconf": 0.5035,
@@ -788,6 +799,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5025,
+    "eff": 0.4922,
+    "last_ats": 0.5044,
+    "rest": 0.5,
+    "fav": 0.5037,
+    "home": 0.5,
+    "last_margin": 0.4997,
+    "cover_form": 0.5049,
+    "composite": 0.4876
    }
   },
   {
@@ -807,7 +829,7 @@
    "pick_last_ats": 2.5,
    "opp_last_ats": -4.5,
    "conf": 0.504,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 44.5,
    "ours_total": 49,
    "tconf": 0.5009,
@@ -839,6 +861,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5023,
+    "eff": 0.4982,
+    "last_ats": 0.5044,
+    "rest": 0.5051,
+    "fav": 0.5031,
+    "home": 0.4934,
+    "last_margin": 0.4999,
+    "cover_form": 0.528,
+    "composite": 0.496
    }
   },
   {
@@ -858,7 +891,7 @@
    "pick_last_ats": -25.0,
    "opp_last_ats": -10.0,
    "conf": 0.462,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 51.5,
    "ours_total": 56,
    "tconf": 0.5193,
@@ -890,6 +923,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.4929,
+    "eff": 0.4568,
+    "last_ats": 0.5095,
+    "rest": 0.5,
+    "fav": 0.5074,
+    "home": 0.4934,
+    "last_margin": 0.4996,
+    "cover_form": 0.489,
+    "composite": 0.462
    }
   },
   {
@@ -909,7 +953,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -2.5,
    "conf": 0.4962,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 46.5,
    "ours_total": 43,
    "tconf": 0.5128,
@@ -941,6 +985,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5042,
+    "eff": 0.5102,
+    "last_ats": 0.4975,
+    "rest": 0.4983,
+    "fav": 0.4882,
+    "home": 0.4934,
+    "last_margin": 0.5,
+    "cover_form": 0.5061,
+    "composite": 0.5038
    }
   },
   {
@@ -960,7 +1015,7 @@
    "pick_last_ats": 1.0,
    "opp_last_ats": 2.0,
    "conf": 0.5395,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 50.5,
    "ours_total": 49,
    "tconf": 0.5008,
@@ -992,6 +1047,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5009,
+    "eff": 0.4833,
+    "last_ats": 0.4994,
+    "rest": 0.4983,
+    "fav": 0.5087,
+    "home": 0.4934,
+    "last_margin": 0.4999,
+    "cover_form": 0.4878,
+    "composite": 0.4605
    }
   },
   {
@@ -1011,7 +1077,7 @@
    "pick_last_ats": -17.5,
    "opp_last_ats": -3.0,
    "conf": 0.496,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 43.5,
    "ours_total": 47,
    "tconf": 0.5067,
@@ -1043,6 +1109,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5035,
+    "eff": 0.5121,
+    "last_ats": 0.4909,
+    "rest": 0.5118,
+    "fav": 0.4969,
+    "home": 0.4934,
+    "last_margin": 0.5002,
+    "cover_form": 0.517,
+    "composite": 0.504
    }
   },
   {
@@ -1062,7 +1139,7 @@
    "pick_last_ats": 16.0,
    "opp_last_ats": -11.0,
    "conf": 0.5098,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 39.5,
    "ours_total": 40,
    "tconf": 0.5069,
@@ -1094,6 +1171,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5015,
+    "eff": 0.4868,
+    "last_ats": 0.517,
+    "rest": 0.4865,
+    "fav": 0.5043,
+    "home": 0.4934,
+    "last_margin": 0.4997,
+    "cover_form": 0.551,
+    "composite": 0.4902
    }
   },
   {
@@ -1113,7 +1201,7 @@
    "pick_last_ats": 8.5,
    "opp_last_ats": 11.0,
    "conf": 0.5,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 47.5,
    "ours_total": 46,
    "tconf": 0.501,
@@ -1145,6 +1233,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5023,
+    "eff": 0.5038,
+    "last_ats": 0.4984,
+    "rest": 0.5,
+    "fav": 0.5068,
+    "home": 0.4934,
+    "last_margin": 0.5,
+    "cover_form": 0.4939,
+    "composite": 0.5
    }
   },
   {
@@ -1164,7 +1263,7 @@
    "pick_last_ats": -16.0,
    "opp_last_ats": -8.5,
    "conf": 0.5421,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 40.5,
    "ours_total": 37,
    "tconf": 0.5162,
@@ -1196,6 +1295,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.505,
+    "eff": 0.49,
+    "last_ats": 0.4953,
+    "rest": 0.4882,
+    "fav": 0.5056,
+    "home": 0.4934,
+    "last_margin": 0.4999,
+    "cover_form": 0.5243,
+    "composite": 0.4579
    }
   },
   {
@@ -1215,7 +1325,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": -11.5,
    "conf": 0.5136,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 51.5,
    "ours_total": 56,
    "tconf": 0.5105,
@@ -1247,6 +1357,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5036,
+    "eff": 0.4901,
+    "last_ats": 0.5113,
+    "rest": 0.5118,
+    "fav": 0.4876,
+    "home": 0.4934,
+    "last_margin": 0.4998,
+    "cover_form": 0.5158,
+    "composite": 0.4864
    }
   },
   {
@@ -1266,7 +1387,7 @@
    "pick_last_ats": -2.0,
    "opp_last_ats": 4.5,
    "conf": 0.5067,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 46.5,
    "ours_total": 38,
    "tconf": 0.5193,
@@ -1298,6 +1419,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.4965,
+    "eff": 0.498,
+    "last_ats": 0.5041,
+    "rest": 0.4966,
+    "fav": 0.4969,
+    "home": 0.4934,
+    "last_margin": 0.5,
+    "cover_form": 0.511,
+    "composite": 0.5067
    }
   },
   {
@@ -1317,7 +1449,7 @@
    "pick_last_ats": 10.0,
    "opp_last_ats": -20.0,
    "conf": 0.4714,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 43.5,
    "ours_total": 48,
    "tconf": 0.5165,
@@ -1349,6 +1481,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5014,
+    "eff": 0.5142,
+    "last_ats": 0.5189,
+    "rest": 0.4966,
+    "fav": 0.487,
+    "home": 0.4934,
+    "last_margin": 0.4998,
+    "cover_form": 0.5219,
+    "composite": 0.5286
    }
   },
   {
@@ -1368,7 +1511,7 @@
    "pick_last_ats": 13.5,
    "opp_last_ats": 20.0,
    "conf": 0.4861,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 46.5,
    "ours_total": 45,
    "tconf": 0.502,
@@ -1400,6 +1543,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.5043,
+    "eff": 0.5185,
+    "last_ats": 0.4959,
+    "rest": 0.4983,
+    "fav": 0.4926,
+    "home": 0.4934,
+    "last_margin": 0.5,
+    "cover_form": 0.4672,
+    "composite": 0.5139
    }
   },
   {
@@ -1419,7 +1573,7 @@
    "pick_last_ats": -1.0,
    "opp_last_ats": 23.0,
    "conf": 0.5065,
-   "saved_at": "2026-11-03T15:26:02+00:00",
+   "saved_at": "2026-11-03T15:29:21+00:00",
    "total": 45.5,
    "ours_total": 47,
    "tconf": 0.5053,
@@ -1451,6 +1605,17 @@
     "last": 0.1667,
     "pace": 0.1667,
     "composite": 0.1667
+   },
+   "sens": {
+    "model": 0.4938,
+    "eff": 0.4884,
+    "last_ats": 0.5151,
+    "rest": 0.5,
+    "fav": 0.5043,
+    "home": 0.4934,
+    "last_margin": 0.4997,
+    "cover_form": 0.5122,
+    "composite": 0.5065
    }
   }
  ]
