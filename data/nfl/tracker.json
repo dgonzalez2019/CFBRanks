@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-08T17:58:23+00:00",
+ "updated": "2026-11-08T22:15:42+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -906,6 +906,23 @@
     "last_margin": 0.4999,
     "cover_form": 0.528,
     "composite": 0.4923
+   },
+   "home_pts": 21,
+   "away_pts": 26,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": "W",
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 1.4,
+    "model_open": null
    }
   },
   {
@@ -968,6 +985,23 @@
     "last_margin": 0.4996,
     "cover_form": 0.489,
     "composite": 0.4657
+   },
+   "home_pts": 23,
+   "away_pts": 27,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "L",
+    "ou_ens": "W",
+    "ou_top": "W",
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 1.98,
+    "model_open": null
    }
   },
   {
@@ -1030,6 +1064,23 @@
     "last_margin": 0.5,
     "cover_form": 0.5061,
     "composite": 0.501
+   },
+   "home_pts": 35,
+   "away_pts": 12,
+   "results": {
+    "model_close": "L",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "L",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 3.08,
+    "model_open": null
    }
   },
   {
@@ -1092,6 +1143,23 @@
     "last_margin": 0.4999,
     "cover_form": 0.4878,
     "composite": 0.4828
+   },
+   "home_pts": 9,
+   "away_pts": 19,
+   "results": {
+    "model_close": "L",
+    "model_open": null,
+    "fav37": "W",
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 0.74,
+    "model_open": null
    }
   },
   {
@@ -1154,6 +1222,23 @@
     "last_margin": 0.5002,
     "cover_form": 0.517,
     "composite": 0.5127
+   },
+   "home_pts": 23,
+   "away_pts": 22,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "L",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 4.07,
+    "model_open": null
    }
   },
   {
@@ -1216,6 +1301,23 @@
     "last_margin": 0.4997,
     "cover_form": 0.551,
     "composite": 0.4912
+   },
+   "home_pts": 11,
+   "away_pts": 19,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": "W",
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "L",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 1.46,
+    "model_open": null
    }
   },
   {
@@ -1278,6 +1380,23 @@
     "last_margin": 0.5,
     "cover_form": 0.4939,
     "composite": 0.5069
+   },
+   "home_pts": 13,
+   "away_pts": 20,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "L",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 1.63,
+    "model_open": null
    }
   },
   {
@@ -1536,19 +1655,19 @@
    "neutral": false,
    "start": "2026-11-09T01:20:00.000Z",
    "first_saved": "2026-11-02T07:45:36+00:00",
-   "ours": 3.93,
+   "ours": 3.83,
    "line": 6.0,
    "open": null,
    "inj_home": 0.0,
    "inj_away": 0.16,
-   "ppa_margin": 2.93,
+   "ppa_margin": 2.77,
    "pick_last_ats": 13.5,
    "opp_last_ats": 20.0,
-   "conf": 0.4847,
-   "saved_at": "2026-11-08T17:58:23+00:00",
+   "conf": 0.4837,
+   "saved_at": "2026-11-08T22:15:42+00:00",
    "total": 47.5,
-   "ours_total": 45,
-   "tconf": 0.5001,
+   "ours_total": 44,
+   "tconf": 0.5016,
    "tfeat": {
     "last_h": 4.5,
     "last_a": -26.5,
@@ -1560,15 +1679,15 @@
    "top5": false,
    "ttop_conf": false,
    "ttop5": false,
-   "tconf_model": 0.5053,
-   "tside": -1,
+   "tconf_model": 0.5013,
+   "tside": 1,
    "tens": {
     "form": 0.5,
-    "gap": 0.5153,
+    "gap": 0.5214,
     "high": 0.5001,
     "last": 0.5065,
     "pace": 0.4828,
-    "composite": 0.4947
+    "composite": 0.4987
    },
    "tw": {
     "form": 0.1667,
@@ -1579,15 +1698,15 @@
     "composite": 0.1667
    },
    "sens": {
-    "model": 0.5036,
-    "eff": 0.5184,
+    "model": 0.5038,
+    "eff": 0.5194,
     "last_ats": 0.4959,
     "rest": 0.4983,
     "fav": 0.4926,
     "home": 0.4934,
     "last_margin": 0.5,
     "cover_form": 0.4672,
-    "composite": 0.5153
+    "composite": 0.5163
    }
   },
   {
@@ -1598,16 +1717,16 @@
    "neutral": false,
    "start": "2026-11-10T01:15:00.000Z",
    "first_saved": "2026-11-03T12:18:41+00:00",
-   "ours": -0.1,
+   "ours": -0.16,
    "line": -3.0,
    "open": null,
    "inj_home": 0.02,
    "inj_away": 0.04,
-   "ppa_margin": -1.52,
+   "ppa_margin": -1.56,
    "pick_last_ats": -1.0,
    "opp_last_ats": 23.0,
    "conf": 0.5077,
-   "saved_at": "2026-11-08T17:58:23+00:00",
+   "saved_at": "2026-11-08T22:15:42+00:00",
    "total": 43.5,
    "ours_total": 47,
    "tconf": 0.5016,
@@ -1641,8 +1760,8 @@
     "composite": 0.1667
    },
    "sens": {
-    "model": 0.4949,
-    "eff": 0.4911,
+    "model": 0.495,
+    "eff": 0.4913,
     "last_ats": 0.5151,
     "rest": 0.5,
     "fav": 0.5037,
