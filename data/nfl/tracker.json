@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-09T08:05:56+00:00",
+ "updated": "2026-11-09T13:19:12+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -1811,10 +1811,10 @@
    "pick_last_ats": -1.0,
    "opp_last_ats": 23.0,
    "conf": 0.5069,
-   "saved_at": "2026-11-09T08:05:56+00:00",
-   "total": 43.5,
+   "saved_at": "2026-11-09T13:19:12+00:00",
+   "total": 44.5,
    "ours_total": 45,
-   "tconf": 0.5049,
+   "tconf": 0.5068,
    "tfeat": {
     "last_h": -12.5,
     "last_a": -8.5,
@@ -1826,15 +1826,15 @@
    "top5": false,
    "ttop_conf": false,
    "ttop5": false,
-   "tconf_model": 0.5038,
+   "tconf_model": 0.509,
    "tside": 1,
    "tens": {
     "form": 0.5161,
-    "gap": 0.4908,
+    "gap": 0.4969,
     "high": 0.5,
     "last": 0.5062,
     "pace": 0.5128,
-    "composite": 0.5038
+    "composite": 0.509
    },
    "tw": {
     "form": 0.1667,
@@ -1864,16 +1864,16 @@
    "neutral": false,
    "start": "2026-11-13T01:15:00.000Z",
    "first_saved": "2026-11-06T12:25:59+00:00",
-   "ours": 2.51,
+   "ours": 2.5,
    "line": 1.5,
    "open": null,
    "inj_home": 0.0,
-   "inj_away": 0.05,
-   "ppa_margin": 3.34,
+   "inj_away": 0.04,
+   "ppa_margin": 3.33,
    "pick_last_ats": 5.0,
    "opp_last_ats": -2.5,
    "conf": 0.4852,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.4982,
     "eff": 0.489,
@@ -1931,11 +1931,11 @@
    "open": null,
    "inj_home": 1.29,
    "inj_away": 0.15,
-   "ppa_margin": 1.18,
+   "ppa_margin": 1.17,
    "pick_last_ats": -21.0,
    "opp_last_ats": 3.5,
    "conf": 0.5119,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5064,
     "eff": 0.508,
@@ -1993,11 +1993,11 @@
    "open": null,
    "inj_home": 0.33,
    "inj_away": 0.55,
-   "ppa_margin": -4.37,
+   "ppa_margin": -4.38,
    "pick_last_ats": 13.5,
    "opp_last_ats": -14.0,
    "conf": 0.4854,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5019,
     "eff": 0.5053,
@@ -2055,21 +2055,21 @@
    "open": null,
    "inj_home": 0.22,
    "inj_away": 0.26,
-   "ppa_margin": -3.97,
+   "ppa_margin": -3.98,
    "pick_last_ats": 16.5,
    "opp_last_ats": 3.5,
-   "conf": 0.5019,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "conf": 0.5018,
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5016,
-    "eff": 0.4968,
+    "eff": 0.4969,
     "last_ats": 0.5082,
     "rest": 0.5017,
     "fav": 0.5056,
     "home": 0.4934,
     "last_margin": 0.4997,
     "cover_form": 0.4741,
-    "composite": 0.4981
+    "composite": 0.4982
    },
    "total": 39.5,
    "ours_total": 43,
@@ -2121,7 +2121,7 @@
    "pick_last_ats": -1.0,
    "opp_last_ats": 21.0,
    "conf": 0.5522,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5107,
     "eff": 0.496,
@@ -2183,7 +2183,7 @@
    "pick_last_ats": -3.5,
    "opp_last_ats": 0.5,
    "conf": 0.5257,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5019,
     "eff": 0.496,
@@ -2245,7 +2245,7 @@
    "pick_last_ats": -3.5,
    "opp_last_ats": -2.0,
    "conf": 0.4964,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.4985,
     "eff": 0.4951,
@@ -2298,16 +2298,16 @@
    "neutral": false,
    "start": "2026-11-15T18:00:00.000Z",
    "first_saved": "2026-11-09T08:05:56+00:00",
-   "ours": -9.84,
+   "ours": -9.83,
    "line": -7.5,
    "open": null,
-   "inj_home": 0.4,
+   "inj_home": 0.39,
    "inj_away": 0.04,
    "ppa_margin": -6.05,
    "pick_last_ats": 23.0,
    "opp_last_ats": -13.5,
    "conf": 0.5059,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5041,
     "eff": 0.4913,
@@ -2369,7 +2369,7 @@
    "pick_last_ats": 14.5,
    "opp_last_ats": 6.5,
    "conf": 0.4917,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5104,
     "eff": 0.5202,
@@ -2381,9 +2381,9 @@
     "cover_form": 0.511,
     "composite": 0.5083
    },
-   "total": 46.5,
+   "total": 47.5,
    "ours_total": 42,
-   "tconf": 0.5152,
+   "tconf": 0.5171,
    "tfeat": {
     "last_h": 33.5,
     "last_a": 2.5,
@@ -2391,15 +2391,15 @@
     "form_a": 0.5,
     "pace": 55.9
    },
-   "tconf_model": 0.4496,
+   "tconf_model": 0.4445,
    "tside": 1,
    "tens": {
     "form": 0.5,
-    "gap": 0.5276,
-    "high": 0.5,
+    "gap": 0.5337,
+    "high": 0.5001,
     "last": 0.4894,
     "pace": 0.5237,
-    "composite": 0.5504
+    "composite": 0.5555
    },
    "tw": {
     "form": 0.1667,
@@ -2431,7 +2431,7 @@
    "pick_last_ats": 2.5,
    "opp_last_ats": -5.5,
    "conf": 0.5052,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5018,
     "eff": 0.4961,
@@ -2443,9 +2443,9 @@
     "cover_form": 0.51,
     "composite": 0.4948
    },
-   "total": 45.5,
+   "total": 44.5,
    "ours_total": 44,
-   "tconf": 0.5034,
+   "tconf": 0.5053,
    "tfeat": {
     "last_h": -19.5,
     "last_a": -15.5,
@@ -2453,15 +2453,15 @@
     "form_a": 0.455,
     "pace": 65.3
    },
-   "tconf_model": 0.5184,
+   "tconf_model": 0.5235,
    "tside": -1,
    "tens": {
     "form": 0.5,
-    "gap": 0.5092,
+    "gap": 0.5031,
     "high": 0.5,
     "last": 0.5103,
     "pace": 0.4782,
-    "composite": 0.4816
+    "composite": 0.4765
    },
    "tw": {
     "form": 0.1667,
@@ -2485,25 +2485,25 @@
    "start": "2026-11-15T21:05:00.000Z",
    "first_saved": "2026-11-09T08:05:56+00:00",
    "ours": -6.02,
-   "line": -3.0,
+   "line": -3.5,
    "open": null,
    "inj_home": 0.13,
    "inj_away": 1.22,
    "ppa_margin": -4.9,
    "pick_last_ats": 5.5,
    "opp_last_ats": -12.5,
-   "conf": 0.4884,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "conf": 0.4905,
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
-    "model": 0.5053,
-    "eff": 0.5114,
+    "model": 0.5044,
+    "eff": 0.5084,
     "last_ats": 0.5113,
     "rest": 0.5017,
-    "fav": 0.5037,
+    "fav": 0.5043,
     "home": 0.4934,
     "last_margin": 0.4996,
     "cover_form": 0.4701,
-    "composite": 0.5116
+    "composite": 0.5095
    },
    "total": 43.5,
    "ours_total": 48,
@@ -2555,7 +2555,7 @@
    "pick_last_ats": 12.5,
    "opp_last_ats": -0.5,
    "conf": 0.4895,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5064,
     "eff": 0.5138,
@@ -2617,7 +2617,7 @@
    "pick_last_ats": 17.5,
    "opp_last_ats": 14.0,
    "conf": 0.5071,
-   "saved_at": "2026-11-09T08:05:56+00:00",
+   "saved_at": "2026-11-09T13:19:12+00:00",
    "sens": {
     "model": 0.5013,
     "eff": 0.4952,
