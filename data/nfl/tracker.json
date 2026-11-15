@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-15T16:26:51+00:00",
+ "updated": "2026-11-15T22:57:25+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -2012,7 +2012,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "home_pts": 35,
+   "away_pts": 10,
+   "results": {
+    "model_close": "L",
+    "model_open": null,
+    "fav37": "W",
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 2.74,
+    "model_open": null
+   }
   },
   {
    "key": "10|Atlanta Falcons|Kansas City Chiefs",
@@ -2074,7 +2091,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "home_pts": 13,
+   "away_pts": 35,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": "W",
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "L",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 1.49,
+    "model_open": null
+   }
   },
   {
    "key": "10|Cleveland Browns|Houston Texans",
@@ -2136,7 +2170,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "home_pts": 27,
+   "away_pts": 24,
+   "results": {
+    "model_close": "L",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "L",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 0.55,
+    "model_open": null
+   }
   },
   {
    "key": "10|Green Bay Packers|Minnesota Vikings",
@@ -2198,7 +2249,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": true,
-   "ttop5": true
+   "ttop5": true,
+   "home_pts": 10,
+   "away_pts": 30,
+   "results": {
+    "model_close": "L",
+    "model_open": null,
+    "fav37": "L",
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "L",
+    "ou_top": "L",
+    "ou_top5": "L"
+   },
+   "edges": {
+    "model_close": 3.75,
+    "model_open": null
+   }
   },
   {
    "key": "10|Indianapolis Colts|Miami Dolphins",
@@ -2260,7 +2328,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "home_pts": 24,
+   "away_pts": 22,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "W",
+    "ou_ens": "L",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 3.01,
+    "model_open": null
+   }
   },
   {
    "key": "10|New Orleans Saints|Carolina Panthers",
@@ -2322,7 +2407,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "home_pts": 17,
+   "away_pts": 20,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "L",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 4.19,
+    "model_open": null
+   }
   },
   {
    "key": "10|New York Jets|Buffalo Bills",
@@ -2384,7 +2486,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "home_pts": 12,
+   "away_pts": 31,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "L",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 2.79,
+    "model_open": null
+   }
   },
   {
    "key": "10|Tennessee Titans|Jacksonville Jaguars",
@@ -2446,7 +2565,24 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "home_pts": 23,
+   "away_pts": 40,
+   "results": {
+    "model_close": "W",
+    "model_open": null,
+    "fav37": null,
+    "top_conf": null,
+    "top5": null,
+    "ou_model": "L",
+    "ou_ens": "W",
+    "ou_top": null,
+    "ou_top5": null
+   },
+   "edges": {
+    "model_close": 6.09,
+    "model_open": null
+   }
   },
   {
    "key": "10|Arizona Cardinals|Los Angeles Rams",
@@ -2642,26 +2778,26 @@
    "neutral": false,
    "start": "2026-11-16T01:20:00.000Z",
    "first_saved": "2026-11-09T08:05:56+00:00",
-   "ours": 2.58,
+   "ours": 2.26,
    "line": 3.5,
    "open": null,
    "inj_home": 0.05,
    "inj_away": 0.0,
-   "ppa_margin": 4.33,
+   "ppa_margin": 4.4,
    "pick_last_ats": 17.5,
    "opp_last_ats": 14.0,
-   "conf": 0.5081,
-   "saved_at": "2026-11-15T16:26:51+00:00",
+   "conf": 0.5099,
+   "saved_at": "2026-11-15T22:57:25+00:00",
    "sens": {
-    "model": 0.5016,
-    "eff": 0.495,
+    "model": 0.5022,
+    "eff": 0.4946,
     "last_ats": 0.5022,
     "rest": 0.4882,
     "fav": 0.4957,
     "home": 0.4934,
     "last_margin": 0.5,
     "cover_form": 0.5219,
-    "composite": 0.4919
+    "composite": 0.4901
    },
    "total": 49.5,
    "ours_total": 48,
@@ -2704,30 +2840,30 @@
    "neutral": false,
    "start": "2026-11-17T01:15:00.000Z",
    "first_saved": "2026-11-10T12:56:34+00:00",
-   "ours": 4.41,
+   "ours": 3.95,
    "line": 4.5,
    "open": null,
    "inj_home": 0.24,
    "inj_away": 0.1,
-   "ppa_margin": 3.72,
+   "ppa_margin": 3.53,
    "pick_last_ats": -16.5,
    "opp_last_ats": -14.5,
-   "conf": 0.4938,
-   "saved_at": "2026-11-15T16:26:51+00:00",
+   "conf": 0.4941,
+   "saved_at": "2026-11-15T22:57:25+00:00",
    "sens": {
-    "model": 0.5002,
-    "eff": 0.5047,
+    "model": 0.501,
+    "eff": 0.5058,
     "last_ats": 0.4987,
     "rest": 0.5051,
     "fav": 0.4944,
     "home": 0.4934,
     "last_margin": 0.5,
     "cover_form": 0.4811,
-    "composite": 0.5062
+    "composite": 0.5059
    },
    "total": 38.5,
-   "ours_total": 41,
-   "tconf": 0.5039,
+   "ours_total": 42,
+   "tconf": 0.5022,
    "tfeat": {
     "last_h": 2.5,
     "last_a": 25.5,
@@ -2735,15 +2871,15 @@
     "form_a": 0.3,
     "pace": 57.6
    },
-   "tconf_model": 0.5093,
+   "tconf_model": 0.5053,
    "tside": 1,
    "tens": {
     "form": 0.5224,
-    "gap": 0.4847,
+    "gap": 0.4786,
     "high": 0.4998,
     "last": 0.4918,
     "pace": 0.5152,
-    "composite": 0.5093
+    "composite": 0.5053
    },
    "tw": {
     "form": 0.1667,
