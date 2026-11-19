@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-18T20:30:30+00:00",
+ "updated": "2026-11-19T20:36:11+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -2987,18 +2987,18 @@
    "neutral": false,
    "start": "2026-11-20T01:15:00.000Z",
    "first_saved": "2026-11-13T12:35:03+00:00",
-   "ours": 4.79,
+   "ours": 5.4,
    "line": 12.5,
    "open": null,
-   "inj_home": 0.0,
-   "inj_away": 0.0,
+   "inj_home": 0.74,
+   "inj_away": 1.34,
    "ppa_margin": 7.46,
    "pick_last_ats": -2.5,
    "opp_last_ats": -7.5,
-   "conf": 0.4863,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "conf": 0.484,
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
-    "model": 0.5136,
+    "model": 0.5125,
     "eff": 0.5302,
     "last_ats": 0.5032,
     "rest": 0.5,
@@ -3006,11 +3006,11 @@
     "home": 0.4934,
     "last_margin": 0.4999,
     "cover_form": 0.5149,
-    "composite": 0.5137
+    "composite": 0.516
    },
    "total": 44.5,
-   "ours_total": 51,
-   "tconf": 0.5187,
+   "ours_total": 48,
+   "tconf": 0.5137,
    "tfeat": {
     "last_h": 10.5,
     "last_a": 8.5,
@@ -3018,15 +3018,15 @@
     "form_a": 0.583,
     "pace": 60.6
    },
-   "tconf_model": 0.4637,
+   "tconf_model": 0.4756,
    "tside": -1,
    "tens": {
     "form": 0.4682,
-    "gap": 0.4602,
+    "gap": 0.4786,
     "high": 0.5,
     "last": 0.4944,
     "pace": 0.5011,
-    "composite": 0.4637
+    "composite": 0.4756
    },
    "tw": {
     "form": 0.1667,
@@ -3058,7 +3058,7 @@
    "pick_last_ats": 2.5,
    "opp_last_ats": 10.5,
    "conf": 0.482,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.5067,
     "eff": 0.5258,
@@ -3070,9 +3070,9 @@
     "cover_form": 0.4701,
     "composite": 0.518
    },
-   "total": 45.5,
+   "total": 44.5,
    "ours_total": 49,
-   "tconf": 0.504,
+   "tconf": 0.5059,
    "tfeat": {
     "last_h": -7.5,
     "last_a": 8.5,
@@ -3080,15 +3080,15 @@
     "form_a": 0.545,
     "pace": 57.4
    },
-   "tconf_model": 0.4942,
+   "tconf_model": 0.4891,
    "tside": -1,
    "tens": {
     "form": 0.4868,
-    "gap": 0.4786,
+    "gap": 0.4724,
     "high": 0.5,
     "last": 0.4997,
     "pace": 0.5164,
-    "composite": 0.4942
+    "composite": 0.4891
    },
    "tw": {
     "form": 0.1667,
@@ -3112,25 +3112,25 @@
    "start": "2026-11-22T18:00:00.000Z",
    "first_saved": "2026-11-16T08:03:23+00:00",
    "ours": 1.74,
-   "line": 2.5,
+   "line": 3.0,
    "open": null,
    "inj_home": 0.0,
    "inj_away": 0.0,
    "ppa_margin": 2.78,
    "pick_last_ats": -7.5,
    "opp_last_ats": 4.5,
-   "conf": 0.5244,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "conf": 0.5068,
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
-    "model": 0.5013,
-    "eff": 0.4983,
+    "model": 0.5022,
+    "eff": 0.5014,
     "last_ats": 0.4924,
     "rest": 0.5034,
-    "fav": 0.4969,
+    "fav": 0.4963,
     "home": 0.4934,
     "last_margin": 0.5001,
     "cover_form": 0.4776,
-    "composite": 0.4756
+    "composite": 0.4932
    },
    "total": 43.5,
    "ours_total": 50,
@@ -3182,7 +3182,7 @@
    "pick_last_ats": -4.5,
    "opp_last_ats": -3.5,
    "conf": 0.4733,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.505,
     "eff": 0.5274,
@@ -3244,7 +3244,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -2.5,
    "conf": 0.4886,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.5041,
     "eff": 0.5155,
@@ -3298,29 +3298,29 @@
    "start": "2026-11-22T18:00:00.000Z",
    "first_saved": "2026-11-16T08:03:23+00:00",
    "ours": 1.59,
-   "line": 7.0,
+   "line": 6.0,
    "open": null,
    "inj_home": 0.0,
    "inj_away": 0.0,
    "ppa_margin": 3.11,
    "pick_last_ats": 3.5,
    "opp_last_ats": 22.5,
-   "conf": 0.496,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "conf": 0.5002,
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
-    "model": 0.5095,
-    "eff": 0.5233,
+    "model": 0.5078,
+    "eff": 0.5173,
     "last_ats": 0.488,
     "rest": 0.4899,
-    "fav": 0.4913,
+    "fav": 0.4926,
     "home": 0.4934,
     "last_margin": 0.5003,
     "cover_form": 0.5,
-    "composite": 0.504
+    "composite": 0.4998
    },
-   "total": 43.5,
+   "total": 45.5,
    "ours_total": 47,
-   "tconf": 0.5104,
+   "tconf": 0.5066,
    "tfeat": {
     "last_h": -5.5,
     "last_a": 3.5,
@@ -3328,15 +3328,15 @@
     "form_a": 0.545,
     "pace": 61.3
    },
-   "tconf_model": 0.4742,
+   "tconf_model": 0.4844,
    "tside": -1,
    "tens": {
     "form": 0.4868,
-    "gap": 0.4786,
+    "gap": 0.4908,
     "high": 0.5,
     "last": 0.5006,
     "pace": 0.4974,
-    "composite": 0.4742
+    "composite": 0.4844
    },
    "tw": {
     "form": 0.1667,
@@ -3368,7 +3368,7 @@
    "pick_last_ats": -18.0,
    "opp_last_ats": 19.0,
    "conf": 0.4903,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.5071,
     "eff": 0.5285,
@@ -3430,7 +3430,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": -4.5,
    "conf": 0.5094,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.5077,
     "eff": 0.5018,
@@ -3492,7 +3492,7 @@
    "pick_last_ats": -10.5,
    "opp_last_ats": 7.5,
    "conf": 0.5202,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.509,
     "eff": 0.5043,
@@ -3554,7 +3554,7 @@
    "pick_last_ats": -1.5,
    "opp_last_ats": 2.0,
    "conf": 0.4933,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.5079,
     "eff": 0.5182,
@@ -3616,7 +3616,7 @@
    "pick_last_ats": -15.5,
    "opp_last_ats": -5.0,
    "conf": 0.5583,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.506,
     "eff": 0.4804,
@@ -3678,7 +3678,7 @@
    "pick_last_ats": 22.5,
    "opp_last_ats": 2.5,
    "conf": 0.5306,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
     "model": 0.5018,
     "eff": 0.474,
@@ -3690,9 +3690,9 @@
     "cover_form": 0.49,
     "composite": 0.4694
    },
-   "total": 45.5,
+   "total": 46.5,
    "ours_total": 40,
-   "tconf": 0.5244,
+   "tconf": 0.5262,
    "tfeat": {
     "last_h": 30.5,
     "last_a": -2.5,
@@ -3700,15 +3700,15 @@
     "form_a": 0.182,
     "pace": 56.9
    },
-   "tconf_model": 0.4372,
+   "tconf_model": 0.4322,
    "tside": 1,
    "tens": {
     "form": 0.5395,
-    "gap": 0.5337,
+    "gap": 0.5398,
     "high": 0.5,
     "last": 0.4918,
     "pace": 0.5185,
-    "composite": 0.5628
+    "composite": 0.5678
    },
    "tw": {
     "form": 0.1667,
@@ -3732,25 +3732,25 @@
    "start": "2026-11-24T01:15:00.000Z",
    "first_saved": "2026-11-17T13:48:59+00:00",
    "ours": -10.23,
-   "line": -6.5,
+   "line": -6.0,
    "open": null,
    "inj_home": 0.0,
    "inj_away": 0.0,
    "ppa_margin": -3.3,
    "pick_last_ats": 15.5,
    "opp_last_ats": 4.5,
-   "conf": 0.5354,
-   "saved_at": "2026-11-18T20:30:30+00:00",
+   "conf": 0.5333,
+   "saved_at": "2026-11-19T20:36:11+00:00",
    "sens": {
-    "model": 0.5066,
-    "eff": 0.4808,
+    "model": 0.5075,
+    "eff": 0.4838,
     "last_ats": 0.5069,
     "rest": 0.5068,
-    "fav": 0.5081,
+    "fav": 0.5074,
     "home": 0.4934,
     "last_margin": 0.4998,
     "cover_form": 0.5,
-    "composite": 0.4646
+    "composite": 0.4667
    },
    "total": 54.5,
    "ours_total": 54,
@@ -3771,6 +3771,130 @@
     "last": 0.4968,
     "pace": 0.5041,
     "composite": 0.5103
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   },
+   "top_conf": false,
+   "top5": false,
+   "ttop_conf": false,
+   "ttop5": false
+  },
+  {
+   "key": "12|Los Angeles Rams|Green Bay Packers",
+   "week": 12,
+   "home": "Los Angeles Rams",
+   "away": "Green Bay Packers",
+   "neutral": false,
+   "start": "2026-11-26T01:00:00.000Z",
+   "first_saved": "2026-11-19T20:36:11+00:00",
+   "ours": 2.4,
+   "line": 3.5,
+   "open": null,
+   "inj_home": 0.0,
+   "inj_away": 0.0,
+   "ppa_margin": 6.6,
+   "pick_last_ats": -22.5,
+   "opp_last_ats": 18.0,
+   "conf": 0.5595,
+   "saved_at": "2026-11-19T20:36:11+00:00",
+   "sens": {
+    "model": 0.5019,
+    "eff": 0.4814,
+    "last_ats": 0.4745,
+    "rest": 0.5,
+    "fav": 0.4957,
+    "home": 0.4934,
+    "last_margin": 0.5006,
+    "cover_form": 0.4909,
+    "composite": 0.4405
+   },
+   "total": 45.5,
+   "ours_total": 42,
+   "tconf": 0.5093,
+   "tfeat": {
+    "last_h": 1.5,
+    "last_a": -2.5,
+    "form_h": 0.5,
+    "form_a": 0.333,
+    "pace": 62.6
+   },
+   "tconf_model": 0.4817,
+   "tside": 1,
+   "tens": {
+    "form": 0.5241,
+    "gap": 0.5214,
+    "high": 0.5,
+    "last": 0.5003,
+    "pace": 0.4913,
+    "composite": 0.5183
+   },
+   "tw": {
+    "form": 0.1667,
+    "gap": 0.1667,
+    "high": 0.1667,
+    "last": 0.1667,
+    "pace": 0.1667,
+    "composite": 0.1667
+   },
+   "top_conf": true,
+   "top5": true,
+   "ttop_conf": true,
+   "ttop5": true
+  },
+  {
+   "key": "12|Detroit Lions|Chicago Bears",
+   "week": 12,
+   "home": "Detroit Lions",
+   "away": "Chicago Bears",
+   "neutral": false,
+   "start": "2026-11-26T18:00:00.000Z",
+   "first_saved": "2026-11-19T20:36:11+00:00",
+   "ours": -1.33,
+   "line": -2.5,
+   "open": null,
+   "inj_home": 0.0,
+   "inj_away": 0.0,
+   "ppa_margin": 2.59,
+   "pick_last_ats": 22.5,
+   "opp_last_ats": -3.5,
+   "conf": 0.4523,
+   "saved_at": "2026-11-19T20:36:11+00:00",
+   "sens": {
+    "model": 0.4979,
+    "eff": 0.4695,
+    "last_ats": 0.4836,
+    "rest": 0.4899,
+    "fav": 0.5031,
+    "home": 0.4934,
+    "last_margin": 0.5003,
+    "cover_form": 0.5199,
+    "composite": 0.4523
+   },
+   "total": 55.5,
+   "ours_total": 53,
+   "tconf": 0.5041,
+   "tfeat": {
+    "last_h": -5.5,
+    "last_a": 3.5,
+    "form_h": 0.545,
+    "form_a": 0.545,
+    "pace": 65.8
+   },
+   "tconf_model": 0.5035,
+   "tside": -1,
+   "tens": {
+    "form": 0.4868,
+    "gap": 0.5153,
+    "high": 0.5003,
+    "last": 0.5006,
+    "pace": 0.4758,
+    "composite": 0.4965
    },
    "tw": {
     "form": 0.1667,
