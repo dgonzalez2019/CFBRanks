@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-23T09:12:40+00:00",
+ "updated": "2026-11-23T15:17:28+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -3944,7 +3944,7 @@
    "pick_last_ats": 15.5,
    "opp_last_ats": 4.5,
    "conf": 0.5287,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.5042,
     "eff": 0.4818,
@@ -4006,7 +4006,7 @@
    "pick_last_ats": 18.0,
    "opp_last_ats": -22.5,
    "conf": 0.455,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.499,
     "eff": 0.4774,
@@ -4068,7 +4068,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": -3.5,
    "conf": 0.4553,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.4959,
     "eff": 0.4639,
@@ -4130,7 +4130,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": 13.5,
    "conf": 0.4877,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.5055,
     "eff": 0.5195,
@@ -4192,7 +4192,7 @@
    "pick_last_ats": 11.5,
    "opp_last_ats": 0.5,
    "conf": 0.5013,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.5022,
     "eff": 0.4989,
@@ -4254,7 +4254,7 @@
    "pick_last_ats": 2.5,
    "opp_last_ats": -6.5,
    "conf": 0.5133,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.5009,
     "eff": 0.4884,
@@ -4266,9 +4266,9 @@
     "cover_form": 0.5183,
     "composite": 0.4867
    },
-   "total": 38.5,
+   "total": 37.5,
    "ours_total": 41,
-   "tconf": 0.5034,
+   "tconf": 0.5053,
    "tfeat": {
     "last_h": -2.5,
     "last_a": 20.5,
@@ -4276,15 +4276,15 @@
     "form_a": 0.5,
     "pace": 59.0
    },
-   "tconf_model": 0.4919,
+   "tconf_model": 0.4868,
    "tside": -1,
    "tens": {
     "form": 0.5,
-    "gap": 0.4847,
+    "gap": 0.4786,
     "high": 0.4998,
     "last": 0.4947,
     "pace": 0.5084,
-    "composite": 0.4919
+    "composite": 0.4868
    },
    "tw": {
     "form": 0.1667,
@@ -4316,7 +4316,7 @@
    "pick_last_ats": 15.5,
    "opp_last_ats": 3.5,
    "conf": 0.521,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.4974,
     "eff": 0.5153,
@@ -4378,7 +4378,7 @@
    "pick_last_ats": 10.5,
    "opp_last_ats": 0.5,
    "conf": 0.4984,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.4993,
     "eff": 0.5012,
@@ -4440,7 +4440,7 @@
    "pick_last_ats": -10.5,
    "opp_last_ats": 11.0,
    "conf": 0.4678,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.498,
     "eff": 0.4676,
@@ -4502,7 +4502,7 @@
    "pick_last_ats": -11.0,
    "opp_last_ats": -13.5,
    "conf": 0.5018,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.4977,
     "eff": 0.499,
@@ -4564,7 +4564,7 @@
    "pick_last_ats": -0.5,
    "opp_last_ats": 6.0,
    "conf": 0.4768,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.4943,
     "eff": 0.4723,
@@ -4618,25 +4618,25 @@
    "start": "2026-11-29T18:00:00.000Z",
    "first_saved": "2026-11-22T23:39:36+00:00",
    "ours": 1.91,
-   "line": 7.0,
+   "line": 6.5,
    "open": null,
    "inj_home": 4.13,
    "inj_away": 0.0,
    "ppa_margin": 4.32,
    "pick_last_ats": -19.0,
    "opp_last_ats": -20.5,
-   "conf": 0.4966,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "conf": 0.4987,
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
-    "model": 0.509,
-    "eff": 0.5161,
+    "model": 0.5081,
+    "eff": 0.5131,
     "last_ats": 0.5009,
     "rest": 0.4865,
-    "fav": 0.4913,
+    "fav": 0.4919,
     "home": 0.4934,
     "last_margin": 0.5,
     "cover_form": 0.4817,
-    "composite": 0.5034
+    "composite": 0.5013
    },
    "total": 42.5,
    "ours_total": 30,
@@ -4688,7 +4688,7 @@
    "pick_last_ats": -22.5,
    "opp_last_ats": -6.0,
    "conf": 0.5129,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.5159,
     "eff": 0.5205,
@@ -4750,7 +4750,7 @@
    "pick_last_ats": -11.5,
    "opp_last_ats": 4.5,
    "conf": 0.462,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.4938,
     "eff": 0.458,
@@ -4762,9 +4762,9 @@
     "cover_form": 0.5176,
     "composite": 0.462
    },
-   "total": 40.5,
+   "total": 41.5,
    "ours_total": 48,
-   "tconf": 0.5187,
+   "tconf": 0.5168,
    "tfeat": {
     "last_h": 0.5,
     "last_a": 4.5,
@@ -4772,15 +4772,15 @@
     "form_a": 0.545,
     "pace": 60.4
    },
-   "tconf_model": 0.4565,
+   "tconf_model": 0.4616,
    "tside": -1,
    "tens": {
     "form": 0.4767,
-    "gap": 0.4541,
+    "gap": 0.4602,
     "high": 0.4999,
     "last": 0.4985,
     "pace": 0.502,
-    "composite": 0.4565
+    "composite": 0.4616
    },
    "tw": {
     "form": 0.1667,
@@ -4812,7 +4812,7 @@
    "pick_last_ats": 20.5,
    "opp_last_ats": 1.5,
    "conf": 0.477,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.4979,
     "eff": 0.4858,
@@ -4824,9 +4824,9 @@
     "cover_form": 0.4726,
     "composite": 0.477
    },
-   "total": 46.5,
+   "total": 47.5,
    "ours_total": 46,
-   "tconf": 0.5045,
+   "tconf": 0.5064,
    "tfeat": {
     "last_h": 0.5,
     "last_a": -6.5,
@@ -4834,15 +4834,15 @@
     "form_a": 0.417,
     "pace": 58.8
    },
-   "tconf_model": 0.487,
+   "tconf_model": 0.4819,
    "tside": 1,
    "tens": {
     "form": 0.5,
-    "gap": 0.5031,
-    "high": 0.5,
+    "gap": 0.5092,
+    "high": 0.5001,
     "last": 0.5018,
     "pace": 0.5094,
-    "composite": 0.513
+    "composite": 0.5181
    },
    "tw": {
     "form": 0.1667,
@@ -4874,7 +4874,7 @@
    "pick_last_ats": -2.5,
    "opp_last_ats": 7.5,
    "conf": 0.5048,
-   "saved_at": "2026-11-23T09:12:40+00:00",
+   "saved_at": "2026-11-23T15:17:28+00:00",
    "sens": {
     "model": 0.5088,
     "eff": 0.513,
@@ -4886,9 +4886,9 @@
     "cover_form": 0.486,
     "composite": 0.4952
    },
-   "total": 40.5,
+   "total": 41.5,
    "ours_total": 51,
-   "tconf": 0.5258,
+   "tconf": 0.5239,
    "tfeat": {
     "last_h": 10.5,
     "last_a": 20.5,
@@ -4896,15 +4896,15 @@
     "form_a": 0.692,
     "pace": 59.0
    },
-   "tconf_model": 0.4497,
+   "tconf_model": 0.4547,
    "tside": -1,
    "tens": {
     "form": 0.4601,
-    "gap": 0.436,
+    "gap": 0.442,
     "high": 0.4999,
     "last": 0.4909,
     "pace": 0.5089,
-    "composite": 0.4497
+    "composite": 0.4547
    },
    "tw": {
     "form": 0.1667,
