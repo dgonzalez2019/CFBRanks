@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-24T15:45:49+00:00",
+ "updated": "2026-11-24T22:26:25+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -4023,7 +4023,7 @@
    "pick_last_ats": 18.0,
    "opp_last_ats": -22.5,
    "conf": 0.4527,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4978,
     "eff": 0.4737,
@@ -4035,9 +4035,9 @@
     "cover_form": 0.4909,
     "composite": 0.4527
    },
-   "total": 43.5,
+   "total": 44.5,
    "ours_total": 42,
-   "tconf": 0.5055,
+   "tconf": 0.5074,
    "tfeat": {
     "last_h": 1.5,
     "last_a": -2.5,
@@ -4045,15 +4045,15 @@
     "form_a": 0.333,
     "pace": 62.6
    },
-   "tconf_model": 0.4919,
+   "tconf_model": 0.4868,
    "tside": 1,
    "tens": {
     "form": 0.5241,
-    "gap": 0.5092,
+    "gap": 0.5153,
     "high": 0.5,
     "last": 0.5003,
     "pace": 0.4913,
-    "composite": 0.5081
+    "composite": 0.5132
    },
    "tw": {
     "form": 0.1667,
@@ -4085,7 +4085,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": -3.5,
    "conf": 0.4548,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4958,
     "eff": 0.4633,
@@ -4147,7 +4147,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": 13.5,
    "conf": 0.4873,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.5056,
     "eff": 0.5198,
@@ -4209,7 +4209,7 @@
    "pick_last_ats": 11.5,
    "opp_last_ats": 0.5,
    "conf": 0.5023,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.5022,
     "eff": 0.498,
@@ -4271,7 +4271,7 @@
    "pick_last_ats": 2.5,
    "opp_last_ats": -6.5,
    "conf": 0.5144,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.5011,
     "eff": 0.488,
@@ -4283,9 +4283,9 @@
     "cover_form": 0.5183,
     "composite": 0.4856
    },
-   "total": 38.5,
+   "total": 37.5,
    "ours_total": 41,
-   "tconf": 0.5034,
+   "tconf": 0.5053,
    "tfeat": {
     "last_h": -2.5,
     "last_a": 20.5,
@@ -4293,15 +4293,15 @@
     "form_a": 0.5,
     "pace": 59.0
    },
-   "tconf_model": 0.4919,
+   "tconf_model": 0.4868,
    "tside": -1,
    "tens": {
     "form": 0.5,
-    "gap": 0.4847,
+    "gap": 0.4786,
     "high": 0.4998,
     "last": 0.4947,
     "pace": 0.5084,
-    "composite": 0.4919
+    "composite": 0.4868
    },
    "tw": {
     "form": 0.1667,
@@ -4333,7 +4333,7 @@
    "pick_last_ats": -8.0,
    "opp_last_ats": 3.5,
    "conf": 0.5465,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4988,
     "eff": 0.5184,
@@ -4395,7 +4395,7 @@
    "pick_last_ats": 10.5,
    "opp_last_ats": 0.5,
    "conf": 0.4982,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4991,
     "eff": 0.5008,
@@ -4407,9 +4407,9 @@
     "cover_form": 0.4881,
     "composite": 0.4982
    },
-   "total": 46.5,
+   "total": 47.5,
    "ours_total": 45,
-   "tconf": 0.5012,
+   "tconf": 0.5007,
    "tfeat": {
     "last_h": -15.5,
     "last_a": 23.5,
@@ -4417,15 +4417,15 @@
     "form_a": 0.615,
     "pace": 59.2
    },
-   "tconf_model": 0.4931,
-   "tside": -1,
+   "tconf_model": 0.488,
+   "tside": 1,
    "tens": {
     "form": 0.4712,
-    "gap": 0.5092,
-    "high": 0.5,
+    "gap": 0.5153,
+    "high": 0.5001,
     "last": 0.4977,
     "pace": 0.5079,
-    "composite": 0.5069
+    "composite": 0.512
    },
    "tw": {
     "form": 0.1667,
@@ -4457,7 +4457,7 @@
    "pick_last_ats": -10.5,
    "opp_last_ats": 11.0,
    "conf": 0.4674,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4981,
     "eff": 0.4674,
@@ -4519,7 +4519,7 @@
    "pick_last_ats": -11.0,
    "opp_last_ats": -13.5,
    "conf": 0.5013,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4976,
     "eff": 0.4984,
@@ -4581,7 +4581,7 @@
    "pick_last_ats": -0.5,
    "opp_last_ats": 6.0,
    "conf": 0.4778,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4943,
     "eff": 0.4731,
@@ -4643,7 +4643,7 @@
    "pick_last_ats": -19.0,
    "opp_last_ats": -20.5,
    "conf": 0.4965,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.5088,
     "eff": 0.5158,
@@ -4655,9 +4655,9 @@
     "cover_form": 0.4817,
     "composite": 0.5035
    },
-   "total": 42.5,
+   "total": 41.5,
    "ours_total": 30,
-   "tconf": 0.535,
+   "tconf": 0.5332,
    "tfeat": {
     "last_h": 0.5,
     "last_a": 0.5,
@@ -4665,15 +4665,15 @@
     "form_a": 0.5,
     "pace": 57.0
    },
-   "tconf_model": 0.4203,
+   "tconf_model": 0.4253,
    "tside": 1,
    "tens": {
     "form": 0.5362,
-    "gap": 0.576,
+    "gap": 0.57,
     "high": 0.4999,
     "last": 0.4997,
     "pace": 0.5185,
-    "composite": 0.5797
+    "composite": 0.5747
    },
    "tw": {
     "form": 0.1667,
@@ -4705,7 +4705,7 @@
    "pick_last_ats": -22.5,
    "opp_last_ats": -6.0,
    "conf": 0.511,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.5157,
     "eff": 0.5217,
@@ -4767,7 +4767,7 @@
    "pick_last_ats": -11.5,
    "opp_last_ats": 8.0,
    "conf": 0.4608,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4943,
     "eff": 0.4569,
@@ -4829,7 +4829,7 @@
    "pick_last_ats": 20.5,
    "opp_last_ats": 1.5,
    "conf": 0.4766,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4979,
     "eff": 0.4854,
@@ -4891,7 +4891,7 @@
    "pick_last_ats": -2.5,
    "opp_last_ats": 7.5,
    "conf": 0.5032,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.5088,
     "eff": 0.5143,
@@ -4953,7 +4953,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -0.5,
    "conf": 0.4967,
-   "saved_at": "2026-11-24T15:45:49+00:00",
+   "saved_at": "2026-11-24T22:26:25+00:00",
    "sens": {
     "model": 0.4996,
     "eff": 0.4959,
