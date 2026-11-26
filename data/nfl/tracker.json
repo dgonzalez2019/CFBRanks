@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T17:12:17+00:00",
+ "updated": "2026-11-26T17:16:31+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -4102,7 +4102,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": -3.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4973,
     "eff": 0.4693,
@@ -4136,6 +4136,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.058,
@@ -4144,8 +4145,7 @@
     "last": -0.0124,
     "pace": -0.0749
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Dallas Cowboys|Philadelphia Eagles",
@@ -4164,7 +4164,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": 13.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.5053,
     "eff": 0.5197,
@@ -4198,6 +4198,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.0715,
@@ -4206,8 +4207,7 @@
     "last": 0.0256,
     "pace": 0.0078
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Buffalo Bills|Kansas City Chiefs",
@@ -4226,7 +4226,7 @@
    "pick_last_ats": 11.5,
    "opp_last_ats": 0.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.5016,
     "eff": 0.498,
@@ -4260,6 +4260,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.0141,
@@ -4268,8 +4269,7 @@
     "last": -0.0124,
     "pace": -0.0193
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Pittsburgh Steelers|Denver Broncos",
@@ -4288,7 +4288,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": 2.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.498,
     "eff": 0.4789,
@@ -4322,6 +4322,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.0141,
@@ -4330,8 +4331,7 @@
     "last": 0.0199,
     "pace": 0.03
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Cincinnati Bengals|New Orleans Saints",
@@ -4350,7 +4350,7 @@
    "pick_last_ats": 3.5,
    "opp_last_ats": -8.0,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.5006,
     "eff": 0.5184,
@@ -4384,6 +4384,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.058,
@@ -4392,8 +4393,7 @@
     "last": -0.0308,
     "pace": -0.0095
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Houston Texans|Baltimore Ravens",
@@ -4412,7 +4412,7 @@
    "pick_last_ats": 10.5,
    "opp_last_ats": 0.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4994,
     "eff": 0.5008,
@@ -4446,6 +4446,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.1187,
@@ -4454,8 +4455,7 @@
     "last": 0.0084,
     "pace": 0.028
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Indianapolis Colts|New York Giants",
@@ -4474,7 +4474,7 @@
    "pick_last_ats": -10.5,
    "opp_last_ats": 11.0,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4967,
     "eff": 0.4704,
@@ -4508,6 +4508,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.0782,
@@ -4516,8 +4517,7 @@
     "last": -0.0239,
     "pace": -0.0072
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Jacksonville Jaguars|Tennessee Titans",
@@ -4536,7 +4536,7 @@
    "pick_last_ats": -11.0,
    "opp_last_ats": -13.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4973,
     "eff": 0.4984,
@@ -4570,6 +4570,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": 1,
    "tstack": {
     "form": -0.058,
@@ -4578,8 +4579,7 @@
     "last": 0.0233,
     "pace": 0.0632
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Miami Dolphins|New York Jets",
@@ -4598,7 +4598,7 @@
    "pick_last_ats": -0.5,
    "opp_last_ats": 6.0,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4927,
     "eff": 0.4671,
@@ -4632,6 +4632,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": 1,
    "tstack": {
     "form": 0.0061,
@@ -4640,8 +4641,7 @@
     "last": -0.0043,
     "pace": 0.0997
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Minnesota Vikings|Atlanta Falcons",
@@ -4660,7 +4660,7 @@
    "pick_last_ats": -19.0,
    "opp_last_ats": -20.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.5014,
     "eff": 0.5158,
@@ -4694,6 +4694,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": 1,
    "tstack": {
     "form": 0.1174,
@@ -4702,8 +4703,7 @@
     "last": 0.0003,
     "pace": 0.0677
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Los Angeles Chargers|New England Patriots",
@@ -4722,7 +4722,7 @@
    "pick_last_ats": -22.5,
    "opp_last_ats": -6.0,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.5095,
     "eff": 0.5038,
@@ -4756,6 +4756,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.0141,
@@ -4764,8 +4765,7 @@
     "last": 0.0014,
     "pace": 0.0515
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Arizona Cardinals|Washington Commanders",
@@ -4784,7 +4784,7 @@
    "pick_last_ats": -11.5,
    "opp_last_ats": 8.0,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4953,
     "eff": 0.4629,
@@ -4815,9 +4815,10 @@
    },
    "top_conf": false,
    "top5": false,
-   "ttop_conf": true,
+   "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.0748,
@@ -4826,8 +4827,7 @@
     "last": -0.0147,
     "pace": 0.0054
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|San Francisco 49ers|Seattle Seahawks",
@@ -4846,7 +4846,7 @@
    "pick_last_ats": 20.5,
    "opp_last_ats": 1.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4968,
     "eff": 0.4824,
@@ -4880,6 +4880,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.0141,
@@ -4888,8 +4889,7 @@
     "last": -0.0078,
     "pace": 0.0336
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Cleveland Browns|Las Vegas Raiders",
@@ -4908,7 +4908,7 @@
    "pick_last_ats": -2.5,
    "opp_last_ats": 7.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.5091,
     "eff": 0.5142,
@@ -4942,6 +4942,7 @@
    "ttop_conf": true,
    "ttop5": true,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.1592,
@@ -4950,8 +4951,7 @@
     "last": 0.0349,
     "pace": 0.0318
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   },
   {
    "key": "12|Tampa Bay Buccaneers|Carolina Panthers",
@@ -4970,7 +4970,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -0.5,
    "conf": null,
-   "saved_at": "2026-11-26T17:12:17+00:00",
+   "saved_at": "2026-11-26T17:16:31+00:00",
    "sens": {
     "model": 0.4994,
     "eff": 0.4959,
@@ -5004,6 +5004,7 @@
    "ttop_conf": false,
    "ttop5": false,
    "max_conf": false,
+   "tmax_conf": false,
    "tside": -1,
    "tstack": {
     "form": -0.058,
@@ -5012,8 +5013,7 @@
     "last": 0.0302,
     "pace": -0.0086
    },
-   "tconst": -0.0232,
-   "tmax_conf": false
+   "tconst": -0.0232
   }
  ]
 }
