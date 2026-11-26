@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T16:59:02+00:00",
+ "updated": "2026-11-26T17:12:13+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -18390,7 +18390,7 @@
    "pick_last_ats": 5.0,
    "opp_last_ats": -12.2,
    "conf": 0.5009,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4919,
     "eff": 0.5094,
@@ -18424,7 +18424,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Akron|Buffalo",
@@ -18443,7 +18445,7 @@
    "pick_last_ats": 4.0,
    "opp_last_ats": 16.5,
    "conf": 0.511,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4979,
     "eff": 0.4917,
@@ -18477,7 +18479,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Iowa|Nebraska",
@@ -18496,7 +18500,7 @@
    "pick_last_ats": 9.2,
    "opp_last_ats": 6.5,
    "conf": 0.5176,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4983,
     "eff": 0.5031,
@@ -18530,7 +18534,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Ohio|Toledo",
@@ -18549,7 +18555,7 @@
    "pick_last_ats": 2.2,
    "opp_last_ats": -3.0,
    "conf": 0.5163,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5001,
     "eff": 0.5021,
@@ -18583,7 +18589,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Ole Miss|Mississippi State",
@@ -18602,7 +18610,7 @@
    "pick_last_ats": -7.8,
    "opp_last_ats": -11.0,
    "conf": 0.5258,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4998,
     "eff": 0.5079,
@@ -18636,7 +18644,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|UTSA|Tulsa",
@@ -18655,7 +18665,7 @@
    "pick_last_ats": -2.0,
    "opp_last_ats": 5.5,
    "conf": 0.5179,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4988,
     "eff": 0.4984,
@@ -18689,7 +18699,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|South Alabama|App State",
@@ -18708,7 +18720,7 @@
    "pick_last_ats": -13.0,
    "opp_last_ats": -0.5,
    "conf": 0.5182,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5011,
     "eff": 0.5035,
@@ -18742,7 +18754,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Florida State|Florida",
@@ -18761,7 +18775,7 @@
    "pick_last_ats": -28.5,
    "opp_last_ats": -6.5,
    "conf": 0.5147,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4967,
     "eff": 0.4958,
@@ -18795,7 +18809,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Memphis|Temple",
@@ -18814,7 +18830,7 @@
    "pick_last_ats": -6.8,
    "opp_last_ats": -5.5,
    "conf": 0.507,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5014,
     "eff": 0.5108,
@@ -18848,7 +18864,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|San Jos\u00e9 State|North Dakota State",
@@ -18867,7 +18885,7 @@
    "pick_last_ats": 4.2,
    "opp_last_ats": -19.2,
    "conf": 0.509,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.499,
     "eff": 0.4992,
@@ -18901,7 +18919,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|New Mexico|Air Force",
@@ -18920,7 +18940,7 @@
    "pick_last_ats": -3.5,
    "opp_last_ats": 26.0,
    "conf": 0.5147,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4968,
     "eff": 0.4926,
@@ -18954,7 +18974,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Texas A&M|Texas",
@@ -18973,7 +18995,7 @@
    "pick_last_ats": -14.0,
    "opp_last_ats": 23.5,
    "conf": 0.5258,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5,
     "eff": 0.4926,
@@ -19007,7 +19029,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Wisconsin|Minnesota",
@@ -19026,7 +19050,7 @@
    "pick_last_ats": 27.5,
    "opp_last_ats": 6.0,
    "conf": 0.4993,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4955,
     "eff": 0.4983,
@@ -19060,7 +19084,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Utah|West Virginia",
@@ -19079,7 +19105,7 @@
    "pick_last_ats": 3.5,
    "opp_last_ats": 12.2,
    "conf": 0.5062,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5043,
     "eff": 0.5056,
@@ -19113,7 +19139,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Alabama|Auburn",
@@ -19132,7 +19160,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": 0.5,
    "conf": 0.5147,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5006,
     "eff": 0.5069,
@@ -19166,7 +19194,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Clemson|South Carolina",
@@ -19185,7 +19215,7 @@
    "pick_last_ats": -12.5,
    "opp_last_ats": 21.5,
    "conf": 0.548,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5016,
     "eff": 0.4944,
@@ -19219,7 +19249,9 @@
    "top_conf": true,
    "top5": true,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Kentucky|Louisville",
@@ -19238,7 +19270,7 @@
    "pick_last_ats": 21.5,
    "opp_last_ats": -9.5,
    "conf": 0.4988,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.502,
     "eff": 0.5062,
@@ -19272,7 +19304,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Oregon|Washington",
@@ -19291,7 +19325,7 @@
    "pick_last_ats": 12.2,
    "opp_last_ats": 18.5,
    "conf": 0.5142,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5011,
     "eff": 0.5057,
@@ -19325,7 +19359,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Vanderbilt|Tennessee",
@@ -19344,7 +19380,7 @@
    "pick_last_ats": 6.5,
    "opp_last_ats": 16.0,
    "conf": 0.5194,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4995,
     "eff": 0.497,
@@ -19378,7 +19414,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Wake Forest|Duke",
@@ -19397,7 +19435,7 @@
    "pick_last_ats": -21.5,
    "opp_last_ats": -1.2,
    "conf": 0.539,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5019,
     "eff": 0.4985,
@@ -19431,7 +19469,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Ball State|Central Michigan",
@@ -19450,7 +19490,7 @@
    "pick_last_ats": 3.0,
    "opp_last_ats": -16.5,
    "conf": 0.5049,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4995,
     "eff": 0.4919,
@@ -19484,7 +19524,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Charlotte|Navy",
@@ -19503,7 +19545,7 @@
    "pick_last_ats": -5.5,
    "opp_last_ats": 5.5,
    "conf": 0.5134,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4991,
     "eff": 0.4911,
@@ -19537,7 +19579,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Georgia Southern|Louisiana Tech",
@@ -19556,7 +19600,7 @@
    "pick_last_ats": 30.5,
    "opp_last_ats": 30.2,
    "conf": 0.5037,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5027,
     "eff": 0.5101,
@@ -19590,7 +19634,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Miami|Boston College",
@@ -19601,26 +19647,26 @@
    "start": "2026-11-28T17:00:00.000Z",
    "first_saved": "2026-11-22T17:14:08+00:00",
    "ours": 28.69,
-   "line": 25.25,
+   "line": 24.75,
    "open": 26.25,
    "inj_home": 0.04,
    "inj_away": 1.0,
    "ppa_margin": 27.66,
    "pick_last_ats": -13.5,
    "opp_last_ats": 15.0,
-   "conf": 0.5183,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "conf": 0.5164,
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
-    "model": 0.4973,
-    "eff": 0.4955,
+    "model": 0.4969,
+    "eff": 0.4946,
     "last_ats": 0.5146,
-    "move": 0.4974,
+    "move": 0.496,
     "rest": 0.4982,
-    "fav": 0.4843,
+    "fav": 0.4846,
     "home": 0.5013,
     "last_margin": 0.5006,
     "cover_form": 0.5,
-    "composite": 0.5183
+    "composite": 0.5164
    },
    "total": 53.75,
    "ours_total": 55,
@@ -19643,7 +19689,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|North Carolina|NC State",
@@ -19662,7 +19710,7 @@
    "pick_last_ats": -18.2,
    "opp_last_ats": 28.5,
    "conf": 0.5458,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4978,
     "eff": 0.5002,
@@ -19696,7 +19744,9 @@
    "top_conf": true,
    "top5": true,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Ohio State|Michigan",
@@ -19715,7 +19765,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": 5.5,
    "conf": 0.5089,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4977,
     "eff": 0.49,
@@ -19749,7 +19799,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Syracuse|Notre Dame",
@@ -19768,7 +19820,7 @@
    "pick_last_ats": -15.0,
    "opp_last_ats": 0.5,
    "conf": 0.5393,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4965,
     "eff": 0.5083,
@@ -19802,7 +19854,9 @@
    "top_conf": true,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Wyoming|UConn",
@@ -19821,7 +19875,7 @@
    "pick_last_ats": -6.0,
    "opp_last_ats": 3.5,
    "conf": 0.5083,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5029,
     "eff": 0.5078,
@@ -19855,7 +19909,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Northwestern|Illinois",
@@ -19874,7 +19930,7 @@
    "pick_last_ats": -9.2,
    "opp_last_ats": -6.0,
    "conf": 0.5421,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5036,
     "eff": 0.4837,
@@ -19908,7 +19964,9 @@
    "top_conf": true,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Arkansas|LSU",
@@ -19927,7 +19985,7 @@
    "pick_last_ats": -23.5,
    "opp_last_ats": -16.0,
    "conf": 0.5447,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.499,
     "eff": 0.5097,
@@ -19961,7 +20019,9 @@
    "top_conf": true,
    "top5": true,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|East Carolina|Florida Atlantic",
@@ -19980,7 +20040,7 @@
    "pick_last_ats": 8.5,
    "opp_last_ats": 23.5,
    "conf": 0.5086,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4976,
     "eff": 0.489,
@@ -20014,7 +20074,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Old Dominion|Southern Miss",
@@ -20033,7 +20095,7 @@
    "pick_last_ats": 6.0,
    "opp_last_ats": 0.5,
    "conf": 0.5104,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4997,
     "eff": 0.4922,
@@ -20067,7 +20129,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|UL Monroe|Marshall",
@@ -20086,7 +20150,7 @@
    "pick_last_ats": 13.0,
    "opp_last_ats": -2.0,
    "conf": 0.5066,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.498,
     "eff": 0.4965,
@@ -20120,7 +20184,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Western Kentucky|Kennesaw State",
@@ -20139,7 +20205,7 @@
    "pick_last_ats": -12.8,
    "opp_last_ats": 9.0,
    "conf": 0.5231,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4994,
     "eff": 0.497,
@@ -20173,7 +20239,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Colorado|UCF",
@@ -20192,7 +20260,7 @@
    "pick_last_ats": 32.5,
    "opp_last_ats": -4.0,
    "conf": 0.4992,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5032,
     "eff": 0.5003,
@@ -20226,7 +20294,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Florida International|Sam Houston",
@@ -20245,7 +20315,7 @@
    "pick_last_ats": 3.0,
    "opp_last_ats": -9.0,
    "conf": 0.5097,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5004,
     "eff": 0.5061,
@@ -20279,7 +20349,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Georgia State|Louisiana",
@@ -20298,7 +20370,7 @@
    "pick_last_ats": 2.0,
    "opp_last_ats": 3.8,
    "conf": 0.5047,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4961,
     "eff": 0.4941,
@@ -20332,7 +20404,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Iowa State|Kansas State",
@@ -20351,7 +20425,7 @@
    "pick_last_ats": -32.5,
    "opp_last_ats": 3.0,
    "conf": 0.5169,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.495,
     "eff": 0.4984,
@@ -20385,7 +20459,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|James Madison|Coastal Carolina",
@@ -20404,7 +20480,7 @@
    "pick_last_ats": -3.8,
    "opp_last_ats": -28.2,
    "conf": 0.5074,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5001,
     "eff": 0.5049,
@@ -20438,7 +20514,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Middle Tennessee|New Mexico State",
@@ -20457,7 +20535,7 @@
    "pick_last_ats": -3.0,
    "opp_last_ats": -10.0,
    "conf": 0.5105,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4995,
     "eff": 0.4934,
@@ -20491,7 +20569,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Missouri State|Liberty",
@@ -20510,7 +20590,7 @@
    "pick_last_ats": 7.2,
    "opp_last_ats": 12.8,
    "conf": 0.5127,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4971,
     "eff": 0.4985,
@@ -20544,7 +20624,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Rice|Army",
@@ -20563,7 +20645,7 @@
    "pick_last_ats": 6.8,
    "opp_last_ats": -8.5,
    "conf": 0.5148,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4992,
     "eff": 0.502,
@@ -20597,7 +20679,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Arkansas State|Troy",
@@ -20616,7 +20700,7 @@
    "pick_last_ats": -30.5,
    "opp_last_ats": -30.2,
    "conf": 0.518,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4992,
     "eff": 0.4997,
@@ -20650,7 +20734,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Virginia Tech|Virginia",
@@ -20669,7 +20755,7 @@
    "pick_last_ats": 18.2,
    "opp_last_ats": 13.5,
    "conf": 0.5057,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5023,
     "eff": 0.5072,
@@ -20703,7 +20789,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|BYU|Cincinnati",
@@ -20722,7 +20810,7 @@
    "pick_last_ats": -2.8,
    "opp_last_ats": 4.0,
    "conf": 0.5396,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4998,
     "eff": 0.502,
@@ -20756,7 +20844,9 @@
    "top_conf": true,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Bowling Green|Massachusetts",
@@ -20775,7 +20865,7 @@
    "pick_last_ats": -4.0,
    "opp_last_ats": -2.2,
    "conf": 0.5104,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5023,
     "eff": 0.5045,
@@ -20809,7 +20899,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Delaware|Jacksonville State",
@@ -20828,7 +20920,7 @@
    "pick_last_ats": -7.2,
    "opp_last_ats": 10.0,
    "conf": 0.5187,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5023,
     "eff": 0.501,
@@ -20862,7 +20954,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Georgia|Georgia Tech",
@@ -20881,7 +20975,7 @@
    "pick_last_ats": 1.2,
    "opp_last_ats": 12.5,
    "conf": 0.5038,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5029,
     "eff": 0.5135,
@@ -20915,7 +21009,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Maryland|Penn State",
@@ -20934,7 +21030,7 @@
    "pick_last_ats": 4.8,
    "opp_last_ats": -25.8,
    "conf": 0.5078,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4996,
     "eff": 0.4986,
@@ -20968,7 +21064,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Northern Illinois|UTEP",
@@ -20987,7 +21085,7 @@
    "pick_last_ats": 19.2,
    "opp_last_ats": -26.0,
    "conf": 0.5059,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4995,
     "eff": 0.5023,
@@ -21021,7 +21119,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|South Florida|Tulane",
@@ -21040,7 +21140,7 @@
    "pick_last_ats": -23.5,
    "opp_last_ats": 11.5,
    "conf": 0.5298,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4995,
     "eff": 0.4992,
@@ -21074,7 +21174,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Stanford|SMU",
@@ -21093,7 +21195,7 @@
    "pick_last_ats": -0.5,
    "opp_last_ats": 13.5,
    "conf": 0.5221,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5007,
     "eff": 0.501,
@@ -21127,7 +21229,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|UCLA|USC",
@@ -21146,7 +21250,7 @@
    "pick_last_ats": -5.5,
    "opp_last_ats": -4.8,
    "conf": 0.4753,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4897,
     "eff": 0.4812,
@@ -21180,7 +21284,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|North Texas|UAB",
@@ -21199,7 +21305,7 @@
    "pick_last_ats": 2.0,
    "opp_last_ats": -11.5,
    "conf": 0.5353,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5012,
     "eff": 0.4751,
@@ -21233,7 +21339,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Missouri|Oklahoma",
@@ -21252,7 +21360,7 @@
    "pick_last_ats": 9.5,
    "opp_last_ats": 14.0,
    "conf": 0.5393,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4991,
     "eff": 0.5044,
@@ -21286,7 +21394,9 @@
    "top_conf": true,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Rutgers|Michigan State",
@@ -21305,7 +21415,7 @@
    "pick_last_ats": 25.8,
    "opp_last_ats": -18.5,
    "conf": 0.4963,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4966,
     "eff": 0.5002,
@@ -21339,7 +21449,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Colorado State|Boise State",
@@ -21358,7 +21470,7 @@
    "pick_last_ats": 13.5,
    "opp_last_ats": -22.5,
    "conf": 0.4979,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4991,
     "eff": 0.4915,
@@ -21392,7 +21504,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Oklahoma State|Kansas",
@@ -21411,7 +21525,7 @@
    "pick_last_ats": 2.8,
    "opp_last_ats": -0.2,
    "conf": 0.5077,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5004,
     "eff": 0.5113,
@@ -21445,7 +21559,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Washington State|San Diego State",
@@ -21464,7 +21580,7 @@
    "pick_last_ats": 22.5,
    "opp_last_ats": -14.0,
    "conf": 0.5021,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5003,
     "eff": 0.5057,
@@ -21498,7 +21614,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Indiana|Purdue",
@@ -21517,7 +21635,7 @@
    "pick_last_ats": -12.2,
    "opp_last_ats": -27.5,
    "conf": 0.5126,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4999,
     "eff": 0.4974,
@@ -21551,7 +21669,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|California|Pittsburgh",
@@ -21570,7 +21690,7 @@
    "pick_last_ats": -21.5,
    "opp_last_ats": -13.5,
    "conf": 0.5132,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5002,
     "eff": 0.51,
@@ -21604,7 +21724,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Arizona|Arizona State",
@@ -21623,7 +21745,7 @@
    "pick_last_ats": -3.0,
    "opp_last_ats": 0.2,
    "conf": 0.5154,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4979,
     "eff": 0.4997,
@@ -21657,7 +21779,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|UNLV|Nevada",
@@ -21676,7 +21800,7 @@
    "pick_last_ats": -4.2,
    "opp_last_ats": 1.0,
    "conf": 0.5153,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4989,
     "eff": 0.496,
@@ -21710,7 +21834,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Houston|Baylor",
@@ -21729,7 +21855,7 @@
    "pick_last_ats": -5.0,
    "opp_last_ats": -3.5,
    "conf": 0.5095,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5007,
     "eff": 0.5101,
@@ -21763,7 +21889,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Utah State|Texas State",
@@ -21782,7 +21910,7 @@
    "pick_last_ats": 14.0,
    "opp_last_ats": -0.5,
    "conf": 0.5109,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5012,
     "eff": 0.5013,
@@ -21816,7 +21944,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Fresno State|Oregon State",
@@ -21835,7 +21965,7 @@
    "pick_last_ats": 0.5,
    "opp_last_ats": -13.5,
    "conf": 0.5083,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.5007,
     "eff": 0.5058,
@@ -21869,7 +21999,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   },
   {
    "key": "13|Hawai'i|Sacramento State",
@@ -21888,7 +22020,7 @@
    "pick_last_ats": -1.0,
    "opp_last_ats": -3.8,
    "conf": 0.5217,
-   "saved_at": "2026-11-26T16:59:02+00:00",
+   "saved_at": "2026-11-26T17:12:13+00:00",
    "sens": {
     "model": 0.4981,
     "eff": 0.5082,
@@ -21922,7 +22054,9 @@
    "top_conf": false,
    "top5": false,
    "ttop_conf": false,
-   "ttop5": false
+   "ttop5": false,
+   "max_conf": false,
+   "tmax_conf": false
   }
  ]
 }
