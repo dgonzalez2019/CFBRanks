@@ -70,3 +70,11 @@ Top 10% held out: CFB spreads 2024-26 106-82 (56.4%) vs the current score 104-84
 vs 88-91 (49.2%); NFL spreads 2019-26 109-107 (50.5%) vs 113-103 (52.3%); NFL totals 118-89 (57.0%) vs 113-94
 (54.6%). Weighting by record mostly didn't beat an equal average (eta 0 chosen for three of four). The site uses the
 ensemble for totals only.
+
+Redo, Nov 2026 (research/redo.py): every approach refit week by week on earlier games, top 10% held out.
+CFB spreads 2024-26: current score 117-97 (54.7%), ensemble 118-96 (55.1%), stack 115-99, leader 105-109.
+CFB totals 2024-26: every approach 50-53% pooled but 37-47% in 2025 and 2026 (current 96-109) -> not rated.
+NFL spreads 2019-26: current 116-104 (52.7%), stack 115-105, ensemble 111-109 -> not rated.
+NFL totals 2019-26: stack (L2 100) 126-85 (59.7%), ensemble 121-90, leader 121-90, current 115-96 -> stack used.
+Rules (every game): favorites at 3/7 CFB 50.9% NFL 49.2%; conference-game dogs 51.4%; division dogs 51.1%;
+home dogs 51.5% / 50.5%; 14+ dogs 51.2%; following 1+ point line moves 50.6%. None reach 52.4%.

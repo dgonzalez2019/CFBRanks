@@ -68,15 +68,19 @@ def total_confidence(ours, line, last_sum, form_sum, pace):
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 D = ROOT / "data" / ("nfl" if LEAGUE == "nfl" else "")
 
-# Totals confidence = an ensemble (research/ensemble.py): six one-signal models of whether the game goes over (our
-# predicted total vs the line, both teams' last game and season over rates, pace, size of the total, and the
-# multi-signal score above as one more member), averaged with weights from each model's log loss on every earlier
-# game, research seasons plus every game graded here since (w ~ exp(-eta * (loss - best loss)); eta from research).
-# Held out it beat the multi-signal score alone: NFL top 10% 118-89 (57.0%) vs 113-94, CFB 95-84 (53.1%) vs 88-91.
+# Nov 2026 redo (research/redo.py): every approach we have, refit week by week on earlier games only and scored on
+# held-out seasons, after a poor live month. Only two markets kept a confidence rating:
+#   CFB spreads: the multi-signal score above, top 10% 117-97 (54.7%) 2024-26, 54-56% every season.
+#   NFL totals: one L2 logistic on all the totals signals (STACK), top 10% 126-85 (59.7%) 2019-26, 6 of 8 seasons
+#               above 52% (the six-model ensemble used before: 57.3%; the single score above: 54.5%).
+# CFB totals (every approach 37-47% in 2025 and 2026) and NFL spreads (best 52.7% over 2019-26, a coin flip) get no
+# confidence: conf / tconf are None there, so they're never starred or listed in Top picks.
+RATED = {"cfb": ("spread",), "nfl": ("total",)}[LEAGUE]
+try: STACK = json.loads((ROOT / "research" / f"redo_{LEAGUE}.json").read_text())["total"]["live_stack"] if "total" in RATED else None
+except (OSError, ValueError, KeyError): STACK = None
+# One-signal models (research/ensemble.py), shown per game for reference ("what each model picked").
 try: ENS = json.loads((ROOT / "research" / f"ensemble_{LEAGUE}.json").read_text())["total"]["live"]
 except (OSError, ValueError, KeyError): ENS = None
-# The spread models from the same research, shown per game on the site ("what each model picked"); the spread
-# confidence stays the multi-signal score above, since the ensemble didn't beat it on spreads.
 try: SENS = json.loads((ROOT / "research" / f"ensemble_{LEAGUE}.json").read_text())["spread"]["live"]
 except (OSError, ValueError, KeyError): SENS = None
 
@@ -89,18 +93,13 @@ def ensemble_probs(ours_t, total, last_sum, form_sum, pace, comp_over):
     return p
 
 
-def ensemble_weights(track):
-    """Weights from research losses plus every graded tracked game that stored its models' chances."""
-    L = dict(ENS["loss"])
-    for g in track.values():
-        if not g.get("tens") or "results" not in g or g.get("total") is None: continue
-        pts = g["home_pts"] + g["away_pts"]
-        if pts == g["total"]: continue
-        y = 1.0 if pts > g["total"] else 0.0
-        for n, q in g["tens"].items():
-            q = min(max(q, 1e-6), 1 - 1e-6); L[n] = L.get(n, 0.0) - (y * math.log(q) + (1 - y) * math.log(1 - q))
-    lo = min(L.values()); w = {n: math.exp(-ENS["eta"] * (v - lo)) for n, v in L.items()}; s = sum(w.values())
-    return {n: v / s for n, v in w.items()}
+def stack_total(ours_t, total, last_sum, form_sum, pace):
+    """NFL totals: P(over) from the stacked logistic, and each signal's part of the logit."""
+    x = dict(gap=ours_t - total, last=last_sum, form=form_sum - 1, pace=pace - STACK["pace_avg"], high=total - STACK["mid"])
+    parts = {n: c * (x[n] - mu) / sd for n, c, mu, sd in zip(STACK["names"], STACK["b"][1:], STACK["mu"], STACK["sd"])}
+    return 1 / (1 + math.exp(-(STACK["b"][0] + sum(parts.values())))), parts
+
+
 OUT = D / "tracker.json"
 WINDOW_DAYS = 7
 now = datetime.datetime.now(datetime.timezone.utc)
@@ -181,7 +180,6 @@ def spread_probs(home, away, wk, start, line, ours, pm, opening, neutral, conf):
 
 try: track = {g["key"]: g for g in json.loads(OUT.read_text())["games"]}
 except (OSError, ValueError, KeyError): track = {}
-EW = ensemble_weights(track) if ENS else None
 
 
 def grade(margin, line):
@@ -200,7 +198,7 @@ for r in lines:
         line = -spread; pick = home if ours > line else away
         opp = away if pick == home else home
         pm = m.ppa_margin(P, home, away); la, lo = last_ats(pick, wk), last_ats(opp, wk)
-        conf = confidence(la, lo, pm, line, ours) if ours != line else None
+        conf = confidence(la, lo, pm, line, ours) if ours != line and "spread" in RATED else None
         t.update(ours=round(ours, 2), line=line, open=(-opening if opening is not None else None),
                  inj_home=round(ih, 2), inj_away=round(ia, 2), ppa_margin=round(pm, 2),
                  pick_last_ats=None if la is None else round(la, 1), opp_last_ats=None if lo is None else round(lo, 1),
@@ -210,13 +208,14 @@ for r in lines:
         if total is not None and ours_t != total:
             (lh, fh, ph), (la_, fa, pa_) = ou_form(home, wk), ou_form(away, wk)
             tc = total_confidence(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2)
-            t.update(total=total, ours_total=ours_t, tconf=round(tc, 4),
+            for k in ("tw", "tconf_model", "tstack", "tside", "tconst"): t.pop(k, None)   # from earlier versions
+            t.update(total=total, ours_total=ours_t, tconf=None,
                      tfeat=dict(last_h=round(lh, 1), last_a=round(la_, 1), form_h=round(fh, 3), form_a=round(fa, 3), pace=round((ph + pa_) / 2, 1)))
-            if ENS:   # the ensemble decides the side and the confidence; the multi-signal score is kept as tconf_model
-                ps = ensemble_probs(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2, tc if ours_t > total else 1 - tc)
-                pe = sum(EW.get(n, 0.0) * v for n, v in ps.items())
-                t.update(tconf_model=round(tc, 4), tconf=round(max(pe, 1 - pe), 4), tside=1 if pe >= 0.5 else -1,
-                         tens={n: round(v, 4) for n, v in ps.items()}, tw={n: round(EW.get(n, 0.0), 4) for n in ps})
+            if ENS: t["tens"] = {n: round(v, 4) for n, v in ensemble_probs(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2, tc if ours_t > total else 1 - tc).items()}
+            if STACK:   # rated (NFL): the stacked model decides the side and the confidence
+                pz, parts = stack_total(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2)
+                t.update(tconf=round(max(pz, 1 - pz), 4), tside=1 if pz >= 0.5 else -1, tstack={n: round(v, 4) for n, v in parts.items()},
+                         tconst=round(STACK["b"][0], 4))
         else: t.update(total=total, ours_total=ours_t, tconf=None)
     elif hp is not None and t is not None and "results" not in t:
         act = hp - ap
@@ -246,8 +245,10 @@ for r in lines:
 # the whole week instead let a later game hold a slot until earlier games had locked in unflagged and then lose it,
 # leaving the week with no flagged pick (NFL week 8, 2026).
 def flag_week(games, score, f10, f5):
-    games = [g for g in games if g.get(score) is not None]
     started = lambda g: "results" in g or (when(g["start"]) and when(g["start"]) <= now and f10 in g)
+    for g in games:   # games not started and no longer scored (unrated market) carry no flag
+        if g.get(score) is None and not started(g): g[f10] = g[f5] = False
+    games = [g for g in games if g.get(score) is not None]
     n10 = max(1, round(len(games) * TOP_SHARE)); n5 = max(1, round(len(games) * TOP5_SHARE))
     locked = [g for g in games if started(g)]
     left10 = max(0, n10 - sum(bool(g.get(f10)) for g in locked)); left5 = max(0, n5 - sum(bool(g.get(f5)) for g in locked))
