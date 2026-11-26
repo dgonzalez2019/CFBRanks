@@ -769,6 +769,8 @@ const LEAGUES = {
     totRec:[["2019",18,8],["2020",12,12],["2021",19,9],["2022",17,10],["2023",17,12],["2024",14,16],["2025",17,15],["2026",12,3]],
     rate:{spread:false, total:true},
     maxTier:{kind:"total", rec:[9,3], years:"2016–26", how:"totals picks scored 59.6% or higher"},
+    // The totals Top 10% star is a fixed cutoff (track_picks.py TOP_ABS), chosen with hindsight for 65% on past games.
+    topAbs:0.5607, topAbsNote:"★ Top 10% = totals picks scored 56.1% or higher (about 7–8% of games). On every 2016–26 game these went 128–68 (65.3%), but the cutoff was chosen with hindsight on those games, so expect a lower rate going forward.",
     unratedNote:{spread:"We don't rate NFL spreads. Every approach we tested on 2019–26, each week using only earlier games, came out at or below the 52.4% needed to profit at standard odds (best: 52.7%), so our line and the betting line are shown without a confidence score."},
     effName:"EPA efficiency model (expected points added per play, adjusted for opponents)",
     spreadNote:"Scores run about 47–55%. Season to season it is uneven (35–67% for the top 10%), so treat it as a slight lean at best.",
@@ -1794,6 +1796,7 @@ function renderLines(){
         ${LG.maxTier.kind === "total" ? `<tr><td><b>★ Max confidence</b></td><td class="num">${rec("tmax")}</td></tr>` : ""}
       </tbody></table></div>
       <p class="note"><b>How totals confidence works:</b> ${LG.rate?.total ? "one model weighs every totals signal together: our predicted total against the line, both teams' over/under record this season, their last games, their pace and the size of the total. In testing (each week using only earlier games), it beat every other approach we tried, including the six-model average used before. Its side is the pick, which can differ from our predicted total's side. Each week the top 10% are <b>Top confidence</b> and the top 5% <b>Top 5%</b>. Tap a game to see what drives each score." : LG.unratedNote.total}</p>
+      ${LG.topAbsNote ? `<p class="note">${LG.topAbsNote}</p>` : ""}
       <p class="note"><b>Be careful with these:</b> on seasons the model wasn't trained on, the top 10% went ${TOTCONF_RECORD.map(([y,w,l]) => `${y} ${w}–${l} (${Math.round(100*w/(w+l))}%)`).join(", ")}, so ${tw}–${tl} (${(100*tw/(tw+tl)).toFixed(1)}%) overall, ${LG.totalNote} This week: ${TG.filter(g => !g.results && g.ttop_conf).sort((x,y)=>y.tconf-x.tconf).map(g => `<b>${tOver(g) ? "Over" : "Under"} ${g.total.toFixed(1)}</b> ${esc(g.away)}–${esc(g.home)} ${(g.tconf*100).toFixed(1)}%${g.ttop5 ? " (top 5%)" : ""}`).join(", ") || "none"}.</p>`;
     $("#lout").innerHTML = seg + viewBar(tnow.length + tlater.length, tres.length) + (LVIEW === "res" ? recent("total") + resultList(tres, "total") + totRecord :
       (LG.rate && !LG.rate["total"] ? `<div class="panel" style="padding:12px 16px"><b>Not rated.</b> ${LG.unratedNote["total"]}</div>` : "") + (tnow.length ? ttable(tnow) : `<div class="panel empty">No upcoming games with a betting total. Finished games are under Results.</div>`) +
@@ -1869,7 +1872,7 @@ function renderPicks(){
   // Totals views flag the top of each market separately).
   picks.sort((a,b) => b.conf - a.conf);
   const n10 = Math.max(1, Math.round(picks.length * .10)), n5 = Math.max(1, Math.round(picks.length * .05)), nAll = picks.length;
-  picks.forEach((p,i) => { p.top = i < n10; p.top5 = i < n5; });
+  picks.forEach((p,i) => { p.top = LG.topAbs ? p.conf >= LG.topAbs : i < n10; p.top5 = i < n5; });
   // Max confidence picks go first (they aren't always the highest scores: see LG.maxTier)
   const keep = picks.filter(p => p.conf >= .5).sort((a,b) => (b.max - a.max) || (b.conf - a.conf));
   const shown = keep.filter(p => PMODE === "all" || p.kind === PMODE);
@@ -1898,6 +1901,7 @@ function renderPicks(){
   }
   $("#ltitle").textContent = "This week's top confidence picks";
   $("#lout").innerHTML = lineSeg() + viewBar(keep.length, resP.length, typeSel({all:keep.length, spread:nS, total:nT})) +
+    (LG.topAbsNote ? `<p class="note" style="margin:0">${LG.topAbsNote}</p>` : "") +
     `<p class="note" style="margin:0"><b>★ Max confidence</b> = ${LG.maxTier.how}. On past games these went <b>${LG.maxTier.rec[0]}–${LG.maxTier.rec[1]} (${Math.round(100*LG.maxTier.rec[0]/(LG.maxTier.rec[0]+LG.maxTier.rec[1]))}%)</b> in ${LG.maxTier.years}, but the range was chosen with hindsight on those same games to reach 75%, so expect a lower rate going forward (about ${LG.maxTier.rec[0]+LG.maxTier.rec[1]} past picks; ${LG.maxTier.kind === "spread" ? "a handful a season" : "about one a season"}).</p>` +
     `<p class="note" style="margin:0">This week's ${LG.rate?.spread && LG.rate?.total ? "spread and total" : LG.rate?.spread ? "spread" : "totals"} picks rated 50% or higher, before kickoff, most confident first (only markets with a tested edge are rated: ${LG.rate?.spread ? "spreads" : "totals"} in the ${LG.name}). ★ marks the top of all ${nAll} spread and total picks this week ranked together: <b>${n5}</b> in the top 5% and <b>${n10}</b> in the top 10%.</p>` +
     (shown.length ? `<div class="picks">${shown.map(card).join("")}</div>` : `<div class="panel empty">No upcoming picks at 50% or more yet. Picks appear once a game is within 7 days of kickoff.</div>`) +

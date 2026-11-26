@@ -80,6 +80,9 @@ RATED = {"cfb": ("spread",), "nfl": ("total",)}[LEAGUE]
 # held out, so expect less going forward. CFB spreads: the live score in [0.5494, 0.5552) went 30-10 in 2022-26 (the
 # 10 highest scores went 4-6, so the band stops below them). NFL totals: the stack's chance 0.5962+ went 9-3 in 2016-26.
 MAX_TIER = {"cfb": dict(market="spread", lo=0.5494, hi=0.5552), "nfl": dict(market="total", lo=0.5962, hi=1.0)}[LEAGUE]
+# NFL totals "Top 10%" star (asked for: 65%+ on past games): a fixed cutoff instead of each week's top 10%. Chance
+# 0.5607+ went 128-68 (65.3%) over every 2016-26 game, chosen with hindsight; about 7.5% of games qualify.
+TOP_ABS = {"nfl": 0.5607}.get(LEAGUE)
 in_max = lambda market, c: c is not None and MAX_TIER["market"] == market and MAX_TIER["lo"] <= c < MAX_TIER["hi"]
 try: STACK = json.loads((ROOT / "research" / f"redo_{LEAGUE}.json").read_text())["total"]["live_stack"] if "total" in RATED else None
 except (OSError, ValueError, KeyError): STACK = None
@@ -267,6 +270,10 @@ for wk in {g["week"] for g in track.values()}:
     wg = [g for g in track.values() if g["week"] == wk]
     flag_week(wg, "conf", "top_conf", "top5")
     flag_week(wg, "tconf", "ttop_conf", "ttop5")
+    if TOP_ABS:   # fixed cutoff for the totals Top 10% star; games already locked in keep their flag
+        for g in wg:
+            if "results" not in g and not (when(g["start"]) and when(g["start"]) <= now) and g.get("tconf") is not None:
+                g["ttop_conf"] = g["tconf"] >= TOP_ABS
 
 ordered = sorted(track.values(), key=lambda g: (g["start"] or "", g["key"]))
 OUT.write_text(json.dumps({"updated": stamp, "model": "Matchup model with last-season prior, passing/rushing efficiency "
