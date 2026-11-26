@@ -76,6 +76,11 @@ D = ROOT / "data" / ("nfl" if LEAGUE == "nfl" else "")
 # CFB totals (every approach 37-47% in 2025 and 2026) and NFL spreads (best 52.7% over 2019-26, a coin flip) get no
 # confidence: conf / tconf are None there, so they're never starred or listed in Top picks.
 RATED = {"cfb": ("spread",), "nfl": ("total",)}[LEAGUE]
+# "Max confidence" tier (asked for: 75%+ on past games, skew accepted). Chosen with hindsight on every past game, not
+# held out, so expect less going forward. CFB spreads: the live score in [0.5494, 0.5552) went 30-10 in 2022-26 (the
+# 10 highest scores went 4-6, so the band stops below them). NFL totals: the stack's chance 0.5962+ went 9-3 in 2016-26.
+MAX_TIER = {"cfb": dict(market="spread", lo=0.5494, hi=0.5552), "nfl": dict(market="total", lo=0.5962, hi=1.0)}[LEAGUE]
+in_max = lambda market, c: c is not None and MAX_TIER["market"] == market and MAX_TIER["lo"] <= c < MAX_TIER["hi"]
 try: STACK = json.loads((ROOT / "research" / f"redo_{LEAGUE}.json").read_text())["total"]["live_stack"] if "total" in RATED else None
 except (OSError, ValueError, KeyError): STACK = None
 # One-signal models (research/ensemble.py), shown per game for reference ("what each model picked").
@@ -202,7 +207,7 @@ for r in lines:
         t.update(ours=round(ours, 2), line=line, open=(-opening if opening is not None else None),
                  inj_home=round(ih, 2), inj_away=round(ia, 2), ppa_margin=round(pm, 2),
                  pick_last_ats=None if la is None else round(la, 1), opp_last_ats=None if lo is None else round(lo, 1),
-                 conf=None if conf is None else round(conf, 4), saved_at=stamp)
+                 conf=None if conf is None else round(conf, 4), saved_at=stamp, max_conf=in_max("spread", conf))
         if SENS: t["sens"] = {n: round(v, 4) for n, v in spread_probs(home, away, wk, start, line, ours, pm, t["open"], neutral, conf).items()}
         ours_t = pr["sa"] + pr["sb"]
         if total is not None and ours_t != total:
@@ -215,7 +220,8 @@ for r in lines:
             if STACK:   # rated (NFL): the stacked model decides the side and the confidence
                 pz, parts = stack_total(ours_t, total, lh + la_, fh + fa, (ph + pa_) / 2)
                 t.update(tconf=round(max(pz, 1 - pz), 4), tside=1 if pz >= 0.5 else -1, tstack={n: round(v, 4) for n, v in parts.items()},
-                         tconst=round(STACK["b"][0], 4))
+                         tconst=round(STACK["b"][0], 4), tmax_conf=in_max("total", max(pz, 1 - pz)))
+            else: t["tmax_conf"] = False
         else: t.update(total=total, ours_total=ours_t, tconf=None)
     elif hp is not None and t is not None and "results" not in t:
         act = hp - ap
@@ -236,6 +242,7 @@ for r in lines:
         ens = ou if t.get("tside") is None or tl is None or hp + ap == tl else ("W" if (hp + ap > tl) == (t["tside"] > 0) else "L")
         res["ou_model"] = ou; res["ou_ens"] = ens
         res["ou_top"] = ens if t.get("ttop_conf") else None; res["ou_top5"] = ens if t.get("ttop5") else None
+        res["max"] = res["model_close"] if t.get("max_conf") else None; res["tmax"] = ens if t.get("tmax_conf") else None
         t.update(home_pts=hp, away_pts=ap, results=res,
                  edges=dict(model_close=round(abs(t["ours"] - t["line"]), 2),
                             model_open=round(abs(t["ours"] - t["open"]), 2) if t["open"] is not None else None))
