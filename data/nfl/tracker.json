@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T14:17:29+00:00",
+ "updated": "2026-11-27T14:57:21+00:00",
  "model": "Matchup model with last-season prior, passing/rushing efficiency and players listed Out",
  "games": [
   {
@@ -4345,7 +4345,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": 2.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4985,
     "eff": 0.4792,
@@ -4407,7 +4407,7 @@
    "pick_last_ats": 3.5,
    "opp_last_ats": -8.0,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.5008,
     "eff": 0.5184,
@@ -4469,7 +4469,7 @@
    "pick_last_ats": 10.5,
    "opp_last_ats": 0.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4995,
     "eff": 0.5008,
@@ -4531,7 +4531,7 @@
    "pick_last_ats": -10.5,
    "opp_last_ats": 11.0,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4969,
     "eff": 0.4703,
@@ -4593,7 +4593,7 @@
    "pick_last_ats": -11.0,
    "opp_last_ats": -13.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4974,
     "eff": 0.4984,
@@ -4655,7 +4655,7 @@
    "pick_last_ats": -0.5,
    "opp_last_ats": 6.0,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4911,
     "eff": 0.4613,
@@ -4717,7 +4717,7 @@
    "pick_last_ats": -19.0,
    "opp_last_ats": -20.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.5016,
     "eff": 0.5162,
@@ -4779,7 +4779,7 @@
    "pick_last_ats": -22.5,
    "opp_last_ats": -6.0,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.5079,
     "eff": 0.4976,
@@ -4841,7 +4841,7 @@
    "pick_last_ats": -11.5,
    "opp_last_ats": 8.0,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4956,
     "eff": 0.4629,
@@ -4903,7 +4903,7 @@
    "pick_last_ats": 20.5,
    "opp_last_ats": 1.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4979,
     "eff": 0.4857,
@@ -4965,7 +4965,7 @@
    "pick_last_ats": -2.5,
    "opp_last_ats": 7.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.5092,
     "eff": 0.5142,
@@ -5027,7 +5027,7 @@
    "pick_last_ats": -6.5,
    "opp_last_ats": -0.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "sens": {
     "model": 0.4996,
     "eff": 0.4959,
@@ -5089,7 +5089,7 @@
    "pick_last_ats": -0.0,
    "opp_last_ats": 10.5,
    "conf": null,
-   "saved_at": "2026-11-27T14:17:29+00:00",
+   "saved_at": "2026-11-27T14:57:21+00:00",
    "max_conf": false,
    "sens": {
     "model": 0.5047,
@@ -5119,6 +5119,11 @@
     "pace": 0.4875,
     "composite": 0.5106
    },
+   "tmax_conf": false,
+   "top_conf": false,
+   "top5": false,
+   "ttop_conf": false,
+   "ttop5": true,
    "tside": -1,
    "tstack": {
     "form": 0.0263,
@@ -5127,12 +5132,7 @@
     "last": -0.0331,
     "pace": -0.0482
    },
-   "tconst": -0.0232,
-   "tmax_conf": false,
-   "top_conf": false,
-   "top5": false,
-   "ttop_conf": false,
-   "ttop5": true
+   "tconst": -0.0232
   }
  ]
 }
